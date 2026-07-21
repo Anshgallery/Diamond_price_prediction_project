@@ -1,0 +1,71 @@
+# =========================
+# Python Virtual Environment
+# =========================
+Lib/
+Scripts/
+Include/
+pyvenv.cfg
+.venv/
+venv/
+env/
+ENV/
+
+# =========================
+# Python Cache
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+
+# =========================
+# Jupyter Notebook
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# VS Code
+# =========================
+.vscode/
+
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.*
+/own_revice
+own_revice/
+
+# =========================
+# Python Build Files
+# =========================
+build/
+dist/
+*.egg-info/
+
+# =========================
+# Logs
+# =========================
+*.log
+
+# =========================
+# Temporary Files
+# =========================
+*.tmp
+*.temp
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# ML Artifacts
+# Uncomment if you DON'T want to upload model files
+# =========================
+# artifacts/
+
+# =========================
+# Python Packaging
+# =========================
+*.whl

@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Diamond Price Prediction</title>
+
+    <style>
+
+        /* =========================
+           GLOBAL STYLING
+        ========================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            font-family: Arial, Helvetica, sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at top,
+                    #263b5c 0%,
+                    #111827 40%,
+                    #05070c 100%
+                );
+
+            color: white;
+
+            overflow: hidden;
+        }
+
+
+        /* =========================
+           MAIN CONTAINER
+        ========================== */
+
+        .container {
+            width: 90%;
+            max-width: 550px;
+
+            padding: 45px 35px;
+
+            text-align: center;
+
+            background: rgba(255, 255, 255, 0.08);
+
+            border: 1px solid rgba(255, 255, 255, 0.15);
+
+            border-radius: 25px;
+
+            backdrop-filter: blur(15px);
+
+            box-shadow:
+                0 25px 60px rgba(0, 0, 0, 0.5);
+
+            animation: fadeIn 1s ease;
+        }
+
+
+        /* =========================
+           TITLE
+        ========================== */
+
+        h1 {
+            font-size: 30px;
+
+            margin-bottom: 10px;
+
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: #cbd5e1;
+
+            font-size: 16px;
+
+            margin-bottom: 30px;
+        }
+
+
+        /* =========================
+           ROTATING DIAMOND
+        ========================== */
+
+        .diamond-container {
+
+            width: 120px;
+            height: 120px;
+
+            margin: 0 auto 30px;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            perspective: 800px;
+        }
+
+
+        .diamond {
+
+            width: 75px;
+            height: 75px;
+
+            position: relative;
+
+            transform-style: preserve-3d;
+
+            animation: rotateDiamond 5s linear infinite;
+
+            filter:
+                drop-shadow(
+                    0 0 15px rgba(150, 220, 255, 0.8)
+                );
+        }
+
+
+        /* Diamond shape */
+
+        .diamond::before {
+
+            content: "";
+
+            position: absolute;
+
+            width: 55px;
+            height: 55px;
+
+            left: 10px;
+            top: 10px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #ffffff,
+                    #bdeaff,
+                    #5ebcff,
+                    #ffffff
+                );
+
+            transform:
+                rotate(45deg)
+                skew(-10deg, -10deg);
+
+            border:
+                2px solid rgba(255, 255, 255, 0.8);
+
+            box-shadow:
+                0 0 20px #8bdcff,
+                inset 0 0 15px white;
+        }
+
+
+        /* Diamond shine */
+
+        .diamond::after {
+
+            content: "";
+
+            position: absolute;
+
+            width: 4px;
+            height: 70px;
+
+            left: 36px;
+            top: 2px;
+
+            background: rgba(255, 255, 255, 0.8);
+
+            transform: rotate(45deg);
+
+            filter: blur(2px);
+
+            opacity: 0.8;
+        }
+
+
+        /* =========================
+           PRICE CARD
+        ========================== */
+
+        .price-card {
+
+            padding: 25px;
+
+            margin-bottom: 30px;
+
+            background:
+                rgba(255, 255, 255, 0.07);
+
+            border-radius: 18px;
+
+            border:
+                1px solid rgba(255, 255, 255, 0.12);
+        }
+
+
+        .price-label {
+
+            color: #cbd5e1;
+
+            font-size: 15px;
+
+            text-transform: uppercase;
+
+            letter-spacing: 2px;
+
+            margin-bottom: 10px;
+        }
+
+
+        .price {
+
+            font-size: 42px;
+
+            font-weight: bold;
+
+            color: #ffffff;
+
+            text-shadow:
+                0 0 15px rgba(120, 210, 255, 0.7);
+
+            animation: priceGlow 2s ease-in-out infinite alternate;
+        }
+
+
+        /* =========================
+           BUTTON
+        ========================== */
+
+        .button {
+
+            display: inline-block;
+
+            padding: 14px 30px;
+
+            border-radius: 50px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #38bdf8,
+                    #2563eb
+                );
+
+            color: white;
+
+            text-decoration: none;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            transition: all 0.3s ease;
+
+            box-shadow:
+                0 8px 20px rgba(37, 99, 235, 0.4);
+        }
+
+
+        .button:hover {
+
+            transform: translateY(-3px);
+
+            box-shadow:
+                0 12px 30px rgba(56, 189, 248, 0.5);
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #60a5fa,
+                    #3b82f6
+                );
+        }
+
+
+        /* =========================
+           ANIMATIONS
+        ========================== */
+
+        @keyframes rotateDiamond {
+
+            0% {
+                transform:
+                    rotateY(0deg)
+                    rotateX(10deg);
+            }
+
+            50% {
+                transform:
+                    rotateY(180deg)
+                    rotateX(-10deg);
+            }
+
+            100% {
+                transform:
+                    rotateY(360deg)
+                    rotateX(10deg);
+            }
+        }
+
+
+        @keyframes priceGlow {
+
+            from {
+                text-shadow:
+                    0 0 10px rgba(120, 210, 255, 0.4);
+            }
+
+            to {
+                text-shadow:
+                    0 0 25px rgba(120, 210, 255, 0.9);
+            }
+        }
+
+
+        @keyframes fadeIn {
+
+            from {
+
+                opacity: 0;
+
+                transform:
+                    translateY(30px);
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform:
+                    translateY(0);
+            }
+        }
+
+
+        /* =========================
+           MOBILE RESPONSIVE
+        ========================== */
+
+        @media (max-width: 500px) {
+
+            .container {
+
+                padding:
+                    35px 20px;
+            }
+
+            h1 {
+
+                font-size: 25px;
+            }
+
+            .price {
+
+                font-size: 34px;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <div class="container">
+
+
+        <!-- Rotating Diamond -->
+
+        <div class="diamond-container">
+
+            <div class="diamond"></div>
+
+        </div>
+
+
+        <!-- Heading -->
+
+        <h1>
+            Diamond Price Prediction
+        </h1>
+
+
+        <p class="subtitle">
+            Your estimated diamond price is
+        </p>
+
+
+        <!-- Prediction Result -->
+
+        <div class="price-card">
+
+            <div class="price-label">
+                Predicted Price
+            </div>
+
+            <div class="price">
+
+                ₹{{ "{:,.2f}".format(result) }}
+
+            </div>
+
+        </div>
+
+
+        <!-- Back Button -->
+
+        <a
+            href="/predict"
+            class="button"
+        >
+            Predict Another Diamond
+        </a>
+
+
+    </div>
+
+
+</body>
+
+</html>
