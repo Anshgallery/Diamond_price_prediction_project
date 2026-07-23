@@ -5,49 +5,505 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>DiamondPricePrediction</title>
+    <title>Diamond Price Prediction|AI-Powered</title>
 
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #070505;
-            text-align: center;
-            padding-top: 100px;
+
+        /* ==============================
+           GLOBAL STYLES
+        ============================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .container {
-            background-color: rgb(246, 255, 0);
-            width: 500px;
-            margin: auto;
-            padding: 50px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px gray;
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 20% 20%, #1c2945 0%, transparent 30%),
+                radial-gradient(circle at 80% 80%, #132b3d 0%, transparent 30%),
+                #05070d;
+            color: white;
+            overflow-x: hidden;
+        }
+
+
+        /* ==============================
+           NAVBAR
+        ============================== */
+
+        nav {
+            width: 100%;
+            padding: 25px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: #ffffff;
+        }
+
+        .logo span {
+            color: #65d9ff;
+        }
+
+        .nav-link {
+            color: #b9c7d6;
+            text-decoration: none;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #65d9ff;
+        }
+
+
+        /* ==============================
+           MAIN SECTION
+        ============================== */
+
+        .hero {
+            min-height: calc(100vh - 80px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 8%;
+            position: relative;
+        }
+
+        .hero-content {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 80px;
+        }
+
+
+        /* ==============================
+           LEFT CONTENT
+        ============================== */
+
+        .content {
+            flex: 1;
+            animation: fadeInLeft 1s ease;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border: 1px solid rgba(101, 217, 255, 0.4);
+            border-radius: 30px;
+            color: #65d9ff;
+            font-size: 13px;
+            margin-bottom: 25px;
+            background: rgba(101, 217, 255, 0.05);
         }
 
         h1 {
-            color: #f40000;
+            font-size: clamp(45px, 6vw, 75px);
+            line-height: 1.05;
+            margin-bottom: 25px;
+            font-weight: 700;
         }
 
-        p {
-            color: #666;
-            font-size: 18px;
+        h1 span {
+            background: linear-gradient(
+                90deg,
+                #ffffff,
+                #65d9ff,
+                #b6f0ff
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
+
+        .description {
+            max-width: 550px;
+            color: #aeb9c7;
+            font-size: 18px;
+            line-height: 1.7;
+            margin-bottom: 35px;
+        }
+
+
+        /* ==============================
+           BUTTON
+        ============================== */
+
+        .predict-btn {
+            display: inline-block;
+            text-decoration: none;
+            color: #041018;
+            background: linear-gradient(
+                135deg,
+                #65d9ff,
+                #b6f0ff
+            );
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            transition: 0.3s;
+            box-shadow: 0 10px 30px rgba(101, 217, 255, 0.2);
+        }
+
+        .predict-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(101, 217, 255, 0.4);
+        }
+
+
+        /* ==============================
+           DIAMOND AREA
+        ============================== */
+
+        .diamond-section {
+            flex: 1;
+            min-height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            animation: fadeInRight 1s ease;
+        }
+
+
+        /* Glow behind diamond */
+
+        .glow {
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            background: #3fc8ff;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.15;
+            animation: pulse 4s infinite ease-in-out;
+        }
+
+
+        /* ==============================
+           DIAMOND
+        ============================== */
+
+        .diamond {
+            width: 220px;
+            height: 220px;
+            position: relative;
+            transform: rotate(45deg);
+            animation: floating 4s infinite ease-in-out;
+            z-index: 2;
+        }
+
+        .diamond::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                135deg,
+                #ffffff,
+                #9be9ff,
+                #3bb9e8,
+                #ffffff
+            );
+            clip-path: polygon(
+                50% 0%,
+                100% 35%,
+                75% 100%,
+                25% 100%,
+                0% 35%
+            );
+            box-shadow:
+                0 0 30px #65d9ff,
+                0 0 80px rgba(101, 217, 255, 0.6);
+        }
+
+        /* Diamond internal lines */
+
+        .diamond::after {
+            content: "";
+            position: absolute;
+            inset: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            transform: rotate(0deg);
+            clip-path: polygon(
+                50% 0%,
+                100% 35%,
+                75% 100%,
+                25% 100%,
+                0% 35%
+            );
+        }
+
+
+        /* ==============================
+           FLOATING PARTICLES
+        ============================== */
+
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #65d9ff;
+            opacity: 0.7;
+        }
+
+        .p1 {
+            top: 15%;
+            left: 15%;
+            animation: floatParticle 5s infinite;
+        }
+
+        .p2 {
+            top: 70%;
+            left: 20%;
+            animation: floatParticle 7s infinite;
+        }
+
+        .p3 {
+            top: 25%;
+            right: 20%;
+            animation: floatParticle 6s infinite;
+        }
+
+        .p4 {
+            bottom: 15%;
+            right: 15%;
+            animation: floatParticle 8s infinite;
+        }
+
+
+        /* ==============================
+           FOOTER
+        ============================== */
+
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: #647386;
+            font-size: 13px;
+        }
+
+
+        /* ==============================
+           ANIMATIONS
+        ============================== */
+
+        @keyframes floating {
+
+            0%,
+            100% {
+                transform: rotate(45deg) translateY(0);
+            }
+
+            50% {
+                transform: rotate(45deg) translateY(-25px);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.12;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 0.22;
+            }
+        }
+
+        @keyframes floatParticle {
+
+            0%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.3;
+            }
+
+            50% {
+                transform: translateY(-30px);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInLeft {
+
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+
+        /* ==============================
+           RESPONSIVE DESIGN
+        ============================== */
+
+        @media (max-width: 800px) {
+
+            .hero {
+                padding-top: 30px;
+            }
+
+            .hero-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 30px;
+            }
+
+            .description {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .diamond-section {
+                min-height: 350px;
+            }
+
+            .diamond {
+                width: 160px;
+                height: 160px;
+            }
+
+            .footer {
+                position: relative;
+                margin-top: 30px;
+                padding-bottom: 20px;
+            }
+        }
+
     </style>
 
 </head>
 
+
 <body>
 
-    <div class="container">
 
-        <h1>Welcome to DiamondPricePrediction</h1>
+    <!-- ==============================
+         NAVIGATION
+    ============================== -->
 
-        <p>
-            Predict the price of a diamond using
-            Machine Learning.
-        </p>
+    <nav>
+
+        <div class="logo">
+            Diamond<span>AI</span>
+        </div>
+
+        <a href="#" class="nav-link">
+            Machine Learning Project
+        </a>
+
+    </nav>
+
+
+    <!-- ==============================
+         HERO SECTION
+    ============================== -->
+
+    <section class="hero">
+
+        <!-- Floating particles -->
+
+        <div class="particle p1"></div>
+        <div class="particle p2"></div>
+        <div class="particle p3"></div>
+        <div class="particle p4"></div>
+
+
+        <div class="hero-content">
+
+
+            <!-- LEFT SIDE -->
+
+            <div class="content">
+
+                <div class="badge">
+                    AI-Powered Price Prediction
+                </div>
+
+                <h1>
+                    Predict the True
+                    <span>Value of a Diamond.</span>
+                </h1>
+
+                <p class="description">
+                    Welcome to Diamond Price Prediction — an intelligent
+                    machine learning application that estimates diamond
+                    prices based on key characteristics such as carat,
+                    cut, color, clarity, and other features.
+                </p>
+
+                <a href="/predict" class="predict-btn">
+                    Start Price Prediction →
+                </a>
+
+            </div>
+
+
+            <!-- RIGHT SIDE -->
+
+            <div class="diamond-section">
+
+                <div class="glow"></div>
+
+                <div class="diamond"></div>
+
+            </div>
+
+
+        </div>
+
+    </section>
+
+
+    <!-- ==============================
+         FOOTER
+    ============================== -->
+
+    <div class="footer">
+
+        Built with Machine Learning & Python Flask
 
     </div>
+
 
 </body>
 

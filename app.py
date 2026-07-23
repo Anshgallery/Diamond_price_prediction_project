@@ -28,21 +28,20 @@ def predict():
         cut =request.form.get("cut"),
         color =request.form.get("color"),
         clarity =request.form.get("clarity")
-
         ) # we just create a data object right now
         
         # Accesing the method available inside it 
-        fetched_df =data.get_data_as_dataframe()
+        fetched_df = data.get_data_as_dataframe()
 
-        object =PredictionPipeline()
-        result_predicted_arr =object.prediction(fetched_df) # we got the prediction 
+        object = PredictionPipeline() #This is pridictionpipeline class 
+        result_predicted_arr = object.prediction(fetched_df) # we got the prediction 
         result =round(result_predicted_arr[0],2) # we just fetch out the first element from the [0]
         return render_template("result.html",result =result)
 
 
 
 if __name__ =="__main__": #"If I run this Python file directly, then start the Flask application."
-    app.run(debug=True)
+    app.run(debug=True,host="0.0.0.0",port=8080)
 
 
 

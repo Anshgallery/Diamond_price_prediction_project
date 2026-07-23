@@ -2,17 +2,20 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
     <title>Diamond Price Prediction</title>
 
+
     <style>
 
-        /* =========================
-           GLOBAL STYLING
-        ========================== */
+        /* =====================================================
+           GLOBAL RESET
+        ===================================================== */
 
         * {
             margin: 0;
@@ -20,321 +23,519 @@
             box-sizing: border-box;
         }
 
+
+        /* =====================================================
+           BODY
+        ===================================================== */
+
         body {
+
             min-height: 100vh;
 
+            overflow: hidden;
+
+            font-family:
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
             display: flex;
+
             justify-content: center;
+
             align-items: center;
 
-            font-family: Arial, Helvetica, sans-serif;
+            color: white;
 
             background:
+
                 radial-gradient(
-                    circle at top,
-                    #263b5c 0%,
-                    #111827 40%,
-                    #05070c 100%
+                    circle at 50% 35%,
+                    #172554 0%,
+                    #080d1c 35%,
+                    #020617 75%,
+                    #000000 100%
                 );
 
-            color: white;
+        }
+
+
+        /* =====================================================
+           FALLING DIAMOND CONTAINER
+        ===================================================== */
+
+        .diamond-rain {
+
+            position: fixed;
+
+            inset: 0;
 
             overflow: hidden;
+
+            pointer-events: none;
+
+            z-index: 1;
+
         }
 
 
-        /* =========================
-           MAIN CONTAINER
-        ========================== */
+        /* =====================================================
+           DIAMOND PARTICLE
+        ===================================================== */
 
-        .container {
-            width: 90%;
-            max-width: 550px;
-
-            padding: 45px 35px;
-
-            text-align: center;
-
-            background: rgba(255, 255, 255, 0.08);
-
-            border: 1px solid rgba(255, 255, 255, 0.15);
-
-            border-radius: 25px;
-
-            backdrop-filter: blur(15px);
-
-            box-shadow:
-                0 25px 60px rgba(0, 0, 0, 0.5);
-
-            animation: fadeIn 1s ease;
-        }
-
-
-        /* =========================
-           TITLE
-        ========================== */
-
-        h1 {
-            font-size: 30px;
-
-            margin-bottom: 10px;
-
-            letter-spacing: 1px;
-        }
-
-        .subtitle {
-            color: #cbd5e1;
-
-            font-size: 16px;
-
-            margin-bottom: 30px;
-        }
-
-
-        /* =========================
-           ROTATING DIAMOND
-        ========================== */
-
-        .diamond-container {
-
-            width: 120px;
-            height: 120px;
-
-            margin: 0 auto 30px;
-
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            perspective: 800px;
-        }
-
-
-        .diamond {
-
-            width: 75px;
-            height: 75px;
-
-            position: relative;
-
-            transform-style: preserve-3d;
-
-            animation: rotateDiamond 5s linear infinite;
-
-            filter:
-                drop-shadow(
-                    0 0 15px rgba(150, 220, 255, 0.8)
-                );
-        }
-
-
-        /* Diamond shape */
-
-        .diamond::before {
-
-            content: "";
+        .falling-diamond {
 
             position: absolute;
 
-            width: 55px;
-            height: 55px;
+            top: -120px;
 
-            left: 10px;
-            top: 10px;
+            width: 45px;
 
-            background:
-                linear-gradient(
-                    135deg,
-                    #ffffff,
-                    #bdeaff,
-                    #5ebcff,
-                    #ffffff
-                );
+            height: 45px;
 
             transform:
-                rotate(45deg)
-                skew(-10deg, -10deg);
+
+                rotate(45deg);
+
+            background:
+
+                linear-gradient(
+                    135deg,
+                    rgba(255,255,255,0.95),
+                    rgba(186,230,253,0.9) 25%,
+                    rgba(59,130,246,0.8) 50%,
+                    rgba(255,255,255,0.95) 70%,
+                    rgba(125,211,252,0.8)
+                );
 
             border:
-                2px solid rgba(255, 255, 255, 0.8);
+
+                2px solid
+                rgba(255,255,255,0.9);
 
             box-shadow:
-                0 0 20px #8bdcff,
-                inset 0 0 15px white;
+
+                0 0 10px
+                rgba(125,211,252,0.8),
+
+                0 0 30px
+                rgba(59,130,246,0.5),
+
+                inset 0 0 12px
+                white;
+
+            opacity: 0;
+
+            animation:
+
+                diamondFall
+                linear
+                infinite;
+
         }
 
 
-        /* Diamond shine */
+        /* =====================================================
+           DIAMOND FACETS
+        ===================================================== */
 
-        .diamond::after {
+        .falling-diamond::before {
 
             content: "";
 
             position: absolute;
 
-            width: 4px;
-            height: 70px;
-
-            left: 36px;
-            top: 2px;
-
-            background: rgba(255, 255, 255, 0.8);
-
-            transform: rotate(45deg);
-
-            filter: blur(2px);
-
-            opacity: 0.8;
-        }
-
-
-        /* =========================
-           PRICE CARD
-        ========================== */
-
-        .price-card {
-
-            padding: 25px;
-
-            margin-bottom: 30px;
-
-            background:
-                rgba(255, 255, 255, 0.07);
-
-            border-radius: 18px;
+            inset: 5px;
 
             border:
-                1px solid rgba(255, 255, 255, 0.12);
-        }
 
-
-        .price-label {
-
-            color: #cbd5e1;
-
-            font-size: 15px;
-
-            text-transform: uppercase;
-
-            letter-spacing: 2px;
-
-            margin-bottom: 10px;
-        }
-
-
-        .price {
-
-            font-size: 42px;
-
-            font-weight: bold;
-
-            color: #ffffff;
-
-            text-shadow:
-                0 0 15px rgba(120, 210, 255, 0.7);
-
-            animation: priceGlow 2s ease-in-out infinite alternate;
-        }
-
-
-        /* =========================
-           BUTTON
-        ========================== */
-
-        .button {
-
-            display: inline-block;
-
-            padding: 14px 30px;
-
-            border-radius: 50px;
+                1px solid
+                rgba(255,255,255,0.8);
 
             background:
+
                 linear-gradient(
-                    135deg,
-                    #38bdf8,
-                    #2563eb
+                    45deg,
+                    transparent 45%,
+                    rgba(255,255,255,0.9) 50%,
+                    transparent 55%
                 );
 
-            color: white;
-
-            text-decoration: none;
-
-            font-size: 16px;
-
-            font-weight: bold;
-
-            transition: all 0.3s ease;
-
-            box-shadow:
-                0 8px 20px rgba(37, 99, 235, 0.4);
         }
 
 
-        .button:hover {
+        .falling-diamond::after {
 
-            transform: translateY(-3px);
+            content: "";
 
-            box-shadow:
-                0 12px 30px rgba(56, 189, 248, 0.5);
+            position: absolute;
+
+            width: 70%;
+
+            height: 2px;
+
+            top: 45%;
+
+            left: 15%;
 
             background:
-                linear-gradient(
-                    135deg,
-                    #60a5fa,
-                    #3b82f6
-                );
+
+                rgba(255,255,255,0.9);
+
+            box-shadow:
+
+                0 0 10px
+                white;
+
+            transform:
+
+                rotate(-45deg);
+
         }
 
 
-        /* =========================
-           ANIMATIONS
-        ========================== */
+        /* =====================================================
+           INDIVIDUAL DIAMOND POSITIONS
+        ===================================================== */
 
-        @keyframes rotateDiamond {
+        .falling-diamond:nth-child(1) {
+
+            left: 3%;
+
+            width: 30px;
+
+            height: 30px;
+
+            animation-duration: 8s;
+
+            animation-delay: 0s;
+
+        }
+
+
+        .falling-diamond:nth-child(2) {
+
+            left: 10%;
+
+            width: 55px;
+
+            height: 55px;
+
+            animation-duration: 11s;
+
+            animation-delay: 2s;
+
+        }
+
+
+        .falling-diamond:nth-child(3) {
+
+            left: 18%;
+
+            width: 25px;
+
+            height: 25px;
+
+            animation-duration: 7s;
+
+            animation-delay: 1s;
+
+        }
+
+
+        .falling-diamond:nth-child(4) {
+
+            left: 27%;
+
+            width: 45px;
+
+            height: 45px;
+
+            animation-duration: 10s;
+
+            animation-delay: 4s;
+
+        }
+
+
+        .falling-diamond:nth-child(5) {
+
+            left: 36%;
+
+            width: 32px;
+
+            height: 32px;
+
+            animation-duration: 8s;
+
+            animation-delay: 3s;
+
+        }
+
+
+        .falling-diamond:nth-child(6) {
+
+            left: 45%;
+
+            width: 60px;
+
+            height: 60px;
+
+            animation-duration: 12s;
+
+            animation-delay: 0s;
+
+        }
+
+
+        .falling-diamond:nth-child(7) {
+
+            left: 55%;
+
+            width: 28px;
+
+            height: 28px;
+
+            animation-duration: 7s;
+
+            animation-delay: 2s;
+
+        }
+
+
+        .falling-diamond:nth-child(8) {
+
+            left: 64%;
+
+            width: 48px;
+
+            height: 48px;
+
+            animation-duration: 9s;
+
+            animation-delay: 5s;
+
+        }
+
+
+        .falling-diamond:nth-child(9) {
+
+            left: 73%;
+
+            width: 35px;
+
+            height: 35px;
+
+            animation-duration: 8s;
+
+            animation-delay: 1s;
+
+        }
+
+
+        .falling-diamond:nth-child(10) {
+
+            left: 82%;
+
+            width: 55px;
+
+            height: 55px;
+
+            animation-duration: 11s;
+
+            animation-delay: 3s;
+
+        }
+
+
+        .falling-diamond:nth-child(11) {
+
+            left: 91%;
+
+            width: 30px;
+
+            height: 30px;
+
+            animation-duration: 7s;
+
+            animation-delay: 4s;
+
+        }
+
+
+        .falling-diamond:nth-child(12) {
+
+            left: 97%;
+
+            width: 45px;
+
+            height: 45px;
+
+            animation-duration: 10s;
+
+            animation-delay: 6s;
+
+        }
+
+
+        /* =====================================================
+           FALLING ANIMATION
+        ===================================================== */
+
+        @keyframes diamondFall {
 
             0% {
+
+                top: -120px;
+
+                opacity: 0;
+
                 transform:
-                    rotateY(0deg)
-                    rotateX(10deg);
+
+                    translateX(0)
+                    rotate(0deg);
+
+            }
+
+            10% {
+
+                opacity: 0.9;
+
             }
 
             50% {
+
+                opacity: 0.8;
+
                 transform:
-                    rotateY(180deg)
-                    rotateX(-10deg);
+
+                    translateX(80px)
+                    rotate(180deg);
+
+            }
+
+            90% {
+
+                opacity: 0.5;
+
             }
 
             100% {
+
+                top: 110vh;
+
+                opacity: 0;
+
                 transform:
-                    rotateY(360deg)
-                    rotateX(10deg);
+
+                    translateX(-80px)
+                    rotate(360deg);
+
             }
+
         }
 
 
-        @keyframes priceGlow {
+        /* =====================================================
+           BACKGROUND GLOW
+        ===================================================== */
 
-            from {
-                text-shadow:
-                    0 0 10px rgba(120, 210, 255, 0.4);
-            }
+        .glow {
 
-            to {
-                text-shadow:
-                    0 0 25px rgba(120, 210, 255, 0.9);
-            }
+            position: fixed;
+
+            width: 500px;
+
+            height: 500px;
+
+            border-radius: 50%;
+
+            background:
+
+                rgba(37,99,235,0.15);
+
+            filter:
+
+                blur(100px);
+
+            top: 50%;
+
+            left: 50%;
+
+            transform:
+
+                translate(-50%, -50%);
+
+            z-index: 0;
+
         }
 
 
-        @keyframes fadeIn {
+        /* =====================================================
+           MAIN CARD
+        ===================================================== */
+
+        .container {
+
+            position: relative;
+
+            z-index: 10;
+
+            width: 92%;
+
+            max-width: 620px;
+
+            padding: 50px 45px;
+
+            text-align: center;
+
+            border-radius: 30px;
+
+            background:
+
+                linear-gradient(
+                    145deg,
+                    rgba(15,23,42,0.88),
+                    rgba(15,23,42,0.65)
+                );
+
+            border:
+
+                1px solid
+                rgba(255,255,255,0.18);
+
+            backdrop-filter:
+
+                blur(25px);
+
+            box-shadow:
+
+                0 30px 100px
+                rgba(0,0,0,0.7),
+
+                0 0 60px
+                rgba(37,99,235,0.15);
+
+            animation:
+
+                cardAppear
+                1.2s
+                ease;
+
+        }
+
+
+        @keyframes cardAppear {
 
             from {
 
                 opacity: 0;
 
                 transform:
-                    translateY(30px);
+
+                    translateY(50px)
+                    scale(0.92);
+
             }
 
             to {
@@ -342,32 +543,443 @@
                 opacity: 1;
 
                 transform:
-                    translateY(0);
+
+                    translateY(0)
+                    scale(1);
+
             }
+
         }
 
 
-        /* =========================
-           MOBILE RESPONSIVE
-        ========================== */
+        /* =====================================================
+           BRAND
+        ===================================================== */
 
-        @media (max-width: 500px) {
+        .brand {
+
+            font-size: 12px;
+
+            letter-spacing: 5px;
+
+            font-weight: 600;
+
+            color: #94a3b8;
+
+            margin-bottom: 25px;
+
+        }
+
+
+        .brand span {
+
+            color: #60a5fa;
+
+        }
+
+
+        /* =====================================================
+           MAIN DIAMOND
+        ===================================================== */
+
+        .main-diamond {
+
+            width: 100px;
+
+            height: 100px;
+
+            margin:
+
+                0 auto 30px;
+
+            position: relative;
+
+            transform:
+
+                rotate(45deg);
+
+            background:
+
+                linear-gradient(
+                    135deg,
+                    #ffffff 0%,
+                    #bae6fd 25%,
+                    #3b82f6 50%,
+                    #ffffff 70%,
+                    #7dd3fc 100%
+                );
+
+            border:
+
+                3px solid
+                rgba(255,255,255,0.9);
+
+            box-shadow:
+
+                0 0 20px
+                rgba(125,211,252,0.9),
+
+                0 0 60px
+                rgba(37,99,235,0.6),
+
+                inset 0 0 30px
+                white;
+
+            animation:
+
+                mainDiamond
+                5s
+                ease-in-out
+                infinite;
+
+        }
+
+
+        .main-diamond::before {
+
+            content: "";
+
+            position: absolute;
+
+            inset: 10px;
+
+            border:
+
+                2px solid
+                rgba(255,255,255,0.8);
+
+            background:
+
+                linear-gradient(
+                    45deg,
+                    transparent 40%,
+                    rgba(255,255,255,0.8),
+                    transparent 60%
+                );
+
+        }
+
+
+        .main-diamond::after {
+
+            content: "";
+
+            position: absolute;
+
+            width: 5px;
+
+            height: 130px;
+
+            left: 45px;
+
+            top: -15px;
+
+            background:
+
+                rgba(255,255,255,0.9);
+
+            filter:
+
+                blur(3px);
+
+            transform:
+
+                rotate(45deg);
+
+            animation:
+
+                shine
+                2s
+                infinite;
+
+        }
+
+
+        @keyframes mainDiamond {
+
+            0% {
+
+                transform:
+
+                    rotate(45deg)
+                    translateY(0);
+
+            }
+
+            50% {
+
+                transform:
+
+                    rotate(225deg)
+                    translateY(-10px);
+
+            }
+
+            100% {
+
+                transform:
+
+                    rotate(405deg)
+                    translateY(0);
+
+            }
+
+        }
+
+
+        @keyframes shine {
+
+            0% {
+
+                opacity: 0;
+
+                transform:
+
+                    rotate(45deg)
+                    translateX(-50px);
+
+            }
+
+            50% {
+
+                opacity: 1;
+
+            }
+
+            100% {
+
+                opacity: 0;
+
+                transform:
+
+                    rotate(45deg)
+                    translateX(50px);
+
+            }
+
+        }
+
+
+        /* =====================================================
+           HEADING
+        ===================================================== */
+
+        h1 {
+
+            font-size: 38px;
+
+            margin-bottom: 15px;
+
+            font-weight: 700;
+
+            background:
+
+                linear-gradient(
+                    90deg,
+                    #ffffff,
+                    #93c5fd,
+                    #ffffff
+                );
+
+            -webkit-background-clip:
+
+                text;
+
+            -webkit-text-fill-color:
+
+                transparent;
+
+        }
+
+
+        .subtitle {
+
+            color: #94a3b8;
+
+            font-size: 16px;
+
+            line-height: 1.7;
+
+            margin-bottom: 35px;
+
+        }
+
+
+        /* =====================================================
+           PRICE CARD
+        ===================================================== */
+
+        .price-card {
+
+            padding: 28px;
+
+            margin-bottom: 30px;
+
+            border-radius: 20px;
+
+            background:
+
+                rgba(255,255,255,0.05);
+
+            border:
+
+                1px solid
+                rgba(255,255,255,0.1);
+
+        }
+
+
+        .price-label {
+
+            font-size: 12px;
+
+            letter-spacing: 3px;
+
+            text-transform: uppercase;
+
+            color: #94a3b8;
+
+            margin-bottom: 12px;
+
+        }
+
+
+        .price {
+
+            font-size: 45px;
+
+            font-weight: 800;
+
+            color: #ffffff;
+
+            text-shadow:
+
+                0 0 25px
+                rgba(96,165,250,0.8);
+
+        }
+
+
+        /* =====================================================
+           BUTTON
+        ===================================================== */
+
+        .button {
+
+            display: inline-flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            padding:
+
+                15px
+                30px;
+
+            border-radius: 12px;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-size: 15px;
+
+            font-weight: 600;
+
+            background:
+
+                linear-gradient(
+                    135deg,
+                    #2563eb,
+                    #7c3aed
+                );
+
+            box-shadow:
+
+                0 10px 30px
+                rgba(37,99,235,0.35);
+
+            transition:
+
+                all
+                0.3s
+                ease;
+
+        }
+
+
+        .button:hover {
+
+            transform:
+
+                translateY(-4px);
+
+            box-shadow:
+
+                0 15px 45px
+                rgba(59,130,246,0.6);
+
+        }
+
+
+        .arrow {
+
+            font-size: 20px;
+
+        }
+
+
+        /* =====================================================
+           FOOTER
+        ===================================================== */
+
+        .footer {
+
+            margin-top: 30px;
+
+            color: #64748b;
+
+            font-size: 12px;
+
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media
+        (max-width: 600px) {
 
             .container {
 
                 padding:
-                    35px 20px;
+
+                    40px 20px;
+
             }
 
             h1 {
 
-                font-size: 25px;
+                font-size: 28px;
+
             }
 
             .price {
 
                 font-size: 34px;
+
             }
+
+            .main-diamond {
+
+                width: 75px;
+
+                height: 75px;
+
+            }
+
         }
 
     </style>
@@ -378,36 +990,101 @@
 <body>
 
 
+    <!-- ============================================
+         BACKGROUND GLOW
+    ============================================= -->
+
+    <div class="glow"></div>
+
+
+    <!-- ============================================
+         FALLING DIAMONDS
+    ============================================= -->
+
+    <div class="diamond-rain">
+
+        <div class="falling-diamond"></div>
+
+        <div class="falling-diamond"></div>
+
+        <div class="falling-diamond"></div>
+
+        <div class="falling-diamond"></div>
+
+        <div class="falling-diamond"></div>
+
+        <div class="falling-diamond"></div>
+
+        <div class="falling-diamond"></div>
+
+        <div class="falling-diamond"></div>
+
+        <div class="falling-diamond"></div>
+
+        <div class="falling-diamond"></div>
+
+        <div class="falling-diamond"></div>
+
+        <div class="falling-diamond"></div>
+
+    </div>
+
+
+    <!-- ============================================
+         MAIN CONTENT
+    ============================================= -->
+
     <div class="container">
 
 
-        <!-- Rotating Diamond -->
+        <!-- BRAND -->
 
-        <div class="diamond-container">
+        <div class="brand">
 
-            <div class="diamond"></div>
+            DIAMOND
+
+            <span>AI</span>
+
+            &nbsp; • &nbsp;
+
+            MACHINE LEARNING
 
         </div>
 
 
-        <!-- Heading -->
+        <!-- MAIN DIAMOND -->
+
+        <div class="main-diamond"></div>
+
+
+        <!-- TITLE -->
 
         <h1>
+
             Diamond Price Prediction
+
         </h1>
 
 
+        <!-- DESCRIPTION -->
+
         <p class="subtitle">
-            Your estimated diamond price is
+
+            Harness the power of Machine Learning
+            to estimate the market value of your diamond
+            with intelligent, data-driven predictions.
+
         </p>
 
 
-        <!-- Prediction Result -->
+        <!-- PRICE RESULT -->
 
         <div class="price-card">
 
             <div class="price-label">
-                Predicted Price
+
+                Estimated Diamond Price
+
             </div>
 
             <div class="price">
@@ -419,14 +1096,33 @@
         </div>
 
 
-        <!-- Back Button -->
+        <!-- BUTTON -->
 
         <a
             href="/predict"
             class="button"
         >
+
             Predict Another Diamond
+
+            <span class="arrow">
+
+                →
+
+            </span>
+
         </a>
+
+
+        <!-- FOOTER -->
+
+        <div class="footer">
+
+            Powered by Machine Learning
+            •
+            Intelligent Price Prediction System
+
+        </div>
 
 
     </div>
