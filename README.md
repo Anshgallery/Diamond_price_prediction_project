@@ -4,7 +4,7 @@ A production-ready end-to-end Machine Learning project that predicts the price o
 
 The primary objective of this project is to transform raw diamond attributes into accurate price predictions through a scalable machine learning pipeline.
 
----
+---.
 
 # Project Overview
 
