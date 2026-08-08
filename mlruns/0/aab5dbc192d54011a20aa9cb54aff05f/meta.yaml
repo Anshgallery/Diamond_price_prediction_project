@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Classes_ineuron/own_revice/mlruns/0/aab5dbc192d54011a20aa9cb54aff05f/artifacts
+end_time: 1786176231652
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: aab5dbc192d54011a20aa9cb54aff05f
+run_name: receptive-skunk-149
+run_uuid: aab5dbc192d54011a20aa9cb54aff05f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1786176231330
+status: 4
+tags: []
+user_id: java

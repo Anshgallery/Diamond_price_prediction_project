@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/Classes_ineuron/own_revice/mlruns/0/9a46f9ee527249f2a627c19c2dc39a5d/artifacts
+end_time: 1786176599337
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 9a46f9ee527249f2a627c19c2dc39a5d
+run_name: luxuriant-boar-30
+run_uuid: 9a46f9ee527249f2a627c19c2dc39a5d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1786176599109
+status: 3
+tags: []
+user_id: java

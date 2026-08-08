@@ -5,3 +5,9 @@ scipy
 scikit-learn
 -e .
 flask
+pytest
+black # for formatting 
+ruff
+# now start new part of this project 
+dvc
+mlflow
