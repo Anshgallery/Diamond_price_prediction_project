@@ -82,9 +82,9 @@ class ModelEvaluation:
             # 2. Connect DagsHub with MLflow
             # =================================================
 
-            dagshub.init(repo_owner='anshgallery',
-                        repo_name='Diamond_price_prediction_project',
-                        mlflow=True)
+            dagshub.init(repo_owner='Anshgallery', repo_name='Diamond_price_prediction_project', mlflow=True)
+
+
 
 
 
