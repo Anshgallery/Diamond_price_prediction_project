@@ -11,3 +11,4 @@ ruff
 # now start new part of this project 
 dvc
 mlflow
+gunicorn
