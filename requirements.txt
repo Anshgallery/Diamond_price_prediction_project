@@ -1,15 +1,15 @@
-pandas 
-numpy 
-seaborn 
+pandas
+numpy
+seaborn
 scipy
 scikit-learn
 -e .
 flask
 pytest
-black # for formatting 
+black
 ruff
-# now start new part of this project 
 dvc
 mlflow
-gunicorn # for render
-shap # for ai usecase
+gunicorn
+shap
+pypdf

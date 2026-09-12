@@ -1,576 +1,264 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-
-    <title>DiamondPricePrediction</title>
-
-    <style>
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: Arial, sans-serif;
-        }
-
-        body {
-            min-height: 100vh;
-            background: linear-gradient(
-                135deg,
-                #0f172a,
-                #1e293b,
-                #312e81
-            );
-
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            padding: 40px 20px;
-        }
-
-
-        /* Main Container */
-
-        .container {
-            width: 100%;
-            max-width: 850px;
-
-            background: rgba(255, 255, 255, 0.97);
-
-            border-radius: 20px;
-
-            padding: 40px;
-
-            box-shadow:
-                0 20px 50px rgba(0, 0, 0, 0.3);
-        }
-
-
-        /* Header */
-
-        .header {
-            text-align: center;
-
-            margin-bottom: 35px;
-        }
-
-
-        .diamond-icon {
-            font-size: 50px;
-
-            margin-bottom: 10px;
-        }
-
-
-        .header h1 {
-            color: #1e1b4b;
-
-            font-size: 32px;
-
-            margin-bottom: 10px;
-        }
-
-
-        .header p {
-            color: #64748b;
-
-            font-size: 16px;
-        }
-
-
-        /* Form Grid */
-
-        .form-grid {
-            display: grid;
-
-            grid-template-columns:
-                repeat(2, 1fr);
-
-            gap: 22px;
-        }
-
-
-        /* Form Group */
-
-        .form-group {
-            display: flex;
-
-            flex-direction: column;
-        }
-
-
-        .form-group label {
-            color: #334155;
-
-            font-size: 14px;
-
-            font-weight: 600;
-
-            margin-bottom: 8px;
-        }
-
-
-        /* Input and Select */
-
-        .form-group input,
-        .form-group select {
-
-            width: 100%;
-
-            padding: 13px 15px;
-
-            border: 1px solid #cbd5e1;
-
-            border-radius: 10px;
-
-            font-size: 15px;
-
-            background-color: #f8fafc;
-
-            color: #1e293b;
-
-            outline: none;
-
-            transition: all 0.3s ease;
-        }
-
-
-        /* Focus Effect */
-
-        .form-group input:focus,
-        .form-group select:focus {
-
-            border-color: #6366f1;
-
-            background-color: white;
-
-            box-shadow:
-                0 0 0 3px
-                rgba(99, 102, 241, 0.15);
-        }
-
-
-        /* Select Arrow */
-
-        .form-group select {
-
-            cursor: pointer;
-        }
-
-
-        /* Button Container */
-
-        .button-container {
-
-            grid-column: 1 / -1;
-
-            margin-top: 15px;
-
-            text-align: center;
-        }
-
-
-        /* Predict Button */
-
-        .predict-btn {
-
-            width: 100%;
-
-            padding: 15px;
-
-            border: none;
-
-            border-radius: 10px;
-
-            background: linear-gradient(
-                135deg,
-                #6366f1,
-                #4f46e5
-            );
-
-            color: white;
-
-            font-size: 17px;
-
-            font-weight: 600;
-
-            cursor: pointer;
-
-            transition: all 0.3s ease;
-
-            box-shadow:
-                0 8px 20px
-                rgba(79, 70, 229, 0.3);
-        }
-
-
-        /* Button Hover */
-
-        .predict-btn:hover {
-
-            transform: translateY(-2px);
-
-            box-shadow:
-                0 12px 25px
-                rgba(79, 70, 229, 0.4);
-        }
-
-
-        .predict-btn:active {
-
-            transform: translateY(0);
-
-        }
-
-
-        /* Footer */
-
-        .footer {
-
-            text-align: center;
-
-            margin-top: 25px;
-
-            color: #94a3b8;
-
-            font-size: 13px;
-        }
-
-
-        /* Mobile Responsive */
-
-        @media (max-width: 650px) {
-
-            .container {
-
-                padding: 25px;
-
-            }
-
-            .form-grid {
-
-                grid-template-columns: 1fr;
-
-            }
-
-            .header h1 {
-
-                font-size: 26px;
-
-            }
-
-        }
-
-    </style>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEMFORECAST AI | Diamond Appraisal & GIA Verification Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/gemforecast.css">
 </head>
-
-
 <body>
 
+    <!-- NAVIGATION -->
+    <nav class="gem-nav">
+        <div class="gem-logo">
+            <span class="icon-gem">💎</span> GEMFORECAST <span>AI</span>
+        </div>
+        <ul class="gem-nav-links">
+            <li><a href="/">Platform</a></li>
+            <li><a href="/predict" class="active">Valuation & GIA Check</a></li>
+            <li><a href="/inventory">Jeweller Workspace</a></li>
+            <li><a href="/compare">Compare Diamonds</a></li>
+            <li><a href="/assistant">AI Gemologist</a></li>
+            <li><a href="/market-settings">Market Config</a></li>
+        </ul>
+        <div class="gem-nav-actions">
+            <a href="/" class="gem-btn gem-btn-secondary" style="padding: 0.5rem 1rem;">← Home</a>
+        </div>
+    </nav>
 
-    <div class="container">
-
-
-        <!-- Header -->
-
-        <div class="header">
-
-            <div class="diamond-icon">
-                💎
+    <div class="gem-container-narrow">
+        
+        <!-- HEADER -->
+        <div style="margin-bottom: 2rem; text-align: center;">
+            <div style="margin-bottom: 0.75rem;">
+                <span class="gem-badge badge-gold">Official GIA Workflow & AI Appraisal</span>
             </div>
-
-            <h1>
-                DiamondPricePrediction
+            <h1 style="font-family: var(--font-display); font-size: 2.25rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">
+                Diamond Valuation & GIA Verification
             </h1>
-
-            <p>
-                Predict the estimated price of a diamond
-                using Machine Learning
+            <p style="color: var(--text-muted); font-size: 0.95rem;">
+                Upload a GIA PDF, enter a report number, or manually specify the 4Cs to generate a complete Valuation & Verification Dossier.
             </p>
-
         </div>
 
-
-        <!-- Prediction Form -->
-
-        <form
-            action="{{ url_for('predict') }}"
-            method="POST"
-        >
-
-
-            <div class="form-grid">
-
-
-                <!-- Carat -->
-
-                <div class="form-group">
-
-                    <label for="carat">
-                        Carat
-                    </label>
-
-                    <input
-                        type="number"
-                        step="any"
-                        id="carat"
-                        name="carat"
-                        placeholder="Enter carat value"
-                        required
-                    >
-
+        <!-- 1. GIA CERTIFICATE INGESTION CARD -->
+        <div class="gem-card" style="margin-bottom: 2rem; border: 1px solid rgba(56, 189, 248, 0.25);">
+            <div class="gem-card-header">
+                <div class="gem-card-title">
+                    <span>📄</span> Fast Ingestion: GIA Certificate / PDF OCR
                 </div>
-
-
-                <!-- Depth -->
-
-                <div class="form-group">
-
-                    <label for="depth">
-                        Depth
-                    </label>
-
-                    <input
-                        type="number"
-                        step="any"
-                        id="depth"
-                        name="depth"
-                        placeholder="Enter depth value"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- Table -->
-
-                <div class="form-group">
-
-                    <label for="table">
-                        Table
-                    </label>
-
-                    <input
-                        type="number"
-                        step="any"
-                        id="table"
-                        name="table"
-                        placeholder="Enter table value"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- X -->
-
-                <div class="form-group">
-
-                    <label for="x">
-                        X (Length)
-                    </label>
-
-                    <input
-                        type="number"
-                        step="any"
-                        id="x"
-                        name="x"
-                        placeholder="Enter x value"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- Y -->
-
-                <div class="form-group">
-
-                    <label for="y">
-                        Y (Width)
-                    </label>
-
-                    <input
-                        type="number"
-                        step="any"
-                        id="y"
-                        name="y"
-                        placeholder="Enter y value"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- Z -->
-
-                <div class="form-group">
-
-                    <label for="z">
-                        Z (Depth)
-                    </label>
-
-                    <input
-                        type="number"
-                        step="any"
-                        id="z"
-                        name="z"
-                        placeholder="Enter z value"
-                        required
-                    >
-
-                </div>
-
-
-                <!-- Cut -->
-
-                <div class="form-group">
-
-                    <label for="cut">
-                        Cut Quality
-                    </label>
-
-                    <select
-                        id="cut"
-                        name="cut"
-                        required
-                    >
-
-                        <option value="">
-                            Select Cut Quality
-                        </option>
-
-                        <option value="Fair">
-                            Fair
-                        </option>
-
-                        <option value="Good">
-                            Good
-                        </option>
-
-                        <option value="Very Good">
-                            Very Good
-                        </option>
-
-                        <option value="Premium">
-                            Premium
-                        </option>
-
-                        <option value="Ideal">
-                            Ideal
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <!-- Color -->
-
-                <div class="form-group">
-
-                    <label for="color">
-                        Diamond Color
-                    </label>
-
-                    <select
-                        id="color"
-                        name="color"
-                        required
-                    >
-
-                        <option value="">
-                            Select Color
-                        </option>
-
-                        <option value="D">D</option>
-                        <option value="E">E</option>
-                        <option value="F">F</option>
-                        <option value="G">G</option>
-                        <option value="H">H</option>
-                        <option value="I">I</option>
-                        <option value="J">J</option>
-
-                    </select>
-
-                </div>
-
-
-                <!-- Clarity -->
-
-                <div class="form-group">
-
-                    <label for="clarity">
-                        Diamond Clarity
-                    </label>
-
-                    <select
-                        id="clarity"
-                        name="clarity"
-                        required
-                    >
-
-                        <option value="">
-                            Select Clarity
-                        </option>
-
-                        <option value="I1">I1</option>
-                        <option value="SI2">SI2</option>
-                        <option value="SI1">SI1</option>
-                        <option value="VS2">VS2</option>
-                        <option value="VS1">VS1</option>
-                        <option value="VVS2">VVS2</option>
-                        <option value="VVS1">VVS1</option>
-                        <option value="IF">IF</option>
-
-                    </select>
-
-                </div>
-
-
-                <!-- Button -->
-
-                <div class="button-container">
-
-                    <button
-                        type="submit"
-                        class="predict-btn"
-                    >
-
-                        Predict Diamond Price
-
-                    </button>
-
-                </div>
-
-
+                <span class="gem-badge badge-info">Automated Field Extraction</span>
             </div>
 
+            <div class="gem-grid-2" style="margin-bottom: 1.25rem;">
+                <!-- Sample Selector -->
+                <div class="gem-input-group" style="margin-bottom: 0;">
+                    <label class="gem-label">Select Verified Sample Certificate (Demo Test):</label>
+                    <select id="sample-cert-select" class="gem-select">
+                        <option value="">-- Choose Sample Report --</option>
+                        <option value="2458921840" {% if sample_cert and sample_cert.report_number == '2458921840' %}selected{% endif %}>GIA #2458921840 (1.01ct E/VVS1 Natural Ideal)</option>
+                        <option value="5221789034" {% if sample_cert and sample_cert.report_number == '5221789034' %}selected{% endif %}>GIA #5221789034 (1.52ct F/VS2 Natural Very Good)</option>
+                        <option value="6439012345" {% if sample_cert and sample_cert.report_number == '6439012345' %}selected{% endif %}>GIA #6439012345 (2.01ct D/VS1 Lab-Grown Ideal)</option>
+                    </select>
+                </div>
 
-        </form>
+                <!-- PDF Upload Form -->
+                <div>
+                    <form action="/parse-gia-pdf" method="POST" enctype="multipart/form-data" style="display: flex; gap: 0.5rem; align-items: flex-end;">
+                        <div style="flex: 1;">
+                            <label class="gem-label">Or Upload GIA Report PDF:</label>
+                            <input type="file" name="gia_pdf" accept="application/pdf" class="gem-input" style="padding: 0.5rem;">
+                        </div>
+                        <button type="submit" class="gem-btn gem-btn-primary" style="padding: 0.65rem 1.1rem; font-size: 0.88rem;">Extract PDF</button>
+                    </form>
+                </div>
+            </div>
 
-
-        <!-- Footer -->
-
-        <div class="footer">
-
-            Machine Learning Powered
-            Diamond Price Prediction System
-
+            {% if upload_error %}
+                <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); padding: 0.75rem 1rem; border-radius: var(--radius-md); color: #f87171; font-size: 0.88rem; margin-top: 0.75rem;">
+                    ⚠️ {{ upload_error }}
+                </div>
+            {% endif %}
         </div>
 
+        <!-- 2. MAIN DIAMOND VALUATION FORM -->
+        <form action="/predict" method="POST" class="gem-card">
+            <div class="gem-card-header">
+                <div class="gem-card-title">
+                    <span>💎</span> Diamond Specifications & Provenance
+                </div>
+                <div id="proportion-live-badge">
+                    <span class="gem-badge badge-secondary">Enter Proportions</span>
+                </div>
+            </div>
+
+            <!-- PROVENANCE & REPORT INFO -->
+            <div class="gem-grid-3" style="margin-bottom: 1rem;">
+                <div class="gem-input-group">
+                    <label class="gem-label" for="report_number">GIA Report Number</label>
+                    <input type="text" id="report_number" name="report_number" class="gem-input" placeholder="e.g. 2458921840" value="{{ form_data.report_number or '' }}">
+                </div>
+                <div class="gem-input-group">
+                    <label class="gem-label" for="origin_type">Origin Type</label>
+                    <select id="origin_type" name="origin_type" class="gem-select">
+                        <option value="Natural" {% if form_data.origin_type == 'Natural' or not form_data.origin_type %}selected{% endif %}>Natural Earth-Mined</option>
+                        <option value="Lab-Grown" {% if form_data.origin_type == 'Lab-Grown' %}selected{% endif %}>Laboratory-Grown (CVD / HPHT)</option>
+                    </select>
+                </div>
+                <div class="gem-input-group">
+                    <label class="gem-label" for="shape">Shape & Cutting Style</label>
+                    <select id="shape" name="shape" class="gem-select">
+                        <option value="Round Brilliant" selected>Round Brilliant</option>
+                        <option value="Princess">Princess</option>
+                        <option value="Cushion">Cushion</option>
+                        <option value="Oval">Oval</option>
+                        <option value="Emerald">Emerald</option>
+                        <option value="Radiant">Radiant</option>
+                        <option value="Pear">Pear</option>
+                        <option value="Marquise">Marquise</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 4Cs CORE SPECIFICATION -->
+            <div style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--primary); letter-spacing: 0.05em; margin: 1.5rem 0 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border-subtle);">
+                Core 4Cs Grading Parameters
+            </div>
+
+            <div class="gem-grid-4" style="margin-bottom: 1rem;">
+                <div class="gem-input-group">
+                    <label class="gem-label" for="carat">Carat Weight (ct) *</label>
+                    <input type="number" step="0.01" id="carat" name="carat" class="gem-input" placeholder="e.g. 1.01" value="{{ form_data.carat or '1.01' }}" required>
+                </div>
+
+                <div class="gem-input-group">
+                    <label class="gem-label" for="cut">Cut Quality *</label>
+                    <select id="cut" name="cut" class="gem-select" required>
+                        <option value="Ideal" {% if form_data.cut == 'Ideal' or form_data.cut == 'Excellent' or not form_data.cut %}selected{% endif %}>Ideal / Excellent</option>
+                        <option value="Premium" {% if form_data.cut == 'Premium' %}selected{% endif %}>Premium</option>
+                        <option value="Very Good" {% if form_data.cut == 'Very Good' %}selected{% endif %}>Very Good</option>
+                        <option value="Good" {% if form_data.cut == 'Good' %}selected{% endif %}>Good</option>
+                        <option value="Fair" {% if form_data.cut == 'Fair' %}selected{% endif %}>Fair</option>
+                    </select>
+                </div>
+
+                <div class="gem-input-group">
+                    <label class="gem-label" for="color">Color Grade *</label>
+                    <select id="color" name="color" class="gem-select" required>
+                        <option value="D" {% if form_data.color == 'D' %}selected{% endif %}>D (Colorless)</option>
+                        <option value="E" {% if form_data.color == 'E' or not form_data.color %}selected{% endif %}>E (Colorless)</option>
+                        <option value="F" {% if form_data.color == 'F' %}selected{% endif %}>F (Colorless)</option>
+                        <option value="G" {% if form_data.color == 'G' %}selected{% endif %}>G (Near Colorless)</option>
+                        <option value="H" {% if form_data.color == 'H' %}selected{% endif %}>H (Near Colorless)</option>
+                        <option value="I" {% if form_data.color == 'I' %}selected{% endif %}>I (Near Colorless)</option>
+                        <option value="J" {% if form_data.color == 'J' %}selected{% endif %}>J (Slight Tint)</option>
+                    </select>
+                </div>
+
+                <div class="gem-input-group">
+                    <label class="gem-label" for="clarity">Clarity Grade *</label>
+                    <select id="clarity" name="clarity" class="gem-select" required>
+                        <option value="IF" {% if form_data.clarity == 'IF' or form_data.clarity == 'FL' %}selected{% endif %}>FL / IF (Flawless)</option>
+                        <option value="VVS1" {% if form_data.clarity == 'VVS1' or not form_data.clarity %}selected{% endif %}>VVS1 (Very Very Slight)</option>
+                        <option value="VVS2" {% if form_data.clarity == 'VVS2' %}selected{% endif %}>VVS2</option>
+                        <option value="VS1" {% if form_data.clarity == 'VS1' %}selected{% endif %}>VS1 (Very Slight)</option>
+                        <option value="VS2" {% if form_data.clarity == 'VS2' %}selected{% endif %}>VS2</option>
+                        <option value="SI1" {% if form_data.clarity == 'SI1' %}selected{% endif %}>SI1 (Slightly Included)</option>
+                        <option value="SI2" {% if form_data.clarity == 'SI2' %}selected{% endif %}>SI2</option>
+                        <option value="I1" {% if form_data.clarity == 'I1' %}selected{% endif %}>I1 (Included)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- PROPORTIONS & FINISH -->
+            <div style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--primary); letter-spacing: 0.05em; margin: 1.5rem 0 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border-subtle);">
+                Proportions, Dimensions & Finish (Optical Physics)
+            </div>
+
+            <div class="gem-grid-4" style="margin-bottom: 1rem;">
+                <div class="gem-input-group">
+                    <label class="gem-label" for="table">Table Percentage (%) *</label>
+                    <input type="number" step="0.1" id="table" name="table" class="gem-input" placeholder="e.g. 57.0" value="{{ form_data.table or '57.0' }}" required>
+                </div>
+                <div class="gem-input-group">
+                    <label class="gem-label" for="depth">Total Depth (%) *</label>
+                    <input type="number" step="0.1" id="depth" name="depth" class="gem-input" placeholder="e.g. 61.7" value="{{ form_data.depth or '61.7' }}" required>
+                </div>
+                <div class="gem-input-group">
+                    <label class="gem-label" for="polish">Polish Grade</label>
+                    <select id="polish" name="polish" class="gem-select">
+                        <option value="Excellent" selected>Excellent</option>
+                        <option value="Very Good">Very Good</option>
+                        <option value="Good">Good</option>
+                    </select>
+                </div>
+                <div class="gem-input-group">
+                    <label class="gem-label" for="symmetry">Symmetry Grade</label>
+                    <select id="symmetry" name="symmetry" class="gem-select">
+                        <option value="Excellent" selected>Excellent</option>
+                        <option value="Very Good">Very Good</option>
+                        <option value="Good">Good</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="gem-grid-4" style="margin-bottom: 1rem;">
+                <div class="gem-input-group">
+                    <label class="gem-label" for="x">Length X (mm) *</label>
+                    <input type="number" step="0.01" id="x" name="x" class="gem-input" placeholder="e.g. 6.45" value="{{ form_data.x or '6.45' }}" required>
+                </div>
+                <div class="gem-input-group">
+                    <label class="gem-label" for="y">Width Y (mm) *</label>
+                    <input type="number" step="0.01" id="y" name="y" class="gem-input" placeholder="e.g. 6.48" value="{{ form_data.y or '6.48' }}" required>
+                </div>
+                <div class="gem-input-group">
+                    <label class="gem-label" for="z">Depth Z (mm) *</label>
+                    <input type="number" step="0.01" id="z" name="z" class="gem-input" placeholder="e.g. 3.99" value="{{ form_data.z or '3.99' }}" required>
+                </div>
+                <div class="gem-input-group">
+                    <label class="gem-label" for="fluorescence">Fluorescence</label>
+                    <select id="fluorescence" name="fluorescence" class="gem-select">
+                        <option value="None" selected>None</option>
+                        <option value="Faint">Faint</option>
+                        <option value="Medium Blue">Medium Blue</option>
+                        <option value="Strong Blue">Strong Blue</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- JEWELLER DEAL ANALYSIS INPUT -->
+            <div style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--gold); letter-spacing: 0.05em; margin: 1.5rem 0 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border-subtle);">
+                Jeweller Commercial Deal Analysis (Optional)
+            </div>
+
+            <div class="gem-grid-2" style="margin-bottom: 1.5rem;">
+                <div class="gem-input-group">
+                    <label class="gem-label" for="asking_price">Purchase / Asking Price ($ USD)</label>
+                    <input type="number" step="1" id="asking_price" name="asking_price" class="gem-input" placeholder="e.g. 6500" value="{{ form_data.asking_price or '' }}">
+                    <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 0.3rem;">
+                        Enter memo cost or client asking price to analyze profit margins and deal economics.
+                    </div>
+                </div>
+                <div class="gem-input-group">
+                    <label class="gem-label" for="client_name">Client / Memo Reference (Optional)</label>
+                    <input type="text" id="client_name" name="client_name" class="gem-input" placeholder="e.g. Diamond Vault Memo #84">
+                </div>
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 1.5rem;">
+                <a href="/" class="gem-btn gem-btn-secondary">Cancel</a>
+                <button type="submit" class="gem-btn gem-btn-primary" style="padding: 0.85rem 2.25rem; font-size: 1rem;">
+                    Generate Valuation & Verification Dossier →
+                </button>
+            </div>
+        </form>
 
     </div>
 
-
+    <script src="/static/js/gemforecast.js"></script>
 </body>
-
 </html>

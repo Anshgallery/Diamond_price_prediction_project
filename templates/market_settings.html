@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEMFORECAST AI | Market Feed & GIA Credentials Configuration</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/gemforecast.css">
+</head>
+<body>
+
+    <!-- NAVIGATION -->
+    <nav class="gem-nav">
+        <div class="gem-logo">
+            <span class="icon-gem">💎</span> GEMFORECAST <span>AI</span>
+        </div>
+        <ul class="gem-nav-links">
+            <li><a href="/">Platform</a></li>
+            <li><a href="/predict">Valuation & GIA Check</a></li>
+            <li><a href="/inventory">Jeweller Workspace</a></li>
+            <li><a href="/compare">Compare Diamonds</a></li>
+            <li><a href="/assistant">AI Gemologist</a></li>
+            <li><a href="/market-settings" class="active">Market Config</a></li>
+        </ul>
+        <div class="gem-nav-actions">
+            <a href="/" class="gem-btn gem-btn-secondary">← Back to Platform</a>
+        </div>
+    </nav>
+
+    <div class="gem-container-narrow">
+
+        <div style="margin-bottom: 2rem; text-align: center;">
+            <div style="margin-bottom: 0.5rem;">
+                <span class="gem-badge badge-gold">API Integration Hub</span>
+            </div>
+            <h1 style="font-family: var(--font-display); font-size: 2.25rem; font-weight: 800; color: #fff;">
+                Wholesale Market Data & GIA API Configuration
+            </h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">
+                Connect legitimate B2B diamond pricing feeds and GIA developer credentials.
+            </p>
+        </div>
+
+        {% if message %}
+            <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); padding: 0.85rem 1.25rem; border-radius: var(--radius-md); color: #34d399; margin-bottom: 1.5rem;">
+                ✓ {{ message }}
+            </div>
+        {% endif %}
+
+        <!-- STRICT REAL-DATA NOTICE CARD -->
+        <div class="gem-card" style="margin-bottom: 2rem; border-left: 4px solid var(--warning);">
+            <h4 style="color: #fbbf24; font-size: 1.05rem; margin-bottom: 0.4rem;">Strict Real-Data & Non-Simulation Governance</h4>
+            <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.6;">
+                GemForecast AI never fakes or hardcodes live market prices. When live credentials are not connected, all valuations rely strictly on the <strong>193,573 verified historical sales dataset</strong> and the official <strong>GIA Report Check Portal</strong> workflow.
+            </p>
+        </div>
+
+        <!-- SETTINGS FORM -->
+        <form action="/market-settings" method="POST" class="gem-card">
+            <div class="gem-card-header">
+                <div class="gem-card-title">
+                    <span>🔌</span> Live Wholesale Data Provider
+                </div>
+                {% if config.api_key_configured %}
+                    <span class="gem-badge badge-success">Status: Connected ({{ config.provider }})</span>
+                {% else %}
+                    <span class="gem-badge badge-warning">Status: Offline / Not Connected</span>
+                {% endif %}
+            </div>
+
+            <div class="gem-input-group">
+                <label class="gem-label" for="provider">B2B Diamond Market Feed Provider</label>
+                <select id="provider" name="provider" class="gem-select">
+                    <option value="None" {% if config.provider == 'None' %}selected{% endif %}>None (Offline / Historical Benchmark Mode Only)</option>
+                    <option value="RapNet API" {% if config.provider == 'RapNet API' %}selected{% endif %}>RapNet Wholesale Diamond Pricing API</option>
+                    <option value="IDEX Online" {% if config.provider == 'IDEX Online' %}selected{% endif %}>IDEX Online Wholesale B2B Feed</option>
+                    <option value="Polygon Network" {% if config.provider == 'Polygon Network' %}selected{% endif %}>Polygon Jeweller Exchange Network</option>
+                    <option value="Custom REST Feed" {% if config.provider == 'Custom REST Feed' %}selected{% endif %}>Custom Proprietary REST API Endpoint</option>
+                </select>
+            </div>
+
+            <div class="gem-input-group">
+                <label class="gem-label" for="api_key">Provider API Key / Bearer Token</label>
+                <input type="password" id="api_key" name="api_key" class="gem-input" placeholder="Enter wholesale provider API key..." value="{% if config.api_key_configured %}●●●●●●●●●●●●{% endif %}">
+            </div>
+
+            <div class="gem-input-group">
+                <label class="gem-label" for="base_url">Custom Endpoint Base URL (Optional)</label>
+                <input type="url" id="base_url" name="base_url" class="gem-input" placeholder="https://api.wholesale-diamonds.com/v1" value="{{ config.base_url or '' }}">
+            </div>
+
+            <div style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--primary); letter-spacing: 0.05em; margin: 1.5rem 0 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border-subtle);">
+                Official GIA Developer Credentials
+            </div>
+
+            <div class="gem-input-group">
+                <label class="gem-label" for="gia_api_key">GIA Developer Client API Key</label>
+                <input type="password" id="gia_api_key" name="gia_api_key" class="gem-input" placeholder="Enter official GIA developer client key...">
+                <div style="font-size: 0.78rem; color: var(--text-dim); margin-top: 0.3rem;">
+                    If not configured, GemForecast generates direct deep-links to the official public GIA Report Check database without compromising audit integrity.
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 1rem; align-items: center; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-subtle);">
+                <button type="submit" class="gem-btn gem-btn-primary" style="padding: 0.75rem 2rem;">
+                    💾 Save API Configuration
+                </button>
+            </div>
+        </form>
+
+    </div>
+
+</body>
+</html>
