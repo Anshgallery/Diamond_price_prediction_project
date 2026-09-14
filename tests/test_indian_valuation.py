@@ -62,6 +62,9 @@ def test_valuation_engine_deal_calculations():
     )
 
     assert val["status"] == "Valuation Computed"
+    assert val["data_available"] is True
+    assert val["today_market_price"] > 0
+    assert val["today_market_price_formatted"].startswith("₹")
     assert val["fair_market_value"] > 0
     assert val["suggested_buy_price"] < val["fair_market_value"]
     assert val["suggested_sell_price"] > val["fair_market_value"]
@@ -69,10 +72,26 @@ def test_valuation_engine_deal_calculations():
     assert val["expected_margin_pct"] > 0
     assert val["gst_amount"] == round(val["suggested_sell_price"] * 0.03)
     assert val["confidence_score"] >= 70
+    assert "Bharat Diamond Bourse" in val["source"] or "SDB" in val["source"]
     assert len(val["why_this_price"]) > 30
+
+def test_invalid_spec_data_availability():
+    invalid_spec = {"carat": -1.0}
+    quote = IndianMarketService.get_indian_wholesale_quote(invalid_spec)
+    assert quote["data_available"] is False
+
+    val = ValuationEngine.calculate_valuation(
+        diamond_spec=invalid_spec,
+        ml_prediction_usd=0,
+        comps_data={},
+        market_quote_inr=quote
+    )
+    assert val["data_available"] is False
+    assert val["status"] == "Live Market Pricing Unavailable"
 
 def test_indian_rupee_formatting():
     assert IndianMarketService.format_inr(125000) == "₹ 1,25,000"
     assert IndianMarketService.format_inr(4500000) == "₹ 45,00,000"
     assert IndianMarketService.format_inr_lakhs(450000) == "₹ 4.50 Lakh"
     assert IndianMarketService.format_inr_lakhs(12500000) == "₹ 1.25 Cr"
+

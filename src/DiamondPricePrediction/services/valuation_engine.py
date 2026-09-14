@@ -123,13 +123,18 @@ class ValuationEngine:
             value_drivers = cls._identify_value_drivers(diamond_spec, carat, is_lab)
             quality_score = cls._compute_quality_score(diamond_spec)
 
+            data_avail = market_quote_inr.get("data_available", True)
+
             return {
-                "status": "Valuation Computed",
+                "status": "Valuation Computed" if data_avail else "Live Market Pricing Unavailable",
+                "data_available": data_avail,
                 "currency": "INR",
                 "currency_symbol": "₹",
                 "origin_type": "Lab-Grown" if is_lab else "Natural",
                 
                 # Core Indian Pricing Numbers
+                "today_market_price": fair_market_val,
+                "today_market_price_formatted": IndianMarketService.format_inr(fair_market_val),
                 "fair_market_value": fair_market_val,
                 "fair_market_value_formatted": IndianMarketService.format_inr(fair_market_val),
                 "fair_market_lakhs": IndianMarketService.format_inr_lakhs(fair_market_val),
@@ -153,11 +158,14 @@ class ValuationEngine:
                 "customer_price_with_gst": customer_price_with_gst,
                 "customer_price_with_gst_formatted": IndianMarketService.format_inr(customer_price_with_gst),
                 
-                # Evidence & Confidence
+                # Evidence & Confidence & Source Metadata
                 "confidence_score": confidence["total_score"],
                 "confidence_grade": confidence["grade"],
                 "confidence_breakdown": confidence["details"],
                 "quality_score": quality_score,
+                "source": market_quote_inr.get("source", "Bharat Diamond Bourse / Surat LGD Benchmark"),
+                "timestamp": market_quote_inr.get("timestamp", ""),
+                "market_date": market_quote_inr.get("market_date", ""),
                 
                 # Multi-Pillar Valuation Breakdown
                 "pillars": {
@@ -186,6 +194,7 @@ class ValuationEngine:
                 "value_drivers": value_drivers,
                 "jeweller_deal": deal_analysis
             }
+
 
         except Exception as e:
             logging.error(f"Error in ValuationEngine: {e}")

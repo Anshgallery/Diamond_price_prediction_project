@@ -2,7 +2,7 @@ import os
 import sys
 import json
 from datetime import datetime, timezone
-from flask import Flask, request, render_template, redirect, url_for, flash, session
+from flask import Flask, request, render_template, redirect, url_for, flash, session, make_response
 
 from DiamondPricePrediction.utils.logger import logging
 from DiamondPricePrediction.utils.exception import CustomException
@@ -261,6 +261,37 @@ def parse_igi_pdf():
         logging.error(f"Error parsing IGI PDF: {e}")
         flash(f"PDF extraction error: {str(e)}", "danger")
         return redirect(url_for("home_page"))
+
+
+# ============================================================
+# 4. OFFICIAL IGI REPORT PDF GENERATION & DOWNLOAD ROUTES
+# ============================================================
+
+@app.route("/pdf/<report_number>")
+def serve_igi_pdf(report_number):
+    try:
+        pdf_bytes = IGIService.generate_report_pdf(report_number)
+        response = make_response(pdf_bytes)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'inline; filename="IGI_{report_number}.pdf"'
+        return response
+    except Exception as e:
+        logging.error(f"Error serving PDF for report {report_number}: {e}")
+        return "PDF generation error", 500
+
+
+@app.route("/download-pdf/<report_number>")
+def download_igi_pdf(report_number):
+    try:
+        pdf_bytes = IGIService.generate_report_pdf(report_number)
+        response = make_response(pdf_bytes)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename="IGI_{report_number}.pdf"'
+        return response
+    except Exception as e:
+        logging.error(f"Error downloading PDF for report {report_number}: {e}")
+        return "PDF generation error", 500
+
 
 
 # ============================================================

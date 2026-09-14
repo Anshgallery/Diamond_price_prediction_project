@@ -128,71 +128,106 @@ class IndianMarketService:
     def get_indian_wholesale_quote(cls, diamond_spec: Dict[str, Any]) -> Dict[str, Any]:
         """
         Calculates authentic Indian wholesale price quote in ₹ (INR)
-        differentiating Natural vs. Lab-Grown diamonds.
+        differentiating Natural vs. Lab-Grown diamonds with data transparency.
         """
-        carat = float(diamond_spec.get("carat", 1.0))
-        color = str(diamond_spec.get("color", "F")).upper()
-        clarity = str(diamond_spec.get("clarity", "VS1")).upper()
-        cut = str(diamond_spec.get("cut", "Ideal")).title()
-        shape = str(diamond_spec.get("shape", "Round Brilliant")).title()
-        fluor = str(diamond_spec.get("fluorescence", "None")).title()
-        is_lab = "Lab" in str(diamond_spec.get("origin_type", "Natural")) or "CVD" in str(diamond_spec.get("growth_process", "")) or "HPHT" in str(diamond_spec.get("growth_process", ""))
+        try:
+            carat = float(diamond_spec.get("carat", 1.0))
+            if carat <= 0:
+                return {
+                    "is_connected": True,
+                    "data_available": False,
+                    "error_message": "Invalid carat weight specified.",
+                    "currency": "INR",
+                    "currency_symbol": "₹",
+                    "total_wholesale_inr": 0,
+                    "source": "Mumbai BDB / Surat LGD Benchmark",
+                    "timestamp": datetime.now(timezone.utc).strftime("%d %b %Y, %I:%M %p IST")
+                }
 
-        color_mult = cls.COLOR_MULTIPLIERS.get(color, 1.0)
-        clarity_mult = cls.CLARITY_MULTIPLIERS.get(clarity, 1.0)
-        cut_mult = cls.CUT_MULTIPLIERS.get(cut, 1.0)
-        shape_mult = cls.SHAPE_MULTIPLIERS.get(shape, 1.0)
+            color = str(diamond_spec.get("color", "F")).upper()
+            clarity = str(diamond_spec.get("clarity", "VS1")).upper()
+            cut = str(diamond_spec.get("cut", "Ideal")).title()
+            shape = str(diamond_spec.get("shape", "Round Brilliant")).title()
+            fluor = str(diamond_spec.get("fluorescence", "None")).title()
+            is_lab = "Lab" in str(diamond_spec.get("origin_type", "Natural")) or "CVD" in str(diamond_spec.get("growth_process", "")) or "HPHT" in str(diamond_spec.get("growth_process", ""))
 
-        # Fluorescence adjustment (in Indian trade: strong blue on D-F has 8-12% discount; on I-J has neutral/slight premium)
-        fluor_mult = 1.0
-        if "Strong" in fluor or "Very Strong" in fluor:
-            if color in ["D", "E", "F"]:
-                fluor_mult = 0.90
-            elif color in ["I", "J", "K"]:
-                fluor_mult = 1.03
-        elif "Medium" in fluor and color in ["D", "E"]:
-            fluor_mult = 0.96
+            color_mult = cls.COLOR_MULTIPLIERS.get(color, 1.0)
+            clarity_mult = cls.CLARITY_MULTIPLIERS.get(clarity, 1.0)
+            cut_mult = cls.CUT_MULTIPLIERS.get(cut, 1.0)
+            shape_mult = cls.SHAPE_MULTIPLIERS.get(shape, 1.0)
 
-        if is_lab:
-            # Surat LGD Manufacturing Benchmark
-            base_ppc = 18000
-            for (c_min, c_max), ppc in cls.SURAT_LGD_BASE_PPC_INR.items():
-                if c_min <= carat <= c_max:
-                    base_ppc = ppc
-                    break
-            
-            # Adjusted per-carat rate in INR
-            adjusted_ppc = base_ppc * color_mult * clarity_mult * cut_mult * shape_mult
-            total_wholesale_inr = round(adjusted_ppc * carat)
-            source_label = "Surat Diamond Bourse (SDB) Lab-Grown CVD/HPHT Wholesale Benchmark"
-            market_type = "Lab-Grown (CVD/HPHT)"
-        else:
-            # Mumbai Bharat Diamond Bourse (BDB) Natural Benchmark
-            base_ppc = 440000
-            for (c_min, c_max), ppc in cls.NATURAL_BDB_BASE_PPC_INR.items():
-                if c_min <= carat <= c_max:
-                    base_ppc = ppc
-                    break
+            # Fluorescence adjustment
+            fluor_mult = 1.0
+            if "Strong" in fluor or "Very Strong" in fluor:
+                if color in ["D", "E", "F"]:
+                    fluor_mult = 0.90
+                elif color in ["I", "J", "K"]:
+                    fluor_mult = 1.03
+            elif "Medium" in fluor and color in ["D", "E"]:
+                fluor_mult = 0.96
 
-            adjusted_ppc = base_ppc * color_mult * clarity_mult * cut_mult * shape_mult * fluor_mult
-            total_wholesale_inr = round(adjusted_ppc * carat)
-            source_label = "Mumbai Bharat Diamond Bourse (BDB) Natural Diamond Wholesale Index"
-            market_type = "Natural Mined"
+            if is_lab:
+                # Surat LGD Manufacturing Benchmark
+                base_ppc = 18000
+                found_tier = False
+                for (c_min, c_max), ppc in cls.SURAT_LGD_BASE_PPC_INR.items():
+                    if c_min <= carat <= c_max:
+                        base_ppc = ppc
+                        found_tier = True
+                        break
+                
+                adjusted_ppc = base_ppc * color_mult * clarity_mult * cut_mult * shape_mult
+                total_wholesale_inr = round(adjusted_ppc * carat)
+                source_label = "Surat Diamond Bourse (SDB) Lab-Grown CVD/HPHT Wholesale Benchmark"
+                market_type = "Lab-Grown (CVD/HPHT)"
+            else:
+                # Mumbai Bharat Diamond Bourse (BDB) Natural Benchmark
+                base_ppc = 440000
+                found_tier = False
+                for (c_min, c_max), ppc in cls.NATURAL_BDB_BASE_PPC_INR.items():
+                    if c_min <= carat <= c_max:
+                        base_ppc = ppc
+                        found_tier = True
+                        break
 
-        config = cls.get_config()
+                adjusted_ppc = base_ppc * color_mult * clarity_mult * cut_mult * shape_mult * fluor_mult
+                total_wholesale_inr = round(adjusted_ppc * carat)
+                source_label = "Mumbai Bharat Diamond Bourse (BDB) Natural Diamond Wholesale Index"
+                market_type = "Natural Mined"
 
-        return {
-            "is_connected": True,
-            "currency": "INR",
-            "currency_symbol": "₹",
-            "market_type": market_type,
-            "total_wholesale_inr": total_wholesale_inr,
-            "price_per_carat_inr": round(adjusted_ppc),
-            "source": source_label,
-            "timestamp": datetime.now(timezone.utc).strftime("%d %b %Y, %I:%M %p IST"),
-            "usd_inr_rate": config.get("usd_inr_rate", cls.DEFAULT_USD_INR_RATE),
-            "approx_usd_value": round(total_wholesale_inr / config.get("usd_inr_rate", cls.DEFAULT_USD_INR_RATE), 2)
-        }
+            config = cls.get_config()
+
+            now_time = datetime.now(timezone.utc)
+            timestamp_str = now_time.strftime("%d %b %Y, %I:%M %p IST")
+            market_date_str = now_time.strftime("%d %b %Y")
+
+            return {
+                "is_connected": True,
+                "data_available": True,
+                "currency": "INR",
+                "currency_symbol": "₹",
+                "market_type": market_type,
+                "total_wholesale_inr": total_wholesale_inr,
+                "price_per_carat_inr": round(adjusted_ppc),
+                "source": source_label,
+                "timestamp": timestamp_str,
+                "market_date": market_date_str,
+                "usd_inr_rate": config.get("usd_inr_rate", cls.DEFAULT_USD_INR_RATE),
+                "approx_usd_value": round(total_wholesale_inr / config.get("usd_inr_rate", cls.DEFAULT_USD_INR_RATE), 2)
+            }
+        except Exception as e:
+            logging.error(f"Error calculating Indian wholesale quote: {e}")
+            return {
+                "is_connected": False,
+                "data_available": False,
+                "error_message": f"Live market benchmark calculation error: {str(e)}",
+                "currency": "INR",
+                "currency_symbol": "₹",
+                "total_wholesale_inr": 0,
+                "source": "Mumbai BDB / Surat LGD Benchmark",
+                "timestamp": datetime.now(timezone.utc).strftime("%d %b %Y, %I:%M %p IST")
+            }
+
 
     @staticmethod
     def format_inr(amount: Optional[float]) -> str:

@@ -22,8 +22,9 @@ def test_appraise_get_and_post_endpoints(client):
     res_get = client.get("/appraise?report_number=584392810")
     assert res_get.status_code == 200
     assert b"584392810" in res_get.data
-    assert b"Suggested Jeweller Buy" in res_get.data
+    assert b"Fair Buy Price" in res_get.data or b"Suggested Jeweller Buy" in res_get.data
     assert b"Customer Total with 3% GST" in res_get.data
+
 
     # POST with sample IGI
     res_post = client.post("/appraise", data={"report_number": "LG612345678", "asking_price_inr": "55000"})
@@ -62,3 +63,18 @@ def test_market_rates_endpoint(client):
     assert res.status_code == 200
     assert b"Bharat Diamond Bourse" in res.data
     assert b"Surat Diamond Bourse" in res.data
+
+def test_pdf_routes(client):
+    # Serve inline PDF
+    res_pdf = client.get("/pdf/584392810")
+    assert res_pdf.status_code == 200
+    assert res_pdf.content_type == "application/pdf"
+    assert res_pdf.data.startswith(b"%PDF")
+
+    # Download PDF
+    res_download = client.get("/download-pdf/584392810")
+    assert res_download.status_code == 200
+    assert res_download.content_type == "application/pdf"
+    assert "attachment" in res_download.headers.get("Content-Disposition", "")
+    assert res_download.data.startswith(b"%PDF")
+
