@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% set active_page = "home" %}
+
+{% block title %}IGI Valuation Dossier #{{ diamond_spec.report_number }} | GEMFORECAST IGI{% endblock %}
+
+{% block content %}
+<div class="jewel-container">
+
+    <!-- TOP AUDIT & VERIFICATION HEADER -->
+    <div class="jewel-card" style="margin-bottom: 2rem; border-left: 5px solid {% if 'Lab' in diamond_spec.origin_type %}var(--gold){% else %}var(--emerald){% endif %};">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem;">
+                    <h1 style="font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; color: #fff;">
+                        IGI #{{ diamond_spec.report_number }}
+                    </h1>
+                    {% if "Lab" in diamond_spec.origin_type %}
+                        <span class="jewel-badge badge-warning">🔬 Lab-Grown ({{ diamond_spec.growth_process or 'CVD/HPHT' }})</span>
+                    {% else %}
+                        <span class="jewel-badge badge-emerald">💎 Natural Mined Diamond</span>
+                    {% endif %}
+                    <span class="jewel-badge badge-gold">{{ diamond_spec.carat }} ct • {{ diamond_spec.shape }}</span>
+                </div>
+                <div style="font-size: 0.88rem; color: var(--text-muted);">
+                    Laser Inscription: <strong style="color: #fff;">{{ diamond_spec.inscription or 'IGI ' ~ diamond_spec.report_number }}</strong> • Valuation Timestamp: {{ timestamp }}
+                </div>
+            </div>
+
+            <!-- IGI OFFICIAL REPORT CHECK PORTAL LINK -->
+            <div style="text-align: right;">
+                <div style="margin-bottom: 0.4rem;">
+                    <span class="jewel-badge {{ igi_verification.badge_class }}">
+                        {{ igi_verification.status }}
+                    </span>
+                </div>
+                {% if igi_verification.report_check_url %}
+                    <a href="{{ igi_verification.report_check_url }}" target="_blank" rel="noopener noreferrer" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
+                        🔗 Open Official IGI Database Check ↗
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- PRIMARY FINANCIAL DEAL METRICS (INDIAN RUPEES ₹) -->
+    <div class="jewel-card" style="margin-bottom: 2rem; background: linear-gradient(180deg, rgba(17,24,39,0.9) 0%, rgba(15,23,42,0.95) 100%); border: 1px solid rgba(245,158,11,0.3);">
+        <div class="jewel-card-header">
+            <div class="jewel-card-title">
+                <span>💰</span> Indian Wholesale Valuation & Jeweller Pricing
+            </div>
+            <span class="jewel-badge badge-gold">Mumbai BDB / Surat LGD Benchmark</span>
+        </div>
+
+        <!-- BIG NUMBERS 4-COLUMN GRID -->
+        <div class="jewel-grid-4" style="margin-bottom: 1.5rem;">
+            
+            <div class="stat-box">
+                <div class="stat-label">Wholesale Fair Market Value</div>
+                <div class="stat-value gold">{{ valuation.fair_market_value_formatted }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Range: {{ valuation.low_estimate_formatted }} – {{ valuation.high_estimate_formatted }}
+                </div>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-label">Suggested Jeweller Buy</div>
+                <div class="stat-value cyan">{{ valuation.suggested_buy_price_formatted }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Per Carat: {{ valuation.price_per_carat_formatted }}/ct
+                </div>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-label">Suggested Customer Sell</div>
+                <div class="stat-value emerald">{{ valuation.suggested_sell_price_formatted }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    At 25% Standard Retail Markup
+                </div>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-label">Expected Jeweller Profit</div>
+                <div class="stat-value emerald">+{{ valuation.expected_profit_formatted }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Gross Margin: <strong style="color: #34D399;">{{ valuation.expected_margin_pct }}%</strong>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- GST & INVOICE BREAKDOWN -->
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 0.9rem 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); flex-wrap: wrap; gap: 0.75rem;">
+            <div style="font-size: 0.9rem; color: var(--text-muted);">
+                GST Rate: <strong style="color: #fff;">3% on Polished Diamonds</strong> (HSN 7102) • Tax Amount: <strong style="color: #fff;">{{ valuation.gst_amount_formatted }}</strong>
+            </div>
+            <div style="font-size: 0.95rem; font-weight: 700; color: #fff;">
+                Customer Total with 3% GST: <span style="color: var(--gold-light); font-size: 1.15rem;">{{ valuation.customer_price_with_gst_formatted }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN 2-COLUMN SECTION: GEMOLOGICAL SPECS & CUSTOM DEAL CALCULATOR -->
+    <div class="jewel-grid-2" style="margin-bottom: 2rem; align-items: start;">
+
+        <!-- LEFT: 4CS & GEMOLOGICAL GEOMETRY -->
+        <div class="jewel-card">
+            <div class="jewel-card-header">
+                <div class="jewel-card-title">
+                    <span>💎</span> IGI Gemological 4Cs & Proportions
+                </div>
+                <span class="jewel-badge badge-gold">Quality Score: {{ valuation.quality_score }}/100</span>
+            </div>
+
+            <table class="jewel-table" style="margin-bottom: 1.25rem;">
+                <tbody>
+                    <tr>
+                        <td style="font-weight: 600; color: var(--text-muted);">Carat Weight</td>
+                        <td style="font-weight: 700; color: #fff; font-size: 1.05rem;">{{ diamond_spec.carat }} ct</td>
+                        <td style="font-weight: 600; color: var(--text-muted);">Color Grade</td>
+                        <td style="font-weight: 700; color: var(--gold-light); font-size: 1.05rem;">{{ diamond_spec.color }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; color: var(--text-muted);">Clarity Grade</td>
+                        <td style="font-weight: 700; color: #38BDF8; font-size: 1.05rem;">{{ diamond_spec.clarity }}</td>
+                        <td style="font-weight: 600; color: var(--text-muted);">Cut Grade</td>
+                        <td style="font-weight: 700; color: #34D399; font-size: 1.05rem;">{{ diamond_spec.cut }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; color: var(--text-muted);">Shape & Cutting Style</td>
+                        <td colspan="3" style="font-weight: 600; color: #fff;">{{ diamond_spec.shape }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; color: var(--text-muted);">Polish / Symmetry</td>
+                        <td colspan="3" style="color: #fff;">{{ diamond_spec.polish or 'Excellent' }} / {{ diamond_spec.symmetry or 'Excellent' }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; color: var(--text-muted);">Fluorescence</td>
+                        <td colspan="3" style="color: #fff;">{{ diamond_spec.fluorescence or 'None' }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; color: var(--text-muted);">Measurements</td>
+                        <td colspan="3" style="color: #fff;">{{ diamond_spec.measurements_str or (diamond_spec.x ~ ' x ' ~ diamond_spec.y ~ ' x ' ~ diamond_spec.z ~ ' mm') }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: 600; color: var(--text-muted);">Table % / Depth %</td>
+                        <td colspan="3" style="color: #fff;">Table: <strong>{{ diamond_spec.table }}%</strong> | Total Depth: <strong>{{ diamond_spec.depth }}%</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- VALUE DRIVERS -->
+            <div style="font-weight: 700; font-size: 0.9rem; color: #fff; margin-bottom: 0.5rem;">
+                Gemological Value Drivers:
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                {% for d in valuation.value_drivers %}
+                    <div style="font-size: 0.85rem; padding: 0.4rem 0.65rem; border-radius: var(--radius-sm); background: rgba(255,255,255,0.02); display: flex; align-items: center; gap: 0.5rem;">
+                        <span>{% if d.type == 'positive' %}✅{% elif d.type == 'warning' %}⚠️{% else %}ℹ️{% endif %}</span>
+                        <div><strong style="color: #fff;">{{ d.driver }}:</strong> <span style="color: var(--text-muted);">{{ d.text }}</span></div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- RIGHT: INTERACTIVE JEWELLER DEAL & PROFIT CALCULATOR -->
+        <div class="jewel-card">
+            <div class="jewel-card-header">
+                <div class="jewel-card-title">
+                    <span>🧮</span> Custom Deal & Profit Calculator
+                </div>
+                <span class="jewel-badge badge-emerald">Live Recalculation</span>
+            </div>
+
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                Adjust your purchase price, retail markup %, and mounting charges to calculate exact customer quote and net profit.
+            </p>
+
+            <div class="jewel-input-group">
+                <label class="jewel-label" for="calcBuyPrice">Your Actual Purchase / Offer Price (₹)</label>
+                <input type="number" id="calcBuyPrice" class="jewel-input" value="{{ diamond_spec.asking_price or valuation.suggested_buy_price }}" style="font-size: 1.1rem; font-weight: 700; color: var(--gold-light);">
+            </div>
+
+            <div class="jewel-input-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                    <label class="jewel-label" style="margin-bottom: 0;">Retail Markup Percentage (%)</label>
+                    <span id="calcMarkupValue" style="font-weight: 700; color: var(--emerald);">25%</span>
+                </div>
+                <input type="range" id="calcMarkupSlider" min="5" max="80" value="25" step="1" style="width: 100%; accent-color: var(--gold);">
+            </div>
+
+            <div class="jewel-input-group">
+                <label class="jewel-label" for="calcMakingCharge">Jewellery Gold Mounting / Making Charges (Optional ₹)</label>
+                <input type="number" id="calcMakingCharge" class="jewel-input" placeholder="e.g. 15000 (Ring / Pendant Setting)" value="0">
+            </div>
+
+            <!-- LIVE CALCULATOR OUTPUT BOX -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; margin-top: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.6rem;">
+                    <span style="color: var(--text-muted);">Customer Base Price:</span>
+                    <strong id="outSellPrice" style="color: #fff; font-size: 1.05rem;">{{ valuation.suggested_sell_price_formatted }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.6rem;">
+                    <span style="color: var(--text-muted);">Your Expected Profit:</span>
+                    <strong id="outProfit" style="color: #34D399; font-size: 1.1rem;">+{{ valuation.expected_profit_formatted }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.6rem;">
+                    <span style="color: var(--text-muted);">Profit Margin:</span>
+                    <strong id="outMargin" style="color: #34D399;">{{ valuation.expected_margin_pct }}%</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.6rem;">
+                    <span style="color: var(--text-muted);">3% Diamond GST:</span>
+                    <strong id="outGst" style="color: #fff;">{{ valuation.gst_amount_formatted }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700; color: #fff;">Final Customer Invoice (Incl. GST):</span>
+                    <strong id="outFinalCustomerPrice" style="color: var(--gold-light); font-size: 1.25rem;">{{ valuation.customer_price_with_gst_formatted }}</strong>
+                </div>
+            </div>
+
+            <!-- SAVE TO INVENTORY BUTTON -->
+            <form action="/inventory/save" method="POST" style="margin-top: 1.25rem;">
+                <input type="hidden" name="diamond_spec_json" value='{{ diamond_spec_json }}'>
+                <input type="hidden" name="valuation_json" value='{{ valuation_json }}'>
+                <input type="hidden" name="buying_price_inr" value="{{ diamond_spec.asking_price or valuation.suggested_buy_price }}">
+                
+                <div style="display: flex; gap: 0.75rem;">
+                    <select name="tag" class="jewel-select" style="flex: 1;">
+                        <option value="Inventory">Save to Stock Inventory</option>
+                        <option value="On Memo">Save as On Memo</option>
+                        <option value="Client Inquiry">Save as Client Inquiry</option>
+                        <option value="Watchlist">Add to Price Watchlist</option>
+                    </select>
+                    <button type="submit" class="jewel-btn jewel-btn-primary" style="flex: 1;">
+                        💾 Save to Workspace
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    <!-- PLAIN-LANGUAGE "WHY THIS PRICE?" SUMMARY -->
+    <div class="jewel-card" style="margin-bottom: 2rem; border-left: 4px solid var(--gold);">
+        <div class="jewel-card-header">
+            <div class="jewel-card-title">
+                <span>💡</span> Why This Price? (Jeweller Executive Summary)
+            </div>
+            <span class="jewel-badge badge-gold">Plain Business Language</span>
+        </div>
+        <p style="font-size: 0.95rem; color: #E2E8F0; line-height: 1.75;">
+            {{ valuation.why_this_price }}
+        </p>
+    </div>
+
+    <!-- HISTORICAL BENCHMARK COMPARABLES (193.5K SALES IN ₹) -->
+    <div class="jewel-card">
+        <div class="jewel-card-header">
+            <div class="jewel-card-title">
+                <span>📊</span> 193.5k Verified Historical Benchmark Comparables (INR ₹)
+            </div>
+            <span class="jewel-badge badge-secondary">{{ comparables.sample_count }} matching verified sales found</span>
+        </div>
+
+        {% if comparables.comparables and comparables.comparables|length > 0 %}
+            <div class="jewel-grid-3">
+                {% for comp in comparables.comparables %}
+                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                            <span style="font-weight: 700; color: #fff;">{{ comp.carat }} ct • {{ comp.color }} / {{ comp.clarity }}</span>
+                            <span class="jewel-badge badge-cyan">{{ comp.similarity_score }}% Match</span>
+                        </div>
+                        <div style="font-size: 1.15rem; font-weight: 800; color: var(--gold-light); margin-bottom: 0.35rem;">
+                            {{ comp.price_inr_formatted }}
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-dim);">
+                            {{ comp.rationale }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+                Historical benchmark comparables aggregated across high-density diamond clusters.
+            </p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

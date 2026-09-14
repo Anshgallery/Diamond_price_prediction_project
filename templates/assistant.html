@@ -1,163 +1,152 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GEMFORECAST AI | Gemological AI Assistant & Proportion Analyzer</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/gemforecast.css">
-</head>
-<body>
+{% extends "base.html" %}
+{% set active_page = "assistant" %}
 
-    <!-- NAVIGATION -->
-    <nav class="gem-nav">
-        <div class="gem-logo">
-            <span class="icon-gem">💎</span> GEMFORECAST <span>AI</span>
-        </div>
-        <ul class="gem-nav-links">
-            <li><a href="/">Platform</a></li>
-            <li><a href="/predict">Valuation & GIA Check</a></li>
-            <li><a href="/inventory">Jeweller Workspace</a></li>
-            <li><a href="/compare">Compare Diamonds</a></li>
-            <li><a href="/assistant" class="active">AI Gemologist</a></li>
-            <li><a href="/market-settings">Market Config</a></li>
-        </ul>
-        <div class="gem-nav-actions">
-            <a href="/predict" class="gem-btn gem-btn-primary">+ Appraise Diamond</a>
-        </div>
-    </nav>
+{% block title %}AI Jeweller Trade Advisor & Proportions | GEMFORECAST IGI{% endblock %}
 
-    <div class="gem-container">
+{% block content %}
+<div class="jewel-container">
 
-        <!-- HEADER -->
-        <div style="margin-bottom: 2rem; text-align: center;">
-            <div style="margin-bottom: 0.5rem;">
-                <span class="gem-badge badge-gold">Domain AI & Optical Physics</span>
-            </div>
-            <h1 style="font-family: var(--font-display); font-size: 2.25rem; font-weight: 800; color: #fff;">
-                Gemological AI Advisory & Proportion Analyzer
-            </h1>
-            <p style="color: var(--text-muted); font-size: 0.95rem;">
-                Ask technical trading questions or evaluate cut proportions against Tolkowsky Ideal & GIA Excellent criteria.
-            </p>
-        </div>
+    <!-- HEADER -->
+    <div style="text-align: center; max-width: 800px; margin: 0 auto 2.5rem;">
+        <span class="jewel-badge badge-gold" style="margin-bottom: 0.75rem;">AI Gemological Intelligence</span>
+        <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 800; color: #fff; margin-bottom: 0.75rem;">
+            Indian Jeweller <span style="color: var(--gold);">AI Trade Advisor</span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1rem;">
+            Ask practical diamond business, pricing, and negotiation questions or analyze Tolkowsky optical cut proportions.
+        </p>
+    </div>
 
-        <div class="gem-grid-2">
+    <!-- PRESET PROMPT CHIPS -->
+    <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem;">
+        <button onclick="setQuery('Can I buy a 1.50ct F VS1 Natural diamond at ₹5,00,000 in Mumbai?')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
+            💡 "Can I buy 1.5ct Natural at ₹5L?"
+        </button>
+        <button onclick="setQuery('What should I ask the customer for a 2.04ct D VVS2 Lab-Grown solitaire?')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
+            💡 "What to ask for 2ct Lab-Grown?"
+        </button>
+        <button onclick="setQuery('What is the wholesale trade discount for Strong Blue fluorescence in D color?')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
+            💡 "Strong Blue fluorescence discount"
+        </button>
+        <button onclick="setQuery('How to negotiate with Surat LGD manufacturers for bulk memo?')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
+            💡 "Surat LGD negotiation strategy"
+        </button>
+    </div>
 
-            <!-- 1. INTERACTIVE GEMOLOGICAL Q&A ASSISTANT -->
-            <div class="gem-card">
-                <div class="gem-card-header">
-                    <div class="gem-card-title">
-                        <span>🤖</span> Gemological Knowledge Advisor
-                    </div>
-                    <span class="gem-badge badge-info">Diamond Intelligence</span>
+    <div class="jewel-grid-2" style="align-items: start;">
+
+        <!-- LEFT: AI TRADE ADVISOR CHAT -->
+        <div class="jewel-card">
+            <div class="jewel-card-header">
+                <div class="jewel-card-title">
+                    <span>🤖</span> Ask AI Trade Advisor
                 </div>
-
-                <form action="/assistant" method="POST" style="margin-bottom: 1.5rem;">
-                    <div class="gem-input-group">
-                        <label class="gem-label" for="query">Ask a Question or Select a Topic:</label>
-                        <input type="text" id="query" name="query" class="gem-input" placeholder="e.g. How does fluorescence affect D-F color diamonds?" value="{{ query or '' }}" required>
-                    </div>
-
-                    <!-- Quick Prompts -->
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem;">
-                        <button type="button" onclick="document.getElementById('query').value='What are magic carat size thresholds?'; this.form.submit();" class="gem-btn gem-btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.78rem;">Magic Sizes</button>
-                        <button type="button" onclick="document.getElementById('query').value='Natural vs Lab-grown diamond market pricing spread'; this.form.submit();" class="gem-btn gem-btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.78rem;">Lab vs Natural</button>
-                        <button type="button" onclick="document.getElementById('query').value='Explain Tolkowsky ideal proportions and light leakage'; this.form.submit();" class="gem-btn gem-btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.78rem;">Tolkowsky Proportions</button>
-                        <button type="button" onclick="document.getElementById('query').value='How does fluorescence impact wholesale pricing?'; this.form.submit();" class="gem-btn gem-btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.78rem;">Fluorescence</button>
-                    </div>
-
-                    <button type="submit" class="gem-btn gem-btn-primary" style="width: 100%;">Ask Gemologist AI →</button>
-                </form>
-
-                {% if response %}
-                    <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: var(--radius-md);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                            <h4 style="color: #fff; font-size: 1rem;">{{ response.title }}</h4>
-                            <div style="display: flex; gap: 0.4rem;">
-                                {% for tag in response.tags %}
-                                    <span class="gem-badge badge-gold" style="font-size: 0.65rem;">{{ tag }}</span>
-                                {% endfor %}
-                            </div>
-                        </div>
-                        <div style="color: var(--text-main); font-size: 0.9rem; line-height: 1.6; white-space: pre-line;">
-                            {{ response.answer }}
-                        </div>
-                    </div>
-                {% endif %}
+                <span class="jewel-badge badge-gold">B2B Trade Logic</span>
             </div>
 
-            <!-- 2. OPTICAL PROPORTIONS ANALYZER -->
-            <div class="gem-card">
-                <div class="gem-card-header">
-                    <div class="gem-card-title">
-                        <span>📐</span> Tolkowsky Proportions Calculator
-                    </div>
-                    <span class="gem-badge badge-gold">Optical Physics</span>
+            <form action="/assistant" method="POST" style="margin-bottom: 1.5rem;">
+                <div class="jewel-input-group">
+                    <label class="jewel-label" for="assistantQuery">Your Question</label>
+                    <textarea id="assistantQuery" name="query" class="jewel-input" rows="3" placeholder="e.g. A wholesaler is offering a 1.02ct E VVS1 Natural IGI stone at ₹3,80,000. Is this a good deal? What should I counter-offer?" required style="resize: vertical;">{{ query or '' }}</textarea>
                 </div>
+                <button type="submit" class="jewel-btn jewel-btn-primary" style="width: 100%;">
+                    Ask Trade Advisor →
+                </button>
+            </form>
 
-                <form action="/assistant/proportions" method="POST" style="margin-bottom: 1.25rem;">
-                    <div class="gem-grid-2" style="gap: 1rem; margin-bottom: 1rem;">
-                        <div class="gem-input-group" style="margin-bottom: 0;">
-                            <label class="gem-label" for="prop_table">Table Size (%)</label>
-                            <input type="number" step="0.1" id="prop_table" name="table" class="gem-input" value="{{ prop_data.table or '57.0' }}" required>
-                        </div>
-                        <div class="gem-input-group" style="margin-bottom: 0;">
-                            <label class="gem-label" for="prop_depth">Total Depth (%)</label>
-                            <input type="number" step="0.1" id="prop_depth" name="depth" class="gem-input" value="{{ prop_data.depth or '61.7' }}" required>
-                        </div>
-                    </div>
-
-                    <div class="gem-grid-3" style="gap: 0.75rem; margin-bottom: 1rem;">
-                        <div class="gem-input-group" style="margin-bottom: 0;">
-                            <label class="gem-label" for="prop_x">Length X (mm)</label>
-                            <input type="number" step="0.01" id="prop_x" name="x" class="gem-input" value="{{ prop_data.x or '6.45' }}" required>
-                        </div>
-                        <div class="gem-input-group" style="margin-bottom: 0;">
-                            <label class="gem-label" for="prop_y">Width Y (mm)</label>
-                            <input type="number" step="0.01" id="prop_y" name="y" class="gem-input" value="{{ prop_data.y or '6.48' }}" required>
-                        </div>
-                        <div class="gem-input-group" style="margin-bottom: 0;">
-                            <label class="gem-label" for="prop_z">Depth Z (mm)</label>
-                            <input type="number" step="0.01" id="prop_z" name="z" class="gem-input" value="{{ prop_data.z or '3.99' }}" required>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="gem-btn gem-btn-primary" style="width: 100%;">Evaluate Cut Proportions →</button>
-                </form>
-
-                {% if prop_eval %}
-                    <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: var(--radius-md);">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <div>
-                                <span style="font-size: 0.8rem; color: var(--text-dim); text-transform: uppercase;">Proportion Score</span>
-                                <div style="font-family: var(--font-display); font-size: 1.75rem; font-weight: 800; color: #34d399;">
-                                    {{ prop_eval.overall_proportion_score }}/100
-                                </div>
-                            </div>
-                            <span class="gem-badge badge-success">{{ prop_eval.grade_label }}</span>
-                        </div>
-
-                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                            {% for ev in prop_eval.evaluations %}
-                                <div style="font-size: 0.85rem; padding: 0.5rem; background: rgba(255, 255, 255, 0.02); border-radius: var(--radius-sm);">
-                                    <div style="display: flex; justify-content: space-between; font-weight: 600; color: #fff; margin-bottom: 0.2rem;">
-                                        <span>{{ ev.metric }}: {{ ev.value }}</span>
-                                        <span style="color: var(--primary);">{{ ev.grade }}</span>
-                                    </div>
-                                    <div style="color: var(--text-dim); font-size: 0.8rem;">{{ ev.comment }}</div>
-                                </div>
+            {% if response %}
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(245,158,11,0.3); border-radius: var(--radius-md); padding: 1.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <h4 style="color: var(--gold-light); font-weight: 700;">{{ response.title }}</h4>
+                        <div style="display: flex; gap: 0.3rem;">
+                            {% for tag in response.tags %}
+                                <span class="jewel-badge badge-secondary" style="font-size: 0.72rem;">{{ tag }}</span>
                             {% endfor %}
                         </div>
                     </div>
-                {% endif %}
+                    <div style="font-size: 0.92rem; color: #E2E8F0; line-height: 1.7; white-space: pre-line;">
+                        {{ response.answer }}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- RIGHT: TOLKOWSKY PROPORTIONS ANALYZER -->
+        <div class="jewel-card">
+            <div class="jewel-card-header">
+                <div class="jewel-card-title">
+                    <span>📐</span> Tolkowsky Ideal Cut Analyzer
+                </div>
+                <span class="jewel-badge badge-cyan">Optical Light Return</span>
             </div>
 
+            <form action="/assistant/proportions" method="POST" style="margin-bottom: 1.25rem;">
+                <div class="jewel-grid-2" style="margin-bottom: 1rem;">
+                    <div>
+                        <label class="jewel-label">Table Size (%)</label>
+                        <input type="number" name="table" class="jewel-input" step="0.1" value="{{ prop_data.table or 56.5 }}" required>
+                    </div>
+                    <div>
+                        <label class="jewel-label">Total Depth (%)</label>
+                        <input type="number" name="depth" class="jewel-input" step="0.1" value="{{ prop_data.depth or 61.8 }}" required>
+                    </div>
+                </div>
+
+                <div class="jewel-grid-3" style="margin-bottom: 1rem;">
+                    <div>
+                        <label class="jewel-label">Length X (mm)</label>
+                        <input type="number" name="x" class="jewel-input" step="0.01" value="{{ prop_data.x or 6.46 }}" required>
+                    </div>
+                    <div>
+                        <label class="jewel-label">Width Y (mm)</label>
+                        <input type="number" name="y" class="jewel-input" step="0.01" value="{{ prop_data.y or 6.49 }}" required>
+                    </div>
+                    <div>
+                        <label class="jewel-label">Depth Z (mm)</label>
+                        <input type="number" name="z" class="jewel-input" step="0.01" value="{{ prop_data.z or 4.00 }}" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="jewel-btn jewel-btn-secondary" style="width: 100%;">
+                    Validate Proportions →
+                </button>
+            </form>
+
+            {% if prop_eval %}
+                <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <span style="font-weight: 700; color: #fff;">Optical Proportions Grade</span>
+                        <span class="jewel-badge badge-gold">{{ prop_eval.overall_proportion_score }}/100 • {{ prop_eval.grade_label }}</span>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+                        {% for item in prop_eval.evaluations %}
+                            <div style="font-size: 0.85rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <strong style="color: #fff;">{{ item.metric }} ({{ item.value }}):</strong>
+                                    <span class="jewel-badge {% if item.status == 'Optimal' %}badge-emerald{% else %}badge-warning{% endif %}" style="font-size: 0.7rem;">{{ item.grade }}</span>
+                                </div>
+                                <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.2rem;">{{ item.comment }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
         </div>
 
     </div>
 
-</body>
-</html>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function setQuery(q) {
+    const txt = document.getElementById("assistantQuery");
+    if (txt) {
+        txt.value = q;
+        txt.focus();
+    }
+}
+</script>
+{% endblock %}

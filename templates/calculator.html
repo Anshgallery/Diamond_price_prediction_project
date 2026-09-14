@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% set active_page = "calculator" %}
+
+{% block title %}Jeweller Buy/Sell, Margin & GST Calculator | GEMFORECAST IGI{% endblock %}
+
+{% block content %}
+<div class="jewel-container">
+
+    <!-- HEADER -->
+    <div style="text-align: center; max-width: 800px; margin: 0 auto 2.5rem;">
+        <span class="jewel-badge badge-gold" style="margin-bottom: 0.75rem;">Indian Jeweller B2B Calculator</span>
+        <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 800; color: #fff; margin-bottom: 0.75rem;">
+            Buy, Sell, <span style="color: var(--gold);">Profit & 3% GST</span> Calculator
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1rem;">
+            Calculate total jewellery cost including diamond landed cost, gold weight, making charges, custom jeweller margins, and GST for customer quotes.
+        </p>
+    </div>
+
+    <div class="jewel-grid-2" style="max-width: 1080px; margin: 0 auto; align-items: start;">
+
+        <!-- INPUTS FORM -->
+        <div class="jewel-card">
+            <div class="jewel-card-header">
+                <div class="jewel-card-title">
+                    <span>⚙️</span> Valuation & Mounting Parameters
+                </div>
+                <span class="jewel-badge badge-gold">Indian ₹ Currency</span>
+            </div>
+
+            <!-- Diamond Cost -->
+            <div class="jewel-input-group">
+                <label class="jewel-label" for="calc_diamond_cost">Diamond Landed / Purchase Cost (₹)</label>
+                <input type="number" id="calc_diamond_cost" class="jewel-input" value="150000" style="font-size: 1.1rem; font-weight: 700; color: var(--gold-light);">
+            </div>
+
+            <!-- Gold Metal Selection & Rate -->
+            <div class="jewel-grid-2" style="margin-bottom: 1.25rem;">
+                <div>
+                    <label class="jewel-label" for="calc_gold_purity">Gold Metal Purity</label>
+                    <select id="calc_gold_purity" class="jewel-select">
+                        <option value="18K" selected>18K Gold (75.0% Hallmarked)</option>
+                        <option value="14K">14K Gold (58.5% Hallmarked)</option>
+                        <option value="22K">22K Gold (91.6% Hallmarked)</option>
+                        <option value="950Pt">Platinum 950</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="jewel-label" for="calc_gold_weight">Mounting Net Weight (Grams)</label>
+                    <input type="number" id="calc_gold_weight" class="jewel-input" value="4.5" step="0.1">
+                </div>
+            </div>
+
+            <div class="jewel-grid-2" style="margin-bottom: 1.25rem;">
+                <div>
+                    <label class="jewel-label" for="calc_gold_rate">Gold Rate (₹ per gram)</label>
+                    <input type="number" id="calc_gold_rate" class="jewel-input" value="6200">
+                </div>
+                <div>
+                    <label class="jewel-label" for="calc_making_rate">Making Charge (₹ per gram)</label>
+                    <input type="number" id="calc_making_rate" class="jewel-input" value="1200">
+                </div>
+            </div>
+
+            <!-- Retail Markup Slider -->
+            <div class="jewel-input-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                    <label class="jewel-label" style="margin-bottom: 0;">Retail Markup Percentage</label>
+                    <span id="calc_markup_display" style="font-weight: 700; color: var(--emerald); font-size: 1.1rem;">30%</span>
+                </div>
+                <input type="range" id="calc_markup_range" min="5" max="80" value="30" step="1" style="width: 100%; accent-color: var(--gold);">
+            </div>
+        </div>
+
+        <!-- LIVE RESULT BREAKDOWN -->
+        <div class="jewel-card" style="border: 1px solid rgba(245,158,11,0.4); background: linear-gradient(180deg, rgba(17,24,39,0.95) 0%, rgba(15,23,42,0.98) 100%);">
+            <div class="jewel-card-header">
+                <div class="jewel-card-title">
+                    <span>🧾</span> Complete Deal & Customer Quote
+                </div>
+                <span class="jewel-badge badge-emerald">3% GST Calculated</span>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">1. Diamond Cost:</span>
+                    <strong id="res_diamond_cost" style="color: #fff;">₹ 1,50,000</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">2. Gold Metal Value:</span>
+                    <strong id="res_gold_cost" style="color: #fff;">₹ 27,900</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">3. Making Charges:</span>
+                    <strong id="res_making_cost" style="color: #fff;">₹ 5,400</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-subtle); padding-top: 0.75rem;">
+                    <span style="font-weight: 600; color: var(--text-primary);">Total Landed Cost:</span>
+                    <strong id="res_total_cost" style="color: var(--diamond-cyan); font-size: 1.05rem;">₹ 1,83,300</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="font-weight: 600; color: #fff;">Retail Selling Price (Pre-GST):</span>
+                    <strong id="res_sell_price" style="color: #fff; font-size: 1.15rem;">₹ 2,38,290</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; background: rgba(16,185,129,0.08); padding: 0.6rem 0.85rem; border-radius: var(--radius-sm);">
+                    <span style="font-weight: 700; color: #34D399;">Your Gross Profit:</span>
+                    <strong id="res_profit" style="color: #34D399; font-size: 1.2rem;">+₹ 54,990 (23.1%)</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">3% GST Tax (HSN 7113):</span>
+                    <strong id="res_gst" style="color: #fff;">₹ 7,149</strong>
+                </div>
+            </div>
+
+            <div style="background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.3); border-radius: var(--radius-md); padding: 1.25rem; text-align: center;">
+                <div style="font-size: 0.85rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
+                    Final Customer Invoice Total
+                </div>
+                <div id="res_final_quote" style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: var(--gold-light);">
+                    ₹ 2,45,439
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Inclusive of diamond, gold mounting, making charges & 3% GST.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const dCost = document.getElementById("calc_diamond_cost");
+    const gWeight = document.getElementById("calc_gold_weight");
+    const gRate = document.getElementById("calc_gold_rate");
+    const mRate = document.getElementById("calc_making_rate");
+    const markupRange = document.getElementById("calc_markup_range");
+    const markupDisplay = document.getElementById("calc_markup_display");
+
+    const resDiamond = document.getElementById("res_diamond_cost");
+    const resGold = document.getElementById("res_gold_cost");
+    const resMaking = document.getElementById("res_making_cost");
+    const resTotal = document.getElementById("res_total_cost");
+    const resSell = document.getElementById("res_sell_price");
+    const resProfit = document.getElementById("res_profit");
+    const resGst = document.getElementById("res_gst");
+    const resFinal = document.getElementById("res_final_quote");
+
+    function updateStandaloneCalc() {
+        const diamond = parseFloat(dCost.value) || 0;
+        const weight = parseFloat(gWeight.value) || 0;
+        const goldRate = parseFloat(gRate.value) || 0;
+        const makingRate = parseFloat(mRate.value) || 0;
+        const markup = parseFloat(markupRange.value) || 30;
+
+        markupDisplay.innerText = markup + "%";
+
+        const goldCost = Math.round(weight * goldRate);
+        const makingCost = Math.round(weight * makingRate);
+        const totalLanded = diamond + goldCost + makingCost;
+
+        const sellPreGst = Math.round(totalLanded * (1 + markup / 100));
+        const profit = sellPreGst - totalLanded;
+        const marginPct = sellPreGst > 0 ? ((profit / sellPreGst) * 100).toFixed(1) : 0;
+        const gst = Math.round(sellPreGst * 0.03);
+        const finalQuote = sellPreGst + gst;
+
+        function inr(n) {
+            return "₹ " + Math.round(n).toLocaleString("en-IN");
+        }
+
+        resDiamond.innerText = inr(diamond);
+        resGold.innerText = inr(goldCost);
+        resMaking.innerText = inr(makingCost);
+        resTotal.innerText = inr(totalLanded);
+        resSell.innerText = inr(sellPreGst);
+        resProfit.innerText = "+" + inr(profit) + " (" + marginPct + "%)";
+        resGst.innerText = inr(gst);
+        resFinal.innerText = inr(finalQuote);
+    }
+
+    [dCost, gWeight, gRate, mRate, markupRange].forEach(el => {
+        if (el) el.addEventListener("input", updateStandaloneCalc);
+    });
+
+    updateStandaloneCalc();
+});
+</script>
+{% endblock %}

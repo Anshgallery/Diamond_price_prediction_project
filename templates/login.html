@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% set active_page = "login" %}
+
+{% block title %}Jeweller Authentication & Workspace Access | GEMFORECAST IGI{% endblock %}
+
+{% block content %}
+<div class="jewel-container">
+
+    <div style="max-width: 520px; margin: 1rem auto 3rem;">
+        
+        <!-- LOGIN CARD -->
+        <div class="jewel-card" id="loginCard" style="border: 1px solid rgba(245,158,11,0.3); box-shadow: var(--shadow-glow);">
+            <div class="jewel-card-header">
+                <div class="jewel-card-title">
+                    <span>🔐</span> Jeweller Secure Login
+                </div>
+                <span class="jewel-badge badge-gold">B2B Portal</span>
+            </div>
+
+            <form action="/login" method="POST" style="margin-bottom: 1.5rem;">
+                <div class="jewel-input-group">
+                    <label class="jewel-label" for="loginEmail">Jeweller Email Address</label>
+                    <input type="email" id="loginEmail" name="email" class="jewel-input" value="jeweller@zaveribazaar.in" placeholder="name@jewellers.com" required>
+                </div>
+
+                <div class="jewel-input-group">
+                    <label class="jewel-label" for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" name="password" class="jewel-input" value="jeweller123" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="jewel-btn jewel-btn-primary" style="width: 100%; padding: 0.85rem;">
+                    Sign In to Jeweller Workspace →
+                </button>
+            </form>
+
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.85rem; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                🔑 <strong>Pre-configured Demo Account:</strong><br>
+                Email: <code style="color: var(--gold-light);">jeweller@zaveribazaar.in</code> • Password: <code style="color: var(--gold-light);">jeweller123</code>
+            </div>
+
+            <div style="text-align: center; font-size: 0.88rem; color: var(--text-muted);">
+                Don't have a jeweller account? 
+                <a href="javascript:void(0)" onclick="toggleAuth(true)" style="color: var(--gold-light); font-weight: 600; text-decoration: none;">Register Store</a>
+            </div>
+        </div>
+
+        <!-- REGISTRATION CARD (HIDDEN BY DEFAULT) -->
+        <div class="jewel-card" id="registerCard" style="display: none; border: 1px solid rgba(56,189,248,0.3);">
+            <div class="jewel-card-header">
+                <div class="jewel-card-title">
+                    <span>🏢</span> Register Jeweller Store
+                </div>
+                <span class="jewel-badge badge-cyan">New Workspace</span>
+            </div>
+
+            <form action="/register" method="POST" style="margin-bottom: 1.5rem;">
+                <div class="jewel-input-group">
+                    <label class="jewel-label" for="regBusinessName">Jewellery Business / Firm Name</label>
+                    <input type="text" id="regBusinessName" name="business_name" class="jewel-input" placeholder="e.g. Zaveri Diamonds & Gems" required>
+                </div>
+
+                <div class="jewel-grid-2">
+                    <div class="jewel-input-group">
+                        <label class="jewel-label" for="regOwnerName">Owner / Contact Name</label>
+                        <input type="text" id="regOwnerName" name="owner_name" class="jewel-input" placeholder="e.g. Rajesh Zaveri" required>
+                    </div>
+                    <div class="jewel-input-group">
+                        <label class="jewel-label" for="regCity">City / Hub</label>
+                        <input type="text" id="regCity" name="city" class="jewel-input" placeholder="e.g. Mumbai / Surat" required>
+                    </div>
+                </div>
+
+                <div class="jewel-input-group">
+                    <label class="jewel-label" for="regEmail">Business Email</label>
+                    <input type="email" id="regEmail" name="email" class="jewel-input" placeholder="store@jewellers.in" required>
+                </div>
+
+                <div class="jewel-input-group">
+                    <label class="jewel-label" for="regGst">GSTIN (Optional)</label>
+                    <input type="text" id="regGst" name="gst_number" class="jewel-input" placeholder="e.g. 27AAAAA0000A1Z5">
+                </div>
+
+                <div class="jewel-input-group">
+                    <label class="jewel-label" for="regPassword">Password (Min. 6 chars)</label>
+                    <input type="password" id="regPassword" name="password" class="jewel-input" placeholder="••••••••" minlength="6" required>
+                </div>
+
+                <button type="submit" class="jewel-btn jewel-btn-diamond" style="width: 100%; padding: 0.85rem;">
+                    Create Jeweller Account →
+                </button>
+            </form>
+
+            <div style="text-align: center; font-size: 0.88rem; color: var(--text-muted);">
+                Already registered? 
+                <a href="javascript:void(0)" onclick="toggleAuth(false)" style="color: var(--diamond-cyan); font-weight: 600; text-decoration: none;">Sign In</a>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function toggleAuth(showRegister) {
+    document.getElementById("loginCard").style.display = showRegister ? "none" : "block";
+    document.getElementById("registerCard").style.display = showRegister ? "block" : "none";
+}
+</script>
+{% endblock %}

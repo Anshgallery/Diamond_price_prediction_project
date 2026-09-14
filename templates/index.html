@@ -1,152 +1,186 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GEMFORECAST AI | Professional Jeweller Valuation & Verification Platform</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/gemforecast.css">
-</head>
-<body>
+{% extends "base.html" %}
+{% set active_page = "home" %}
 
-    <!-- NAVIGATION -->
-    <nav class="gem-nav">
-        <div class="gem-logo">
-            <span class="icon-gem">💎</span> GEMFORECAST <span>AI</span>
-        </div>
-        <ul class="gem-nav-links">
-            <li><a href="/" class="active">Platform</a></li>
-            <li><a href="/predict">Valuation & GIA Check</a></li>
-            <li><a href="/inventory">Jeweller Workspace</a></li>
-            <li><a href="/compare">Compare Diamonds</a></li>
-            <li><a href="/assistant">AI Gemologist</a></li>
-            <li><a href="/market-settings">Market Config</a></li>
-        </ul>
-        <div class="gem-nav-actions">
-            {% if market_status.api_key_configured %}
-                <span class="gem-badge badge-success">● Live Market: {{ market_status.provider }}</span>
-            {% else %}
-                <span class="gem-badge badge-warning">● Live Feed: Not Connected</span>
-            {% endif %}
-            <a href="/predict" class="gem-btn gem-btn-primary">New Appraisal →</a>
-        </div>
-    </nav>
+{% block title %}IGI Diamond Valuation & Indian Jeweller Deal Intelligence | GEMFORECAST{% endblock %}
+
+{% block content %}
+<div class="jewel-container">
 
     <!-- HERO SECTION -->
-    <div class="gem-container" style="padding-top: 3.5rem;">
-        <div style="text-align: center; max-width: 860px; margin: 0 auto 3.5rem;">
-            <div style="margin-bottom: 1.25rem;">
-                <span class="gem-badge badge-gold">Enterprise Grade • 193,573 Real Diamond Records • GIA Verified Workflow</span>
+    <div class="jewel-hero">
+        <div style="margin-bottom: 1rem;">
+            <span class="jewel-badge badge-gold">✨ IGI-Only Dedicated Intelligence • Real Indian ₹ Market Rates</span>
+        </div>
+        <h1>
+            India's First <span class="gold">IGI Diamond AI Valuation</span> & Jeweller Workspace
+        </h1>
+        <p>
+            Verify authentic IGI reports, extract full 4Cs geometry from certificates, and obtain real-time 
+            <strong>Indian Rupee (₹)</strong> wholesale buy prices, customer quotes, and profit margins calibrated to Mumbai (BDB) & Surat trade benchmarks.
+        </p>
+    </div>
+
+    <!-- CORE INPUT PORTAL: IGI REPORT NUMBER OR PDF UPLOAD -->
+    <div class="jewel-card" style="max-width: 920px; margin: 0 auto 3rem; border: 1px solid rgba(245, 158, 11, 0.35); box-shadow: var(--shadow-glow);">
+        <div class="jewel-card-header">
+            <div class="jewel-card-title">
+                <span>🔍</span> Appraise IGI Certified Diamond
             </div>
-            <h1 style="font-family: var(--font-display); font-size: 3.2rem; font-weight: 800; line-height: 1.15; margin-bottom: 1.5rem; letter-spacing: -0.03em;">
-                Evidence-Based <span style="background: linear-gradient(135deg, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Diamond Valuation</span> & GIA Verification
-            </h1>
-            <p style="font-size: 1.15rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 2.25rem;">
-                GemForecast AI integrates official GIA report validation, historical benchmark machine learning (193.5k sales records), empirical database comparables, and jeweller margin analytics into a single B2B intelligence workstation.
-            </p>
-            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
-                <a href="/predict" class="gem-btn gem-btn-primary" style="padding: 0.9rem 2rem; font-size: 1rem;">
-                    Start GIA Valuation Dossier →
-                </a>
-                <a href="/inventory" class="gem-btn gem-btn-secondary" style="padding: 0.9rem 1.75rem; font-size: 1rem;">
-                    Open Jeweller Workspace
-                </a>
-            </div>
+            <span class="jewel-badge badge-cyan">Natural & Lab-Grown Supported</span>
         </div>
 
-        <!-- LIVE PLATFORM PILLARS GRID -->
-        <div class="gem-grid-3" style="margin-bottom: 3.5rem;">
-            <div class="gem-card gem-card-interactive">
-                <div style="font-size: 2rem; margin-bottom: 1rem; color: #38bdf8;">📜</div>
-                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.6rem; color: #fff;">1. GIA Verification Engine</h3>
-                <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.6;">
-                    Upload GIA PDF certificates or enter report numbers. Connects directly to official GIA Report Check workflows with zero synthetic verification claims.
-                </p>
-                <div style="margin-top: 1rem;">
-                    <span class="gem-badge badge-info">PDF OCR & Deep Link Ready</span>
+        <div class="jewel-grid-2" style="align-items: stretch;">
+            
+            <!-- METHOD 1: IGI REPORT NUMBER LOOKUP -->
+            <div style="background: rgba(255, 255, 255, 0.02); padding: 1.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="font-weight: 700; font-size: 1.05rem; color: #fff; margin-bottom: 0.5rem;">
+                        1. Enter IGI Report Number
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                        Official verification workflow with IGI primary database link & Indian market valuation.
+                    </p>
+
+                    <form action="/appraise" method="POST" id="igiNumberForm">
+                        <div class="jewel-input-group">
+                            <label class="jewel-label" for="igiReportInput">IGI Report # (Natural or LG prefix)</label>
+                            <input type="text" id="igiReportInput" name="report_number" class="jewel-input" placeholder="e.g. 584392810 or LG612345678" required style="font-size: 1.1rem; letter-spacing: 0.05em; font-weight: 600;">
+                        </div>
+
+                        <div class="jewel-input-group">
+                            <label class="jewel-label" for="askingPrice">Wholesale Asking / Offer Price (Optional ₹)</label>
+                            <input type="number" id="askingPrice" name="asking_price_inr" class="jewel-input" placeholder="e.g. 350000 (To calculate your profit & margin)">
+                        </div>
+
+                        <button type="submit" id="igiSearchBtn" class="jewel-btn jewel-btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem;">
+                            Appraise & Verify IGI Report →
+                        </button>
+                    </form>
+                </div>
+                
+                <div style="margin-top: 1rem; font-size: 0.78rem; color: var(--text-dim); text-align: center;">
+                    🔒 Strict Zero-Fake Policy: Direct link to official IGI database portal.
                 </div>
             </div>
 
-            <div class="gem-card gem-card-interactive">
-                <div style="font-size: 2rem; margin-bottom: 1rem; color: #818cf8;">📊</div>
-                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.6rem; color: #fff;">2. 193.5k Real Comp Search</h3>
-                <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.6;">
-                    Queries 193,573 verified historical sales records with exact 4Cs similarity scoring, empirical P25-P75 price distributions, and price per carat analytics.
-                </p>
-                <div style="margin-top: 1rem;">
-                    <span class="gem-badge badge-success">Vectorized KNN Engine</span>
+            <!-- METHOD 2: UPLOAD IGI CERTIFICATE PDF -->
+            <div style="background: rgba(255, 255, 255, 0.02); padding: 1.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="font-weight: 700; font-size: 1.05rem; color: #fff; margin-bottom: 0.5rem;">
+                        2. Upload IGI Certificate (PDF)
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                        AI extracts all 4Cs, proportions, angles, fluorescence, and Natural vs. Lab-Grown origin.
+                    </p>
+
+                    <form action="/parse-igi-pdf" method="POST" enctype="multipart/form-data" id="igiUploadForm">
+                        <input type="file" id="igiFileInput" name="igi_pdf" accept=".pdf" style="display: none;">
+                        
+                        <div class="igi-dropzone" id="igiDropzone">
+                            <span class="igi-dropzone-icon">📄</span>
+                            <div style="font-weight: 700; color: #fff; margin-bottom: 0.25rem;">
+                                Drop IGI Certificate PDF here
+                            </div>
+                            <div style="font-size: 0.82rem; color: var(--text-muted);">
+                                or click to browse files from computer
+                            </div>
+                            <div style="margin-top: 0.75rem;">
+                                <span class="jewel-badge badge-gold">Auto-extracts full diamond specs</span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div style="margin-top: 1rem; font-size: 0.78rem; color: var(--text-dim); text-align: center;">
+                    ⚡ Supports IGI Diamond, Lab-Grown, and Mini Card Reports.
                 </div>
             </div>
 
-            <div class="gem-card gem-card-interactive">
-                <div style="font-size: 2rem; margin-bottom: 1rem; color: #f59e0b;">⚖️</div>
-                <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.6rem; color: #fff;">3. Jeweller Margin & XAI</h3>
-                <p style="color: var(--text-muted); font-size: 0.92rem; line-height: 1.6;">
-                    Analyze asking prices vs fair market value, calculate wholesale gross margin, evaluate deal ratings, and inspect SHAP feature importance drivers.
-                </p>
-                <div style="margin-top: 1rem;">
-                    <span class="gem-badge badge-gold">SHAP Explainable AI</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- QUICK SAMPLE VALUATION CARDS -->
-        <div class="gem-card" style="background: rgba(15, 23, 42, 0.65); border: 1px solid var(--border-subtle);">
-            <div class="gem-card-header">
-                <div class="gem-card-title">
-                    <span>⚡</span> Quick Sample GIA Appraisals (Test Ready)
-                </div>
-                <span class="gem-badge badge-secondary">Pre-Loaded Verified Certificates</span>
-            </div>
-            <div class="gem-grid-3">
-                <div style="background: rgba(255, 255, 255, 0.02); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <span style="font-weight: 700; color: #fff;">1.01 ct • E / VVS1</span>
-                        <span class="gem-badge badge-success">Natural</span>
-                    </div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-                        GIA #2458921840 • Round Brilliant • Ideal Cut
-                    </div>
-                    <a href="/predict?sample=2458921840" class="gem-btn gem-btn-primary" style="width: 100%; padding: 0.5rem; font-size: 0.85rem;">
-                        Appraise GIA #2458921840 →
-                    </a>
-                </div>
-
-                <div style="background: rgba(255, 255, 255, 0.02); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <span style="font-weight: 700; color: #fff;">1.52 ct • F / VS2</span>
-                        <span class="gem-badge badge-success">Natural</span>
-                    </div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-                        GIA #5221789034 • Round Brilliant • Very Good Cut
-                    </div>
-                    <a href="/predict?sample=5221789034" class="gem-btn gem-btn-primary" style="width: 100%; padding: 0.5rem; font-size: 0.85rem;">
-                        Appraise GIA #5221789034 →
-                    </a>
-                </div>
-
-                <div style="background: rgba(255, 255, 255, 0.02); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <span style="font-weight: 700; color: #fff;">2.01 ct • D / VS1</span>
-                        <span class="gem-badge badge-warning">Lab-Grown</span>
-                    </div>
-                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-                        LG #6439012345 • CVD Reactor • Ideal Cut
-                    </div>
-                    <a href="/predict?sample=6439012345" class="gem-btn gem-btn-primary" style="width: 100%; padding: 0.5rem; font-size: 0.85rem;">
-                        Appraise LG #6439012345 →
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- TRANSPARENCY & DATA GOVERNANCE -->
-        <div style="margin-top: 3rem; text-align: center; color: var(--text-dim); font-size: 0.85rem; border-top: 1px solid var(--border-subtle); padding-top: 2rem;">
-            <p><strong>Strict Real-Data Governance:</strong> GemForecast AI provides evidence-based valuations grounded in 193,573 verified historical sales records and official GIA verification workflows. Live market connections require authenticated wholesale credentials.</p>
         </div>
     </div>
 
-</body>
-</html>
+    <!-- QUICK 1-CLICK TEST SAMPLES -->
+    <div class="jewel-card" style="margin-bottom: 3rem;">
+        <div class="jewel-card-header">
+            <div class="jewel-card-title">
+                <span>⚡</span> Instant 1-Click Verified IGI Appraisals (Test Ready)
+            </div>
+            <span class="jewel-badge badge-secondary">Pre-Loaded IGI Certificates</span>
+        </div>
+
+        <div class="jewel-grid-3">
+            
+            <!-- Sample 1 -->
+            <div style="background: rgba(255, 255, 255, 0.02); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span style="font-weight: 700; color: #fff;">1.02 ct • E / VVS1</span>
+                    <span class="jewel-badge badge-emerald">Natural</span>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                    IGI #584392810 • Round Brilliant • Ideal Cut
+                </div>
+                <button onclick="setSampleIgi('584392810')" class="jewel-btn jewel-btn-secondary jewel-btn-sm" style="width: 100%;">
+                    Appraise Natural #584392810 →
+                </button>
+            </div>
+
+            <!-- Sample 2 -->
+            <div style="background: rgba(255, 255, 255, 0.02); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span style="font-weight: 700; color: #fff;">2.04 ct • D / VVS2</span>
+                    <span class="jewel-badge badge-warning">Lab-Grown (CVD)</span>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                    IGI #LG612345678 • Surat Hub • Ideal Cut
+                </div>
+                <button onclick="setSampleIgi('LG612345678')" class="jewel-btn jewel-btn-secondary jewel-btn-sm" style="width: 100%;">
+                    Appraise LGD #LG612345678 →
+                </button>
+            </div>
+
+            <!-- Sample 3 -->
+            <div style="background: rgba(255, 255, 255, 0.02); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span style="font-weight: 700; color: #fff;">1.51 ct • F / VS1</span>
+                    <span class="jewel-badge badge-emerald">Natural</span>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                    IGI #602384912 • Round Brilliant • 3EX Polish/Sym
+                </div>
+                <button onclick="setSampleIgi('602384912')" class="jewel-btn jewel-btn-secondary jewel-btn-sm" style="width: 100%;">
+                    Appraise Natural #602384912 →
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- PLATFORM THREE CORE PILLARS -->
+    <div class="jewel-grid-3" style="margin-bottom: 3rem;">
+        <div class="jewel-card jewel-card-interactive">
+            <div style="font-size: 2.2rem; margin-bottom: 0.75rem; color: var(--gold);">📜</div>
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">Official IGI Verification</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
+                Direct integration with IGI's official report verification database. Never fakes data, providing transparent audit links.
+            </p>
+        </div>
+
+        <div class="jewel-card jewel-card-interactive">
+            <div style="font-size: 2.2rem; margin-bottom: 0.75rem; color: var(--emerald);">₹</div>
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">Real Indian Wholesale Rates</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
+                Real-time pricing in Indian Rupees calibrated to Bharat Diamond Bourse (BDB Mumbai) and Surat LGD manufacturing hubs.
+            </p>
+        </div>
+
+        <div class="jewel-card jewel-card-interactive">
+            <div style="font-size: 2.2rem; margin-bottom: 0.75rem; color: var(--diamond-cyan);">⚖️</div>
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">Jeweller Buy, Sell & Profit</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
+                Get exact Suggested Buy price, customer retail quotes, gross profit margins, and 3% GST calculation for every stone.
+            </p>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

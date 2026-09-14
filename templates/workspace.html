@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% set active_page = "workspace" %}
+
+{% block title %}Jeweller Workspace & Inventory | GEMFORECAST IGI{% endblock %}
+
+{% block content %}
+<div class="jewel-container">
+
+    <!-- WORKSPACE HEADER -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span class="jewel-badge badge-gold" style="margin-bottom: 0.5rem;">🏢 Certified Jeweller Workspace</span>
+            <h1 style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: #fff;">
+                {{ session.get('jeweller', {}).get('business_name', 'Jeweller Portfolio & Stock Workspace') }}
+            </h1>
+            <div style="font-size: 0.9rem; color: var(--text-muted);">
+                Location: <strong style="color: #fff;">{{ session.get('jeweller', {}).get('city', 'Mumbai / Zaveri Bazaar') }}</strong> 
+                {% if session.get('jeweller', {}).get('gst_number') %}
+                    • GSTIN: <strong style="color: #fff;">{{ session['jeweller']['gst_number'] }}</strong>
+                {% endif %}
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="/" class="jewel-btn jewel-btn-primary">
+                + Appraise New IGI Diamond
+            </a>
+        </div>
+    </div>
+
+    <!-- PORTFOLIO SUMMARY STATS -->
+    <div class="jewel-grid-4" style="margin-bottom: 2.5rem;">
+        <div class="stat-box">
+            <div class="stat-label">Total Diamonds in Stock</div>
+            <div class="stat-value gold">{{ stats.inventory_count }} Stones</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                {{ stats.total_appraisals_logged }} total appraisals logged
+            </div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Total Portfolio Market Value</div>
+            <div class="stat-value gold">{{ stats.total_portfolio_market_lakhs }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Exact: {{ stats.total_portfolio_market_formatted }}
+            </div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Total Acquisition Cost</div>
+            <div class="stat-value cyan">{{ stats.total_acquisition_cost_formatted }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Landed wholesale purchase cost
+            </div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Total Expected Gross Profit</div>
+            <div class="stat-value emerald">+{{ stats.total_expected_profit_formatted }}</div>
+            <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Avg. Confidence: {{ stats.avg_confidence }}/100
+            </div>
+        </div>
+    </div>
+
+    <!-- INVENTORY & WATCHLIST TABLE -->
+    <div class="jewel-card">
+        <div class="jewel-card-header">
+            <div class="jewel-card-title">
+                <span>📋</span> Saved Diamonds & Inventory Memo
+            </div>
+
+            <!-- FILTER TAGS -->
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                <a href="/workspace?tag=All" class="jewel-btn jewel-btn-sm {% if current_tag == 'All' or not current_tag %}jewel-btn-primary{% else %}jewel-btn-secondary{% endif %}">All</a>
+                <a href="/workspace?tag=Inventory" class="jewel-btn jewel-btn-sm {% if current_tag == 'Inventory' %}jewel-btn-primary{% else %}jewel-btn-secondary{% endif %}">In Stock</a>
+                <a href="/workspace?tag=On Memo" class="jewel-btn jewel-btn-sm {% if current_tag == 'On Memo' %}jewel-btn-primary{% else %}jewel-btn-secondary{% endif %}">On Memo</a>
+                <a href="/workspace?tag=Client Inquiry" class="jewel-btn jewel-btn-sm {% if current_tag == 'Client Inquiry' %}jewel-btn-primary{% else %}jewel-btn-secondary{% endif %}">Client Inquiry</a>
+                <a href="/workspace?tag=Watchlist" class="jewel-btn jewel-btn-sm {% if current_tag == 'Watchlist' %}jewel-btn-primary{% else %}jewel-btn-secondary{% endif %}">Watchlist</a>
+            </div>
+        </div>
+
+        {% if items and items|length > 0 %}
+            <div style="overflow-x: auto;">
+                <table class="jewel-table">
+                    <thead>
+                        <tr>
+                            <th>Stock #</th>
+                            <th>IGI Report #</th>
+                            <th>Origin</th>
+                            <th>Carat / 4Cs</th>
+                            <th>Wholesale Value (₹)</th>
+                            <th>Customer Sell (₹)</th>
+                            <th>Expected Profit (₹)</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in items %}
+                            <tr>
+                                <td style="font-weight: 700; color: #fff;">{{ item.stock_number }}</td>
+                                <td>
+                                    <strong style="color: var(--gold-light);">{{ item.report_number }}</strong>
+                                </td>
+                                <td>
+                                    <span class="jewel-badge {% if item.origin_type == 'Natural' %}badge-emerald{% else %}badge-warning{% endif %}">
+                                        {{ item.origin_type }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <strong>{{ item.carat }} ct</strong> • {{ item.shape }}<br>
+                                    <span style="font-size: 0.8rem; color: var(--text-muted);">{{ item.color }} / {{ item.clarity }} / {{ item.cut }}</span>
+                                </td>
+                                <td style="font-weight: 700; color: var(--gold);">{{ item.fair_market_formatted }}</td>
+                                <td style="font-weight: 700; color: #fff;">{{ item.suggested_sell_formatted }}</td>
+                                <td style="font-weight: 700; color: #34D399;">
+                                    +{{ item.profit_formatted }}
+                                    <span style="font-size: 0.75rem; color: var(--text-dim);">({{ item.margin_pct }}%)</span>
+                                </td>
+                                <td>
+                                    <span class="jewel-badge badge-secondary">{{ item.tag }}</span>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 0.4rem;">
+                                        <a href="/workspace/view/{{ item.id }}" class="jewel-btn jewel-btn-secondary jewel-btn-sm">View</a>
+                                        <form action="/workspace/delete/{{ item.id }}" method="POST" onsubmit="return confirm('Remove this diamond from workspace?');">
+                                            <button type="submit" class="jewel-btn jewel-btn-secondary jewel-btn-sm" style="color: #F87171;">✕</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 3rem 1rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--text-dim);">💎</div>
+                <h3 style="font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">No Diamonds in Workspace Tag</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                    Appraise an IGI report number or certificate PDF and click "Save to Workspace" to track stock and profits.
+                </p>
+                <a href="/" class="jewel-btn jewel-btn-primary">
+                    Appraise Your First Diamond →
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

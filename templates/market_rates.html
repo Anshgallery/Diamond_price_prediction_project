@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% set active_page = "market" %}
+
+{% block title %}Indian Diamond Wholesale ₹ Market Rates | GEMFORECAST IGI{% endblock %}
+
+{% block content %}
+<div class="jewel-container">
+
+    <!-- HEADER -->
+    <div style="text-align: center; max-width: 800px; margin: 0 auto 2.5rem;">
+        <span class="jewel-badge badge-gold" style="margin-bottom: 0.75rem;">Wholesale Diamond Indices</span>
+        <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 800; color: #fff; margin-bottom: 0.75rem;">
+            Indian Diamond <span style="color: var(--gold);">Wholesale Market Rates (₹)</span>
+        </h1>
+        <p style="color: var(--text-muted); font-size: 1rem;">
+            Benchmark wholesale pricing matrix calibrated to the <strong>Bharat Diamond Bourse (Mumbai)</strong> for Natural diamonds and <strong>Surat Diamond Bourse</strong> for Lab-Grown (CVD/HPHT) stones.
+        </p>
+    </div>
+
+    <!-- MARKET STATUS CARD -->
+    <div class="jewel-card" style="margin-bottom: 2.5rem;">
+        <div class="jewel-card-header">
+            <div class="jewel-card-title">
+                <span>📈</span> Current Indian Wholesale Benchmark Status
+            </div>
+            <span class="jewel-badge badge-emerald">{{ config.status }}</span>
+        </div>
+
+        <div class="jewel-grid-3" style="margin-bottom: 1.5rem;">
+            <div class="stat-box">
+                <div class="stat-label">USD to INR Exchange Rate</div>
+                <div class="stat-value gold">1 USD = ₹ {{ config.usd_inr_rate }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Daily Indian Forex Conversion
+                </div>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-label">Natural Diamond Hub</div>
+                <div class="stat-value cyan">Mumbai BDB</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Bharat Diamond Bourse Wholesale
+                </div>
+            </div>
+
+            <div class="stat-box">
+                <div class="stat-label">Lab-Grown Diamond Hub</div>
+                <div class="stat-value emerald">Surat SDB</div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Surat CVD / HPHT Manufacturing Hub
+                </div>
+            </div>
+        </div>
+
+        <!-- BENCHMARK PRICE TABLES -->
+        <div class="jewel-grid-2">
+            
+            <!-- NATURAL BENCHMARKS -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <h3 style="font-size: 1.05rem; font-weight: 700; color: #fff;">💎 Natural Mined (BDB Benchmark)</h3>
+                    <span class="jewel-badge badge-emerald">F Color / VS1 / Ideal Cut</span>
+                </div>
+                <table class="jewel-table" style="font-size: 0.85rem;">
+                    <thead>
+                        <tr>
+                            <th>Carat Tier</th>
+                            <th>Wholesale Rate (₹ / Carat)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>0.30 – 0.49 ct</td><td style="font-weight: 700; color: var(--gold-light);">₹ 65,000 / ct</td></tr>
+                        <tr><td>0.50 – 0.69 ct</td><td style="font-weight: 700; color: var(--gold-light);">₹ 1,10,000 / ct</td></tr>
+                        <tr><td>0.70 – 0.89 ct</td><td style="font-weight: 700; color: var(--gold-light);">₹ 1,95,000 / ct</td></tr>
+                        <tr><td>0.90 – 0.99 ct</td><td style="font-weight: 700; color: var(--gold-light);">₹ 2,90,000 / ct</td></tr>
+                        <tr><td>1.00 – 1.49 ct</td><td style="font-weight: 700; color: var(--gold-light);">₹ 4,40,000 / ct</td></tr>
+                        <tr><td>1.50 – 1.99 ct</td><td style="font-weight: 700; color: var(--gold-light);">₹ 6,80,000 / ct</td></tr>
+                        <tr><td>2.00 – 2.99 ct</td><td style="font-weight: 700; color: var(--gold-light);">₹ 10,50,000 / ct</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- LAB-GROWN BENCHMARKS -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <h3 style="font-size: 1.05rem; font-weight: 700; color: #fff;">🔬 Lab-Grown (Surat SDB CVD/HPHT)</h3>
+                    <span class="jewel-badge badge-warning">D-F Color / VVS-VS</span>
+                </div>
+                <table class="jewel-table" style="font-size: 0.85rem;">
+                    <thead>
+                        <tr>
+                            <th>Carat Tier</th>
+                            <th>Wholesale Rate (₹ / Carat)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>0.50 – 0.69 ct</td><td style="font-weight: 700; color: var(--gold-light);">₹ 12,000 / ct</td></tr>
+                        <tr><td>0.70 – 0.99 ct</td><td style="font-weight: 700; color: var(--gold-light);">₹ 14,500 / ct</td></tr>
+                        <tr><td>1.00 – 1.49 ct</td><td style="font-weight: 700; color: var(--gold-light);">₹ 18,000 / ct</td></tr>
+                        <tr><td>1.50 – 1.99 ct</td><td style="font-weight: 700; color: var(--gold-light);">₹ 22,500 / ct</td></tr>
+                        <tr><td>2.00 – 2.99 ct</td><td style="font-weight: 700; color: var(--gold-light);">₹ 28,000 / ct</td></tr>
+                        <tr><td>3.00 – 4.99 ct</td><td style="font-weight: 700; color: var(--gold-light);">₹ 36,000 / ct</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SETTINGS / CONFIGURATION FORM -->
+    <div class="jewel-card" style="max-width: 700px; margin: 0 auto;">
+        <div class="jewel-card-header">
+            <div class="jewel-card-title">
+                <span>⚙️</span> Indian Wholesale Feed Settings
+            </div>
+        </div>
+
+        <form action="/market-rates" method="POST">
+            <div class="jewel-input-group">
+                <label class="jewel-label" for="usd_inr_rate">USD to INR Exchange Rate (₹ / USD)</label>
+                <input type="number" id="usd_inr_rate" name="usd_inr_rate" step="0.1" class="jewel-input" value="{{ config.usd_inr_rate }}" required>
+            </div>
+
+            <div class="jewel-input-group">
+                <label class="jewel-label" for="provider_name">Wholesale Provider Feed Name</label>
+                <input type="text" id="provider_name" name="provider" class="jewel-input" value="{{ config.provider }}" required>
+            </div>
+
+            <div class="jewel-input-group">
+                <label class="jewel-label" for="api_key">B2B Wholesale API Key (Optional)</label>
+                <input type="password" id="api_key" name="api_key" class="jewel-input" placeholder="Enter API Key for live B2B feed sync">
+            </div>
+
+            <div class="jewel-input-group">
+                <label class="jewel-label" for="igi_api_key">Official IGI Developer API Key (Optional)</label>
+                <input type="password" id="igi_api_key" name="igi_api_key" class="jewel-input" placeholder="Official IGI Developer API Token">
+            </div>
+
+            <button type="submit" class="jewel-btn jewel-btn-primary" style="width: 100%;">
+                Save Market Configuration →
+            </button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}
