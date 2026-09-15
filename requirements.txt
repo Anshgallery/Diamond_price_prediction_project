@@ -13,3 +13,4 @@ mlflow
 gunicorn
 shap
 pypdf
+reportlab
