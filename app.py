@@ -188,6 +188,9 @@ def parse_igi_pdf():
             flash("PDF file size exceeds 10MB limit.", "danger")
             return redirect(url_for("home_page"))
 
+        asking_price_raw = request.form.get("asking_price_inr") or request.form.get("asking_price")
+        asking_price = float(asking_price_raw) if asking_price_raw and asking_price_raw.strip() else None
+
         # Extract diamond characteristics
         parsed_result = IGIService.extract_from_pdf(pdf_bytes)
 
@@ -197,6 +200,8 @@ def parse_igi_pdf():
 
         diamond_spec = parsed_result.get("normalized", {})
         report_num = diamond_spec.get("report_number", "Unspecified")
+        if asking_price is not None:
+            diamond_spec["asking_price"] = asking_price
 
         # Run valuation pipeline on extracted specs
         market_quote = IndianMarketService.get_indian_wholesale_quote(diamond_spec)
@@ -229,7 +234,8 @@ def parse_igi_pdf():
             diamond_spec=diamond_spec,
             ml_prediction_usd=raw_ml_usd,
             comps_data=comps_data,
-            market_quote_inr=market_quote
+            market_quote_inr=market_quote,
+            asking_price_inr=asking_price
         )
 
         igi_verification = {
@@ -416,6 +422,45 @@ def save_to_inventory():
         return redirect(url_for("workspace"))
 
 
+@app.route("/inventory/save-to-workshop", methods=["POST"])
+def save_to_workshop_action():
+    try:
+        jeweller_id = session.get("jeweller", {}).get("id", "default")
+        spec_json = request.form.get("diamond_spec_json", "{}")
+        val_json = request.form.get("valuation_json", "{}")
+        buying_price = request.form.get("buying_price_inr")
+        selling_price = request.form.get("selling_price_inr")
+
+        diamond_spec = json.loads(spec_json)
+        valuation = json.loads(val_json)
+        
+        buy_val = float(buying_price) if buying_price and buying_price != "None" else float(valuation.get("suggested_buy_price", 0))
+        sell_val = float(selling_price) if selling_price and selling_price != "None" else float(valuation.get("suggested_sell_price", 0))
+        
+        if sell_val > 0:
+            valuation["suggested_sell_price"] = sell_val
+            valuation["suggested_sell_price_formatted"] = IndianMarketService.format_inr(sell_val)
+
+        item_id = InventoryService.save_diamond(
+            diamond_spec=diamond_spec,
+            valuation_result=valuation,
+            buying_price_inr=buy_val,
+            status="In Workshop",
+            tag="Workshop",
+            notes="Directly Saved to Workshop via AI Trade Recommendation",
+            jeweller_id=jeweller_id
+        )
+        
+        profit_amt = sell_val - buy_val
+        profit_formatted = IndianMarketService.format_inr(profit_amt)
+        flash(f"🎉 Diamond #{diamond_spec.get('report_number')} ({diamond_spec.get('carat')} ct {diamond_spec.get('color')}/{diamond_spec.get('clarity')}) successfully saved to Workshop! (Expected Profit: {profit_formatted})", "success")
+        return redirect(url_for("workspace", tag="Workshop"))
+    except Exception as e:
+        logging.error(f"Error saving diamond to workshop: {e}")
+        flash("Failed to save diamond to workshop.", "danger")
+        return redirect(url_for("workspace"))
+
+
 @app.route("/workspace/view/<item_id>")
 def view_workspace_item(item_id):
     item = InventoryService.get_diamond_by_id(item_id)
@@ -463,7 +508,8 @@ def delete_workspace_item(item_id):
 
 @app.route("/calculator")
 def calculator():
-    return render_template("calculator.html")
+    market_config = IndianMarketService.get_config()
+    return render_template("calculator.html", market_config=market_config)
 
 
 # ============================================================

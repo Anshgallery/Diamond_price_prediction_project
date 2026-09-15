@@ -95,3 +95,61 @@ def test_indian_rupee_formatting():
     assert IndianMarketService.format_inr_lakhs(450000) == "₹ 4.50 Lakh"
     assert IndianMarketService.format_inr_lakhs(12500000) == "₹ 1.25 Cr"
 
+def test_ai_deal_advisor_verdicts():
+    spec = {
+        "report_number": "584392810",
+        "origin_type": "Natural",
+        "carat": 1.02,
+        "color": "E",
+        "clarity": "VVS1",
+        "cut": "Ideal",
+        "shape": "Round Brilliant",
+        "depth": 61.8,
+        "table": 56.5
+    }
+    market_quote = IndianMarketService.get_indian_wholesale_quote(spec)
+    comps = ComparablesService.find_comparables(spec["carat"], spec["cut"], spec["color"], spec["clarity"])
+    
+    # 1. Asking price at Max Buy Price -> Verdict BUY
+    val_buy = ValuationEngine.calculate_valuation(
+        diamond_spec=spec,
+        ml_prediction_usd=5500.0,
+        comps_data=comps,
+        market_quote_inr=market_quote,
+        asking_price_inr=300000
+    )
+    deal_buy = val_buy["deal_advisor"]
+    assert deal_buy["fair_value"] > 0
+    assert deal_buy["max_buy_price"] > 0
+    assert deal_buy["expected_profit"] > 0
+    assert deal_buy["deal_score"] >= 70
+    assert deal_buy["verdict"] == "BUY"
+    assert deal_buy["badge_class"] == "badge-emerald"
+
+    # 2. Asking price above Fair Value -> Verdict NEGOTIATE
+    val_neg = ValuationEngine.calculate_valuation(
+        diamond_spec=spec,
+        ml_prediction_usd=5500.0,
+        comps_data=comps,
+        market_quote_inr=market_quote,
+        asking_price_inr=val_buy["fair_market_value"] + 20000
+    )
+    deal_neg = val_neg["deal_advisor"]
+    assert deal_neg["verdict"] == "NEGOTIATE"
+    assert deal_neg["badge_class"] == "badge-warning"
+    assert 40 <= deal_neg["deal_score"] <= 69
+
+    # 3. Asking price way above high bound -> Verdict WALK AWAY
+    val_walk = ValuationEngine.calculate_valuation(
+        diamond_spec=spec,
+        ml_prediction_usd=5500.0,
+        comps_data=comps,
+        market_quote_inr=market_quote,
+        asking_price_inr=val_buy["high_estimate"] + 200000
+    )
+    deal_walk = val_walk["deal_advisor"]
+    assert deal_walk["verdict"] == "WALK AWAY"
+    assert deal_walk["badge_class"] == "badge-danger"
+    assert deal_walk["deal_score"] < 40
+
+

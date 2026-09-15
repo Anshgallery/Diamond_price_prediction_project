@@ -52,7 +52,7 @@
             <div class="jewel-container" style="padding-top: 1rem; padding-bottom: 0;">
                 {% for category, message in messages %}
                     <div class="jewel-card" style="padding: 0.9rem 1.25rem; margin-bottom: 1rem; border-left: 4px solid {% if category == 'danger' %}var(--ruby){% elif category == 'success' %}var(--emerald){% else %}var(--gold){% endif %};">
-                        <span style="font-weight: 600; color: #fff;">{{ message }}</span>
+                        <span style="font-weight: 600; color: var(--text-primary);">{{ message }}</span>
                     </div>
                 {% endfor %}
             </div>
@@ -66,7 +66,7 @@
     <footer class="jewel-footer">
         <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div style="text-align: left;">
-                <div style="font-weight: 700; color: #fff; margin-bottom: 0.25rem;">
+                <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
                     GEMFORECAST IGI • India Diamond Valuation Platform
                 </div>
                 <div style="font-size: 0.8rem; color: var(--text-dim);">

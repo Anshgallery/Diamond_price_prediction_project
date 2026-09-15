@@ -98,17 +98,18 @@ class ValuationEngine:
                 has_igi=bool(diamond_spec.get("report_number"))
             )
 
-            # 7. Deal Analysis (if asking price is provided by user)
-            deal_analysis = None
-            if asking_price_inr is not None and asking_price_inr > 0:
-                deal_analysis = cls._analyze_jeweller_deal(
-                    asking_price_inr=asking_price_inr,
-                    fair_market_val=fair_market_val,
-                    low_market_val=low_market_val,
-                    high_market_val=high_market_val,
-                    suggested_sell_price=suggested_sell_price,
-                    carat=carat
-                )
+            # 7. Deal Analysis (AI Deal Advisor)
+            effective_asking_price = asking_price_inr if (asking_price_inr is not None and asking_price_inr > 0) else suggested_buy_price
+            deal_analysis = cls._analyze_jeweller_deal(
+                asking_price_inr=effective_asking_price,
+                fair_market_val=fair_market_val,
+                low_market_val=low_market_val,
+                high_market_val=high_market_val,
+                suggested_buy_price=suggested_buy_price,
+                suggested_sell_price=suggested_sell_price,
+                carat=carat,
+                has_user_asking_price=(asking_price_inr is not None and asking_price_inr > 0)
+            )
 
             # 8. Plain-Language "Why This Price?" Summary
             why_this_price = cls._generate_business_explanation(
@@ -192,7 +193,8 @@ class ValuationEngine:
                 
                 "why_this_price": why_this_price,
                 "value_drivers": value_drivers,
-                "jeweller_deal": deal_analysis
+                "jeweller_deal": deal_analysis,
+                "deal_advisor": deal_analysis
             }
 
 
@@ -313,51 +315,65 @@ class ValuationEngine:
         fair_market_val: float,
         low_market_val: float,
         high_market_val: float,
+        suggested_buy_price: float,
         suggested_sell_price: float,
-        carat: float
+        carat: float,
+        has_user_asking_price: bool = True
     ) -> Dict[str, Any]:
-        """Evaluates whether an offered diamond is underpriced, fair, or overpriced for a jeweller."""
+        """Evaluates seller's asking price against Fair Value and Max Buy Price to provide AI Deal Advisor verdict."""
         delta = round(fair_market_val - asking_price_inr)
         margin_on_asking = round((delta / max(asking_price_inr, 1.0)) * 100.0, 1)
 
         realized_profit = round(suggested_sell_price - asking_price_inr)
         realized_margin = round((realized_profit / max(suggested_sell_price, 1.0)) * 100.0, 1)
 
-        if asking_price_inr < low_market_val:
-            rating = "Exceptional Wholesale Value (High Profit Potential)"
-            badge_class = "badge-success"
-            verdict = "STRONG BUY"
-            advice = f"Offered price is {IndianMarketService.format_inr(abs(delta))} below fair market wholesale value. Potential {realized_margin}% profit margin."
+        if asking_price_inr <= suggested_buy_price:
+            deal_score = min(100, max(85, round(85 + 15 * (suggested_buy_price - asking_price_inr) / max(suggested_buy_price * 0.3, 1.0))))
+            rating = "Exceptional Wholesale Value (High Profit Margin)"
+            badge_class = "badge-emerald"
+            verdict = "BUY"
+            advice = f"Offered price is at or below recommended Max Buy Price ({IndianMarketService.format_inr(suggested_buy_price)}). High return potential with {realized_margin}% expected gross margin."
         elif asking_price_inr <= fair_market_val:
+            deal_score = min(84, max(70, round(70 + 14 * (fair_market_val - asking_price_inr) / max(fair_market_val - suggested_buy_price, 1.0))))
             rating = "Fair Wholesale Market Range"
-            badge_class = "badge-primary"
-            verdict = "BUY AT CURRENT PRICE"
-            advice = f"Offered within competitive Indian wholesale range with {IndianMarketService.format_inr(realized_profit)} expected jeweller profit."
+            badge_class = "badge-emerald"
+            verdict = "BUY"
+            advice = f"Offered within competitive Indian wholesale fair value with {IndianMarketService.format_inr(realized_profit)} expected jeweller profit."
         elif asking_price_inr <= high_market_val:
-            rating = "Full Retail Premium"
+            deal_score = min(69, max(40, round(40 + 29 * (high_market_val - asking_price_inr) / max(high_market_val - fair_market_val, 1.0))))
+            rating = "Above Fair Value — Counter-Offer Advised"
             badge_class = "badge-warning"
-            verdict = "NEGOTIATE LOWER"
-            advice = f"Asking price is {abs(margin_on_asking)}% above wholesale fair value. Limits jeweller margin unless selling customized bridal jewelry."
+            verdict = "NEGOTIATE"
+            advice = f"Asking price is {IndianMarketService.format_inr(asking_price_inr - fair_market_val)} above fair market value. Counter-offer closer to Max Buy Price ({IndianMarketService.format_inr(suggested_buy_price)})."
         else:
-            rating = "Overpriced (Above Upper Wholesale Bound)"
+            overprice_amt = asking_price_inr - high_market_val
+            deal_score = max(0, min(39, round(35 - 35 * overprice_amt / max(high_market_val, 1.0))))
+            rating = "Overpriced (Exceeds Wholesale Range)"
             badge_class = "badge-danger"
-            verdict = "OVERPRICED - RE-NEGOTIATE"
-            advice = f"Supplier is asking {IndianMarketService.format_inr(asking_price_inr - high_market_val)} above maximum wholesale benchmark. Counter-offer at {IndianMarketService.format_inr(fair_market_val)}."
+            verdict = "WALK AWAY"
+            advice = f"Asking price exceeds upper wholesale market bound by {IndianMarketService.format_inr(overprice_amt)}. Counter-offer at Max Buy Price ({IndianMarketService.format_inr(suggested_buy_price)}) or walk away."
 
         return {
             "asking_price": asking_price_inr,
             "asking_price_formatted": IndianMarketService.format_inr(asking_price_inr),
             "asking_ppc_formatted": IndianMarketService.format_inr(asking_price_inr / max(carat, 0.01)),
+            "fair_value": fair_market_val,
+            "fair_value_formatted": IndianMarketService.format_inr(fair_market_val),
+            "max_buy_price": suggested_buy_price,
+            "max_buy_price_formatted": IndianMarketService.format_inr(suggested_buy_price),
+            "expected_profit": realized_profit,
+            "expected_profit_formatted": IndianMarketService.format_inr(realized_profit),
+            "expected_profit_at_asking": realized_profit,
             "delta_from_market": delta,
             "delta_formatted": IndianMarketService.format_inr(delta),
             "margin_on_asking_pct": margin_on_asking,
-            "expected_profit_at_asking": realized_profit,
-            "expected_profit_formatted": IndianMarketService.format_inr(realized_profit),
             "realized_margin_pct": realized_margin,
+            "deal_score": deal_score,
             "deal_rating": rating,
             "verdict": verdict,
             "badge_class": badge_class,
-            "advice": advice
+            "advice": advice,
+            "has_user_asking_price": has_user_asking_price
         }
 
     @classmethod

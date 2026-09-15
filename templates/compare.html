@@ -9,7 +9,7 @@
     <!-- HEADER -->
     <div style="text-align: center; max-width: 800px; margin: 0 auto 2.5rem;">
         <span class="jewel-badge badge-gold" style="margin-bottom: 0.75rem;">Multi-IGI Decision Matrix</span>
-        <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 800; color: #fff; margin-bottom: 0.75rem;">
+        <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.75rem;">
             5-Report <span style="color: var(--gold);">IGI Comparison</span> & AI Awards
         </h1>
         <p style="color: var(--text-muted); font-size: 1rem;">
@@ -18,7 +18,7 @@
     </div>
 
     <!-- 5-REPORT INPUT FORM -->
-    <div class="jewel-card" style="margin-bottom: 2.5rem; border: 1px solid rgba(245, 158, 11, 0.3);">
+    <div class="jewel-card" style="margin-bottom: 2.5rem; border: 1px solid var(--gold); box-shadow: var(--shadow-card);">
         <div class="jewel-card-header">
             <div class="jewel-card-title">
                 <span>📑</span> Enter IGI Report Numbers to Compare (2 to 5 Diamonds)
@@ -63,19 +63,19 @@
     {% if comparison and comparison.awards %}
         <!-- AI AWARDS ROW -->
         <div style="margin-bottom: 2.5rem;">
-            <div style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: #fff; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <div style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text-primary); margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
                 <span>🏆</span> AI Jeweller Decision Awards
             </div>
 
             <div class="jewel-grid-3" style="margin-bottom: 1.5rem;">
                 
                 <!-- OVERALL PICK -->
-                <div class="jewel-card" style="border: 2px solid var(--gold); background: linear-gradient(180deg, rgba(245,158,11,0.08) 0%, rgba(17,24,39,0.9) 100%);">
+                <div class="jewel-card" style="border: 2px solid var(--gold); background: #FAF8F2;">
                     <span class="jewel-badge badge-gold" style="margin-bottom: 0.75rem;">{{ comparison.awards.overall_pick.badge }}</span>
-                    <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem;">
+                    <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.25rem;">
                         {{ comparison.awards.overall_pick.title }}
                     </h3>
-                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--gold-light); margin-bottom: 0.5rem;">
+                    <div style="font-size: 1.1rem; font-weight: 700; color: var(--gold); margin-bottom: 0.5rem;">
                         IGI #{{ comparison.awards.overall_pick.diamond.report_number }} ({{ comparison.awards.overall_pick.diamond.carat }}ct {{ comparison.awards.overall_pick.diamond.color }}/{{ comparison.awards.overall_pick.diamond.clarity }})
                     </div>
                     <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
@@ -84,12 +84,12 @@
                 </div>
 
                 <!-- BEST QUALITY -->
-                <div class="jewel-card" style="border: 1px solid var(--diamond-cyan);">
+                <div class="jewel-card" style="border: 1px solid #3A5B72; background: #F4F8FA;">
                     <span class="jewel-badge badge-cyan" style="margin-bottom: 0.75rem;">{{ comparison.awards.best_quality.badge }}</span>
-                    <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem;">
+                    <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.25rem;">
                         {{ comparison.awards.best_quality.title }}
                     </h3>
-                    <div style="font-size: 1.1rem; font-weight: 700; color: #38BDF8; margin-bottom: 0.5rem;">
+                    <div style="font-size: 1.1rem; font-weight: 700; color: #3A5B72; margin-bottom: 0.5rem;">
                         IGI #{{ comparison.awards.best_quality.diamond.report_number }} ({{ comparison.awards.best_quality.diamond.carat }}ct {{ comparison.awards.best_quality.diamond.color }}/{{ comparison.awards.best_quality.diamond.clarity }})
                     </div>
                     <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
@@ -98,12 +98,12 @@
                 </div>
 
                 <!-- BEST BUY / HIGHEST PROFIT -->
-                <div class="jewel-card" style="border: 1px solid var(--emerald);">
+                <div class="jewel-card" style="border: 1px solid #2F6B4F; background: #F0F7F3;">
                     <span class="jewel-badge badge-emerald" style="margin-bottom: 0.75rem;">{{ comparison.awards.best_buy.badge }}</span>
-                    <h3 style="font-size: 1.2rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem;">
+                    <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.25rem;">
                         {{ comparison.awards.best_buy.title }}
                     </h3>
-                    <div style="font-size: 1.1rem; font-weight: 700; color: #34D399; margin-bottom: 0.5rem;">
+                    <div style="font-size: 1.1rem; font-weight: 700; color: #2F6B4F; margin-bottom: 0.5rem;">
                         IGI #{{ comparison.awards.best_buy.diamond.report_number }} (+{{ comparison.awards.best_buy.diamond.profit_formatted }})
                     </div>
                     <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.6;">
@@ -128,7 +128,7 @@
                     <tr>
                         <th>Metric</th>
                         {% for d in comparison.comparison_matrix %}
-                            <th style="color: #fff; font-size: 0.9rem; font-weight: 700;">
+                            <th style="color: var(--text-primary); font-size: 0.9rem; font-weight: 700;">
                                 IGI #{{ d.report_number }}<br>
                                 <span class="jewel-badge {% if d.origin_type == 'Natural' %}badge-emerald{% else %}badge-warning{% endif %}" style="margin-top: 0.25rem;">
                                     {{ d.origin_type }}
@@ -141,16 +141,16 @@
                     <tr>
                         <td style="font-weight: 600; color: var(--text-muted);">Carat Weight</td>
                         {% for d in comparison.comparison_matrix %}
-                            <td style="font-weight: 700; color: #fff; font-size: 1.05rem;">{{ d.carat }} ct</td>
+                            <td style="font-weight: 700; color: var(--text-primary); font-size: 1.05rem;">{{ d.carat }} ct</td>
                         {% endfor %}
                     </tr>
                     <tr>
                         <td style="font-weight: 600; color: var(--text-muted);">Color / Clarity / Cut</td>
                         {% for d in comparison.comparison_matrix %}
                             <td>
-                                <strong style="color: var(--gold-light);">{{ d.color }}</strong> / 
-                                <strong style="color: #38BDF8;">{{ d.clarity }}</strong> / 
-                                <strong style="color: #34D399;">{{ d.cut }}</strong>
+                                <strong style="color: var(--gold);">{{ d.color }}</strong> / 
+                                <strong style="color: #3A5B72;">{{ d.clarity }}</strong> / 
+                                <strong style="color: #2F6B4F;">{{ d.cut }}</strong>
                             </td>
                         {% endfor %}
                     </tr>
@@ -177,8 +177,8 @@
                             </td>
                         {% endfor %}
                     </tr>
-                    <tr style="background: rgba(245,158,11,0.03);">
-                        <td style="font-weight: 700; color: #fff;">Wholesale Market Value</td>
+                    <tr style="background: #FAF8F2;">
+                        <td style="font-weight: 700; color: var(--text-primary);">Wholesale Market Value</td>
                         {% for d in comparison.comparison_matrix %}
                             <td style="font-weight: 800; color: var(--gold); font-size: 1.15rem;">{{ d.fair_market_formatted }}</td>
                         {% endfor %}
@@ -186,19 +186,19 @@
                     <tr>
                         <td style="font-weight: 600; color: var(--text-muted);">Suggested Jeweller Buy</td>
                         {% for d in comparison.comparison_matrix %}
-                            <td style="font-weight: 700; color: #38BDF8;">{{ d.suggested_buy_formatted }}</td>
+                            <td style="font-weight: 700; color: #3A5B72;">{{ d.suggested_buy_formatted }}</td>
                         {% endfor %}
                     </tr>
                     <tr>
                         <td style="font-weight: 600; color: var(--text-muted);">Suggested Customer Sell</td>
                         {% for d in comparison.comparison_matrix %}
-                            <td style="font-weight: 700; color: #34D399;">{{ d.suggested_sell_formatted }}</td>
+                            <td style="font-weight: 700; color: #2F6B4F;">{{ d.suggested_sell_formatted }}</td>
                         {% endfor %}
                     </tr>
-                    <tr style="background: rgba(16,185,129,0.04);">
-                        <td style="font-weight: 700; color: #fff;">Expected Jeweller Profit</td>
+                    <tr style="background: #F0F7F3;">
+                        <td style="font-weight: 700; color: var(--text-primary);">Expected Jeweller Profit</td>
                         {% for d in comparison.comparison_matrix %}
-                            <td style="font-weight: 800; color: #34D399; font-size: 1.1rem;">
+                            <td style="font-weight: 800; color: #2F6B4F; font-size: 1.1rem;">
                                 +{{ d.profit_formatted }}<br>
                                 <span style="font-size: 0.78rem; color: var(--text-muted);">({{ d.margin_pct }}% margin)</span>
                             </td>
@@ -225,7 +225,7 @@
                     <span>💡</span> Executive Comparison Summary
                 </div>
             </div>
-            <p style="font-size: 0.95rem; color: #E2E8F0; line-height: 1.7;">
+            <p style="font-size: 0.95rem; color: var(--text-primary); line-height: 1.7;">
                 {{ comparison.executive_summary }}
             </p>
         </div>

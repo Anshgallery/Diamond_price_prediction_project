@@ -21,7 +21,7 @@
     </div>
 
     <!-- CORE INPUT PORTAL: IGI REPORT NUMBER OR PDF UPLOAD -->
-    <div class="jewel-card" style="max-width: 920px; margin: 0 auto 3rem; border: 1px solid rgba(245, 158, 11, 0.35); box-shadow: var(--shadow-glow);">
+    <div class="jewel-card" style="max-width: 920px; margin: 0 auto 3rem; border: 1px solid var(--gold); box-shadow: var(--shadow-card);">
         <div class="jewel-card-header">
             <div class="jewel-card-title">
                 <span>🔍</span> Appraise IGI Certified Diamond
@@ -32,9 +32,9 @@
         <div class="jewel-grid-2" style="align-items: stretch;">
             
             <!-- METHOD 1: IGI REPORT NUMBER LOOKUP -->
-            <div style="background: rgba(255, 255, 255, 0.02); padding: 1.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); display: flex; flex-direction: column; justify-content: space-between;">
+            <div style="background: #FAFAF8; padding: 1.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
-                    <div style="font-weight: 700; font-size: 1.05rem; color: #fff; margin-bottom: 0.5rem;">
+                    <div style="font-weight: 700; font-size: 1.05rem; color: var(--text-primary); margin-bottom: 0.5rem;">
                         1. Enter IGI Report Number
                     </div>
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
@@ -64,9 +64,9 @@
             </div>
 
             <!-- METHOD 2: UPLOAD IGI CERTIFICATE PDF -->
-            <div style="background: rgba(255, 255, 255, 0.02); padding: 1.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); display: flex; flex-direction: column; justify-content: space-between;">
+            <div style="background: #FAFAF8; padding: 1.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
-                    <div style="font-weight: 700; font-size: 1.05rem; color: #fff; margin-bottom: 0.5rem;">
+                    <div style="font-weight: 700; font-size: 1.05rem; color: var(--text-primary); margin-bottom: 0.5rem;">
                         2. Upload IGI Certificate (PDF)
                     </div>
                     <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
@@ -76,16 +76,21 @@
                     <form action="/parse-igi-pdf" method="POST" enctype="multipart/form-data" id="igiUploadForm">
                         <input type="file" id="igiFileInput" name="igi_pdf" accept=".pdf" style="display: none;">
                         
+                        <div class="jewel-input-group" style="margin-bottom: 0.85rem;">
+                            <label class="jewel-label" for="pdfAskingPrice" style="font-size: 0.82rem;">Seller's Asking / Offer Price (Optional ₹)</label>
+                            <input type="number" id="pdfAskingPrice" name="asking_price_inr" class="jewel-input" placeholder="e.g. 350000 (To get instant AI Deal Advisor verdict)" style="font-size: 0.95rem;">
+                        </div>
+
                         <div class="igi-dropzone" id="igiDropzone">
                             <span class="igi-dropzone-icon">📄</span>
-                            <div style="font-weight: 700; color: #fff; margin-bottom: 0.25rem;">
+                            <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 0.25rem;">
                                 Drop IGI Certificate PDF here
                             </div>
                             <div style="font-size: 0.82rem; color: var(--text-muted);">
                                 or click to browse files from computer
                             </div>
                             <div style="margin-top: 0.75rem;">
-                                <span class="jewel-badge badge-gold">Auto-extracts full diamond specs</span>
+                                <span class="jewel-badge badge-gold">Auto-extracts specs &amp; AI Deal Advisor</span>
                             </div>
                         </div>
                     </form>
@@ -111,9 +116,9 @@
         <div class="jewel-grid-3">
             
             <!-- Sample 1 -->
-            <div style="background: rgba(255, 255, 255, 0.02); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+            <div style="background: #FAFAF8; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <span style="font-weight: 700; color: #fff;">1.02 ct • E / VVS1</span>
+                    <span style="font-weight: 700; color: var(--text-primary);">1.02 ct • E / VVS1</span>
                     <span class="jewel-badge badge-emerald">Natural</span>
                 </div>
                 <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
@@ -125,9 +130,9 @@
             </div>
 
             <!-- Sample 2 -->
-            <div style="background: rgba(255, 255, 255, 0.02); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+            <div style="background: #FAFAF8; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <span style="font-weight: 700; color: #fff;">2.04 ct • D / VVS2</span>
+                    <span style="font-weight: 700; color: var(--text-primary);">2.04 ct • D / VVS2</span>
                     <span class="jewel-badge badge-warning">Lab-Grown (CVD)</span>
                 </div>
                 <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
@@ -139,9 +144,9 @@
             </div>
 
             <!-- Sample 3 -->
-            <div style="background: rgba(255, 255, 255, 0.02); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+            <div style="background: #FAFAF8; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                    <span style="font-weight: 700; color: #fff;">1.51 ct • F / VS1</span>
+                    <span style="font-weight: 700; color: var(--text-primary);">1.51 ct • F / VS1</span>
                     <span class="jewel-badge badge-emerald">Natural</span>
                 </div>
                 <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">
@@ -159,23 +164,23 @@
     <div class="jewel-grid-3" style="margin-bottom: 3rem;">
         <div class="jewel-card jewel-card-interactive">
             <div style="font-size: 2.2rem; margin-bottom: 0.75rem; color: var(--gold);">📜</div>
-            <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">Official IGI Verification</h3>
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">Official IGI Verification</h3>
             <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
                 Direct integration with IGI's official report verification database. Never fakes data, providing transparent audit links.
             </p>
         </div>
 
         <div class="jewel-card jewel-card-interactive">
-            <div style="font-size: 2.2rem; margin-bottom: 0.75rem; color: var(--emerald);">₹</div>
-            <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">Real Indian Wholesale Rates</h3>
+            <div style="font-size: 2.2rem; margin-bottom: 0.75rem; color: #2F6B4F;">₹</div>
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">Real Indian Wholesale Rates</h3>
             <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
                 Real-time pricing in Indian Rupees calibrated to Bharat Diamond Bourse (BDB Mumbai) and Surat LGD manufacturing hubs.
             </p>
         </div>
 
         <div class="jewel-card jewel-card-interactive">
-            <div style="font-size: 2.2rem; margin-bottom: 0.75rem; color: var(--diamond-cyan);">⚖️</div>
-            <h3 style="font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">Jeweller Buy, Sell & Profit</h3>
+            <div style="font-size: 2.2rem; margin-bottom: 0.75rem; color: #3A5B72;">⚖️</div>
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">Jeweller Buy, Sell & Profit</h3>
             <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
                 Get exact Suggested Buy price, customer retail quotes, gross profit margins, and 3% GST calculation for every stone.
             </p>

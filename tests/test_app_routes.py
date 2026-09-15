@@ -78,3 +78,19 @@ def test_pdf_routes(client):
     assert "attachment" in res_download.headers.get("Content-Disposition", "")
     assert res_download.data.startswith(b"%PDF")
 
+def test_save_to_workshop_endpoint(client):
+    import json
+    spec = {"report_number": "584392810", "carat": 1.02, "color": "E", "clarity": "VVS1", "cut": "Ideal", "origin_type": "Natural"}
+    val = {"suggested_buy_price": 300000, "suggested_sell_price": 375000, "fair_market_value": 340000}
+    
+    res = client.post("/inventory/save-to-workshop", data={
+        "diamond_spec_json": json.dumps(spec),
+        "valuation_json": json.dumps(val),
+        "buying_price_inr": "300000",
+        "selling_price_inr": "375000"
+    }, follow_redirects=True)
+    
+    assert res.status_code == 200
+    assert b"successfully saved to Workshop" in res.data or b"Workshop" in res.data
+
+

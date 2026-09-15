@@ -11,7 +11,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div>
                 <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem;">
-                    <h1 style="font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; color: #fff;">
+                    <h1 style="font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; color: var(--text-primary);">
                         IGI #{{ diamond_spec.report_number }}
                     </h1>
                     {% if "Lab" in diamond_spec.origin_type %}
@@ -22,7 +22,7 @@
                     <span class="jewel-badge badge-gold">{{ diamond_spec.carat }} ct • {{ diamond_spec.shape }}</span>
                 </div>
                 <div style="font-size: 0.88rem; color: var(--text-muted);">
-                    Laser Inscription: <strong style="color: #fff;">{{ diamond_spec.inscription or 'IGI ' ~ diamond_spec.report_number }}</strong> • Valuation Timestamp: {{ timestamp }}
+                    Laser Inscription: <strong style="color: var(--text-primary);">{{ diamond_spec.inscription or 'IGI ' ~ diamond_spec.report_number }}</strong> • Valuation Timestamp: {{ timestamp }}
                 </div>
             </div>
 
@@ -43,7 +43,7 @@
     </div>
 
     <!-- LARGE EMBEDDED OFFICIAL IGI REPORT PDF VIEWER & TOOLBAR -->
-    <div class="jewel-card" style="margin-bottom: 2rem; padding: 1.5rem; border: 1px solid rgba(14, 165, 233, 0.4); box-shadow: var(--shadow-glow);">
+    <div class="jewel-card" style="margin-bottom: 2rem; padding: 1.5rem; border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card);">
         <div class="jewel-card-header" style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div class="jewel-card-title">
                 <span>📜</span> Official Verified IGI Report PDF Viewer
@@ -61,7 +61,7 @@
             </div>
         </div>
 
-        <div style="width: 100%; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-subtle); background: #081C38;">
+        <div style="width: 100%; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--border-subtle); background: #FAF8F2;">
             <iframe id="igiPdfFrame" src="/pdf/{{ diamond_spec.report_number }}" style="width: 100%; height: 720px; border: none; display: block;" type="application/pdf">
                 <p>Your browser does not support inline PDF viewing. <a href="/download-pdf/{{ diamond_spec.report_number }}">Click here to download the IGI Certificate PDF</a>.</p>
             </iframe>
@@ -85,8 +85,149 @@
     </script>
 
 
+    <!-- 🤖 AI DEAL ADVISOR SECTION -->
+    <div class="jewel-card" style="margin-bottom: 2rem; background: #FFFFFF; border: 1.5px solid var(--gold); box-shadow: var(--shadow-card);">
+        <div class="jewel-card-header" style="flex-wrap: wrap; gap: 0.75rem;">
+            <div class="jewel-card-title" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.25rem;">
+                <span style="font-size: 1.5rem;">🤖</span> AI Deal Advisor
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="jewel-badge badge-cyan">Automated Wholesaler Trade Decision</span>
+            </div>
+        </div>
+
+        <div class="jewel-grid-2" style="align-items: center; gap: 1.5rem; margin-bottom: 1.5rem;">
+            
+            <!-- LEFT INPUT: SELLER'S ASKING PRICE -->
+            <div style="background: #FAFAF8; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+                <label class="jewel-label" for="dealAskingPriceInput" style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem; display: block;">
+                    💵 Enter Seller's Asking Price (₹)
+                </label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input type="number" id="dealAskingPriceInput" class="jewel-input" value="{{ diamond_spec.asking_price or (valuation.deal_advisor.asking_price if valuation.deal_advisor and valuation.deal_advisor.has_user_asking_price else valuation.suggested_buy_price) }}" placeholder="e.g. 350000" style="font-size: 1.2rem; font-weight: 700; color: var(--gold); flex: 1;" oninput="updateAiDealAdvisor()">
+                    <button type="button" class="jewel-btn jewel-btn-primary" onclick="updateAiDealAdvisor()" style="padding: 0.75rem 1.25rem; font-size: 0.95rem;">
+                        ⚡ Re-Evaluate
+                    </button>
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.5rem;">
+                    Enter seller's asking price to calculate Fair Value, Max Buy Price, Expected Profit, Deal Score &amp; Verdict.
+                </div>
+            </div>
+
+            <!-- RIGHT HIGHLIGHT: VERDICT & DEAL SCORE GAUGE -->
+            <div style="background: #FAFAF8; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.65rem;">
+                <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em;">
+                    AI Trade Recommendation
+                </div>
+                <div id="dealVerdictContainer">
+                    <span id="dealVerdictBadge" class="jewel-badge {{ valuation.deal_advisor.badge_class if valuation.deal_advisor else 'badge-emerald' }}" style="font-size: 1.5rem; padding: 0.55rem 1.75rem; font-weight: 900; letter-spacing: 0.05em; border-radius: 9999px;">
+                        {{ valuation.deal_advisor.verdict if valuation.deal_advisor else 'BUY' }}
+                    </span>
+                </div>
+                
+                <!-- DEAL SCORE GAUGE BAR -->
+                <div style="width: 100%; max-width: 280px; margin-top: 0.25rem;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.25rem;">
+                        <span style="color: var(--text-muted);">Deal Score</span>
+                        <strong id="dealScoreVal" style="color: var(--gold); font-size: 0.95rem;">{{ valuation.deal_advisor.deal_score if valuation.deal_advisor else 85 }} / 100</strong>
+                    </div>
+                    <div style="height: 10px; background: #EAEAE0; border-radius: 5px; overflow: hidden;">
+                        <div id="dealScoreMeter" style="height: 100%; width: {{ valuation.deal_advisor.deal_score if valuation.deal_advisor else 85 }}%; background: linear-gradient(90deg, #2F6B4F, #B08A32, #A34A4A); transition: width 0.4s ease;"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 4-METRIC KEY DEAL GRID -->
+        <div class="jewel-grid-4" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+            
+            <!-- 1. FAIR VALUE -->
+            <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #FAF8F2;">
+                <div class="stat-label" style="font-weight: 700; color: var(--gold);">Fair Value</div>
+                <div id="dealFairValue" class="stat-value gold" style="font-size: 1.35rem;">
+                    {{ valuation.deal_advisor.fair_value_formatted if valuation.deal_advisor else valuation.fair_market_value_formatted }}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
+                    Wholesale Benchmark
+                </div>
+            </div>
+
+            <!-- 2. MAX BUY PRICE -->
+            <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #F4F8FA;">
+                <div class="stat-label" style="font-weight: 700; color: #3A5B72;">Max Buy Price</div>
+                <div id="dealMaxBuyPrice" class="stat-value cyan" style="font-size: 1.35rem;">
+                    {{ valuation.deal_advisor.max_buy_price_formatted if valuation.deal_advisor else valuation.suggested_buy_price_formatted }}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
+                    Target Acquisition Limit
+                </div>
+            </div>
+
+            <!-- 3. EXPECTED PROFIT -->
+            <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #F0F7F3;">
+                <div class="stat-label" style="font-weight: 700; color: #2F6B4F;">Expected Profit</div>
+                <div id="dealExpectedProfit" class="stat-value emerald" style="font-size: 1.35rem;">
+                    {% if valuation.deal_advisor and valuation.deal_advisor.expected_profit >= 0 %}+{% endif %}{{ valuation.deal_advisor.expected_profit_formatted if valuation.deal_advisor else valuation.expected_profit_formatted }}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
+                    At Suggested Retail Quote
+                </div>
+            </div>
+
+            <!-- 4. DEAL SCORE -->
+            <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #FAFAF8;">
+                <div class="stat-label" style="font-weight: 700; color: var(--gold);">Deal Score</div>
+                <div id="dealScoreCard" class="stat-value gold" style="font-size: 1.35rem;">
+                    {{ valuation.deal_advisor.deal_score if valuation.deal_advisor else 85 }}/100
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">
+                    Wholesale Attractiveness
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ADVICE EXPLANATION BOX -->
+        <div style="background: #FAFAF8; padding: 0.9rem 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); display: flex; align-items: flex-start; gap: 0.75rem;">
+            <span style="font-size: 1.2rem;">💡</span>
+            <div style="font-size: 0.9rem; color: var(--text-primary); line-height: 1.5;" id="dealAdviceText">
+                {{ valuation.deal_advisor.advice if valuation.deal_advisor else 'Offered price is evaluated against current BDB Mumbai / Surat LGD trade benchmarks.' }}
+            </div>
+        </div>
+
+        <!-- 🔨 SAVE TO WORKSHOP ACTION BOX -->
+        <div style="margin-top: 1.25rem; background: #F0F7F3; border: 1.5px solid rgba(47, 107, 79, 0.3); border-radius: var(--radius-md); padding: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                        <span style="font-size: 1.3rem;">🔨</span>
+                        <strong style="font-size: 1.05rem; color: var(--text-primary);">Save to Workshop Action</strong>
+                        <span class="jewel-badge badge-emerald">Ready for Workshop</span>
+                    </div>
+                    <div style="font-size: 0.9rem; color: var(--text-muted);">
+                        Recommended Sell Price: <strong id="sellRecPrice" style="color: var(--text-primary);">{{ valuation.suggested_sell_price_formatted }}</strong>
+                        • Expected Profit: <strong id="sellRecProfit" style="color: #2F6B4F;">+{{ valuation.expected_profit_formatted }}</strong>
+                        (<strong id="sellRecMargin" style="color: #2F6B4F;">{{ valuation.expected_margin_pct }}% margin</strong>)
+                    </div>
+                </div>
+
+                <form action="/inventory/save-to-workshop" method="POST" id="sellToWorkshopForm" style="margin: 0;">
+                    <input type="hidden" name="diamond_spec_json" value='{{ diamond_spec_json }}'>
+                    <input type="hidden" name="valuation_json" value='{{ valuation_json }}'>
+                    <input type="hidden" id="sellFormBuyPrice" name="buying_price_inr" value="{{ diamond_spec.asking_price or valuation.suggested_buy_price }}">
+                    <input type="hidden" id="sellFormSellPrice" name="selling_price_inr" value="{{ valuation.suggested_sell_price }}">
+                    
+                    <button type="submit" class="jewel-btn jewel-btn-emerald" style="padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 700; border: none; cursor: pointer;">
+                        🔨 Save to Workshop →
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- PRIMARY FINANCIAL DEAL METRICS & LIVE INDIA MARKET INTELLIGENCE -->
-    <div class="jewel-card" style="margin-bottom: 2rem; background: linear-gradient(180deg, rgba(17,24,39,0.95) 0%, rgba(15,23,42,0.98) 100%); border: 1px solid rgba(245,158,11,0.4); box-shadow: var(--shadow-glow);">
+    <div class="jewel-card" style="margin-bottom: 2rem; background: #FFFFFF; border: 1px solid var(--gold); box-shadow: var(--shadow-card);">
         <div class="jewel-card-header" style="flex-wrap: wrap; gap: 0.75rem;">
             <div class="jewel-card-title">
                 <span>💰</span> Live India Market AI Pricing Dossier
@@ -98,7 +239,7 @@
         </div>
 
         {% if valuation.data_available == False %}
-            <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #EF4444; padding: 1.25rem; border-radius: var(--radius-md); color: #FCA5A5; margin-bottom: 1.5rem; text-align: center; font-weight: 600;">
+            <div style="background: rgba(163, 74, 74, 0.1); border: 1px solid #A34A4A; padding: 1.25rem; border-radius: var(--radius-md); color: #A34A4A; margin-bottom: 1.5rem; text-align: center; font-weight: 600;">
                 ⚠️ Live Market Pricing Unavailable — Benchmark data for this exact diamond spec is unreachable. (Strict Policy: Never output fake or hardcoded estimates.)
             </div>
         {% else %}
@@ -106,7 +247,7 @@
             <div class="jewel-grid-5" style="margin-bottom: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); display: grid; gap: 1rem;">
                 
                 <!-- 1. TODAY'S MARKET PRICE -->
-                <div class="stat-box" style="border: 1px solid rgba(245,158,11,0.3); background: rgba(245,158,11,0.04);">
+                <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #FAF8F2;">
                     <div class="stat-label" style="font-weight: 700;">Today's Market Price</div>
                     <div class="stat-value gold" style="font-size: 1.4rem;">{{ valuation.today_market_price_formatted or valuation.fair_market_value_formatted }}</div>
                     <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
@@ -115,7 +256,7 @@
                 </div>
 
                 <!-- 2. FAIR BUY PRICE -->
-                <div class="stat-box" style="border: 1px solid rgba(14,165,233,0.3); background: rgba(14,165,233,0.04);">
+                <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #F4F8FA;">
                     <div class="stat-label" style="font-weight: 700;">Fair Buy Price</div>
                     <div class="stat-value cyan" style="font-size: 1.4rem;">{{ valuation.suggested_buy_price_formatted }}</div>
                     <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
@@ -124,7 +265,7 @@
                 </div>
 
                 <!-- 3. SUGGESTED SELL PRICE -->
-                <div class="stat-box" style="border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.04);">
+                <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #F0F7F3;">
                     <div class="stat-label" style="font-weight: 700;">Suggested Sell Price</div>
                     <div class="stat-value emerald" style="font-size: 1.4rem;">{{ valuation.suggested_sell_price_formatted }}</div>
                     <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
@@ -133,20 +274,20 @@
                 </div>
 
                 <!-- 4. EXPECTED PROFIT & MARGIN -->
-                <div class="stat-box" style="border: 1px solid rgba(16,185,129,0.3); background: rgba(16,185,129,0.04);">
+                <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #F0F7F3;">
                     <div class="stat-label" style="font-weight: 700;">Expected Profit / Margin</div>
                     <div class="stat-value emerald" style="font-size: 1.4rem;">+{{ valuation.expected_profit_formatted }}</div>
                     <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
-                        Margin: <strong style="color: #34D399;">{{ valuation.expected_margin_pct }}%</strong>
+                        Margin: <strong style="color: #2F6B4F;">{{ valuation.expected_margin_pct }}%</strong>
                     </div>
                 </div>
 
                 <!-- 5. AI CONFIDENCE SCORE -->
-                <div class="stat-box" style="border: 1px solid rgba(168,85,247,0.3); background: rgba(168,85,247,0.04);">
+                <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #FAFAF8;">
                     <div class="stat-label" style="font-weight: 700;">AI Confidence</div>
-                    <div class="stat-value" style="color: #C084FC; font-size: 1.4rem;">{{ valuation.confidence_score }}%</div>
+                    <div class="stat-value gold" style="font-size: 1.4rem;">{{ valuation.confidence_score }}%</div>
                     <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
-                        Level: <strong style="color: #E9D5FF;">{{ valuation.confidence_grade }}</strong>
+                        Level: <strong style="color: var(--text-primary);">{{ valuation.confidence_grade }}</strong>
                     </div>
                 </div>
 
@@ -154,12 +295,12 @@
         {% endif %}
 
         <!-- GST & INVOICE BREAKDOWN -->
-        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); padding: 0.9rem 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); flex-wrap: wrap; gap: 0.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #FAFAF8; padding: 0.9rem 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); flex-wrap: wrap; gap: 0.75rem;">
             <div style="font-size: 0.88rem; color: var(--text-muted);">
-                GST Rate: <strong style="color: #fff;">3% on Polished Diamonds</strong> (HSN 7102) • Tax Amount: <strong style="color: #fff;">{{ valuation.gst_amount_formatted }}</strong>
+                GST Rate: <strong style="color: var(--text-primary);">3% on Polished Diamonds</strong> (HSN 7102) • Tax Amount: <strong style="color: var(--text-primary);">{{ valuation.gst_amount_formatted }}</strong>
             </div>
-            <div style="font-size: 0.95rem; font-weight: 700; color: #fff;">
-                Customer Total with 3% GST: <span style="color: var(--gold-light); font-size: 1.15rem;">{{ valuation.customer_price_with_gst_formatted }}</span>
+            <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary);">
+                Customer Total with 3% GST: <span style="color: var(--gold); font-size: 1.15rem;">{{ valuation.customer_price_with_gst_formatted }}</span>
             </div>
         </div>
     </div>
@@ -181,48 +322,48 @@
                 <tbody>
                     <tr>
                         <td style="font-weight: 600; color: var(--text-muted);">Carat Weight</td>
-                        <td style="font-weight: 700; color: #fff; font-size: 1.05rem;">{{ diamond_spec.carat }} ct</td>
+                        <td style="font-weight: 700; color: var(--text-primary); font-size: 1.05rem;">{{ diamond_spec.carat }} ct</td>
                         <td style="font-weight: 600; color: var(--text-muted);">Color Grade</td>
-                        <td style="font-weight: 700; color: var(--gold-light); font-size: 1.05rem;">{{ diamond_spec.color }}</td>
+                        <td style="font-weight: 700; color: var(--gold); font-size: 1.05rem;">{{ diamond_spec.color }}</td>
                     </tr>
                     <tr>
                         <td style="font-weight: 600; color: var(--text-muted);">Clarity Grade</td>
-                        <td style="font-weight: 700; color: #38BDF8; font-size: 1.05rem;">{{ diamond_spec.clarity }}</td>
+                        <td style="font-weight: 700; color: #3A5B72; font-size: 1.05rem;">{{ diamond_spec.clarity }}</td>
                         <td style="font-weight: 600; color: var(--text-muted);">Cut Grade</td>
-                        <td style="font-weight: 700; color: #34D399; font-size: 1.05rem;">{{ diamond_spec.cut }}</td>
+                        <td style="font-weight: 700; color: #2F6B4F; font-size: 1.05rem;">{{ diamond_spec.cut }}</td>
                     </tr>
                     <tr>
                         <td style="font-weight: 600; color: var(--text-muted);">Shape & Cutting Style</td>
-                        <td colspan="3" style="font-weight: 600; color: #fff;">{{ diamond_spec.shape }}</td>
+                        <td colspan="3" style="font-weight: 600; color: var(--text-primary);">{{ diamond_spec.shape }}</td>
                     </tr>
                     <tr>
                         <td style="font-weight: 600; color: var(--text-muted);">Polish / Symmetry</td>
-                        <td colspan="3" style="color: #fff;">{{ diamond_spec.polish or 'Excellent' }} / {{ diamond_spec.symmetry or 'Excellent' }}</td>
+                        <td colspan="3" style="color: var(--text-primary);">{{ diamond_spec.polish or 'Excellent' }} / {{ diamond_spec.symmetry or 'Excellent' }}</td>
                     </tr>
                     <tr>
                         <td style="font-weight: 600; color: var(--text-muted);">Fluorescence</td>
-                        <td colspan="3" style="color: #fff;">{{ diamond_spec.fluorescence or 'None' }}</td>
+                        <td colspan="3" style="color: var(--text-primary);">{{ diamond_spec.fluorescence or 'None' }}</td>
                     </tr>
                     <tr>
                         <td style="font-weight: 600; color: var(--text-muted);">Measurements</td>
-                        <td colspan="3" style="color: #fff;">{{ diamond_spec.measurements_str or (diamond_spec.x ~ ' x ' ~ diamond_spec.y ~ ' x ' ~ diamond_spec.z ~ ' mm') }}</td>
+                        <td colspan="3" style="color: var(--text-primary);">{{ diamond_spec.measurements_str or (diamond_spec.x ~ ' x ' ~ diamond_spec.y ~ ' x ' ~ diamond_spec.z ~ ' mm') }}</td>
                     </tr>
                     <tr>
                         <td style="font-weight: 600; color: var(--text-muted);">Table % / Depth %</td>
-                        <td colspan="3" style="color: #fff;">Table: <strong>{{ diamond_spec.table }}%</strong> | Total Depth: <strong>{{ diamond_spec.depth }}%</strong></td>
+                        <td colspan="3" style="color: var(--text-primary);">Table: <strong>{{ diamond_spec.table }}%</strong> | Total Depth: <strong>{{ diamond_spec.depth }}%</strong></td>
                     </tr>
                 </tbody>
             </table>
 
             <!-- VALUE DRIVERS -->
-            <div style="font-weight: 700; font-size: 0.9rem; color: #fff; margin-bottom: 0.5rem;">
+            <div style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary); margin-bottom: 0.5rem;">
                 Gemological Value Drivers:
             </div>
             <div style="display: flex; flex-direction: column; gap: 0.4rem;">
                 {% for d in valuation.value_drivers %}
-                    <div style="font-size: 0.85rem; padding: 0.4rem 0.65rem; border-radius: var(--radius-sm); background: rgba(255,255,255,0.02); display: flex; align-items: center; gap: 0.5rem;">
+                    <div style="font-size: 0.85rem; padding: 0.4rem 0.65rem; border-radius: var(--radius-sm); background: #FAFAF8; display: flex; align-items: center; gap: 0.5rem;">
                         <span>{% if d.type == 'positive' %}✅{% elif d.type == 'warning' %}⚠️{% else %}ℹ️{% endif %}</span>
-                        <div><strong style="color: #fff;">{{ d.driver }}:</strong> <span style="color: var(--text-muted);">{{ d.text }}</span></div>
+                        <div><strong style="color: var(--text-primary);">{{ d.driver }}:</strong> <span style="color: var(--text-muted);">{{ d.text }}</span></div>
                     </div>
                 {% endfor %}
             </div>
@@ -243,13 +384,13 @@
 
             <div class="jewel-input-group">
                 <label class="jewel-label" for="calcBuyPrice">Your Actual Purchase / Offer Price (₹)</label>
-                <input type="number" id="calcBuyPrice" class="jewel-input" value="{{ diamond_spec.asking_price or valuation.suggested_buy_price }}" style="font-size: 1.1rem; font-weight: 700; color: var(--gold-light);">
+                <input type="number" id="calcBuyPrice" class="jewel-input" value="{{ diamond_spec.asking_price or valuation.suggested_buy_price }}" style="font-size: 1.1rem; font-weight: 700; color: var(--gold);">
             </div>
 
             <div class="jewel-input-group">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
                     <label class="jewel-label" style="margin-bottom: 0;">Retail Markup Percentage (%)</label>
-                    <span id="calcMarkupValue" style="font-weight: 700; color: var(--emerald);">25%</span>
+                    <span id="calcMarkupValue" style="font-weight: 700; color: #2F6B4F;">25%</span>
                 </div>
                 <input type="range" id="calcMarkupSlider" min="5" max="80" value="25" step="1" style="width: 100%; accent-color: var(--gold);">
             </div>
@@ -260,26 +401,26 @@
             </div>
 
             <!-- LIVE CALCULATOR OUTPUT BOX -->
-            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; margin-top: 1.25rem;">
+            <div style="background: #FAFAF8; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; margin-top: 1.25rem;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.6rem;">
                     <span style="color: var(--text-muted);">Customer Base Price:</span>
-                    <strong id="outSellPrice" style="color: #fff; font-size: 1.05rem;">{{ valuation.suggested_sell_price_formatted }}</strong>
+                    <strong id="outSellPrice" style="color: var(--text-primary); font-size: 1.05rem;">{{ valuation.suggested_sell_price_formatted }}</strong>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.6rem;">
                     <span style="color: var(--text-muted);">Your Expected Profit:</span>
-                    <strong id="outProfit" style="color: #34D399; font-size: 1.1rem;">+{{ valuation.expected_profit_formatted }}</strong>
+                    <strong id="outProfit" style="color: #2F6B4F; font-size: 1.1rem;">+{{ valuation.expected_profit_formatted }}</strong>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.6rem;">
                     <span style="color: var(--text-muted);">Profit Margin:</span>
-                    <strong id="outMargin" style="color: #34D399;">{{ valuation.expected_margin_pct }}%</strong>
+                    <strong id="outMargin" style="color: #2F6B4F;">{{ valuation.expected_margin_pct }}%</strong>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.6rem;">
                     <span style="color: var(--text-muted);">3% Diamond GST:</span>
-                    <strong id="outGst" style="color: #fff;">{{ valuation.gst_amount_formatted }}</strong>
+                    <strong id="outGst" style="color: var(--text-primary);">{{ valuation.gst_amount_formatted }}</strong>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: 700; color: #fff;">Final Customer Invoice (Incl. GST):</span>
-                    <strong id="outFinalCustomerPrice" style="color: var(--gold-light); font-size: 1.25rem;">{{ valuation.customer_price_with_gst_formatted }}</strong>
+                    <span style="font-weight: 700; color: var(--text-primary);">Final Customer Invoice (Incl. GST):</span>
+                    <strong id="outFinalCustomerPrice" style="color: var(--gold); font-size: 1.25rem;">{{ valuation.customer_price_with_gst_formatted }}</strong>
                 </div>
             </div>
 
@@ -313,7 +454,7 @@
             </div>
             <span class="jewel-badge badge-gold">Plain Business Language</span>
         </div>
-        <p style="font-size: 0.95rem; color: #E2E8F0; line-height: 1.75;">
+        <p style="font-size: 0.95rem; color: var(--text-primary); line-height: 1.75;">
             {{ valuation.why_this_price }}
         </p>
     </div>
@@ -330,12 +471,12 @@
         {% if comparables.comparables and comparables.comparables|length > 0 %}
             <div class="jewel-grid-3">
                 {% for comp in comparables.comparables %}
-                    <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem;">
+                    <div style="background: #FAFAF8; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                            <span style="font-weight: 700; color: #fff;">{{ comp.carat }} ct • {{ comp.color }} / {{ comp.clarity }}</span>
+                            <span style="font-weight: 700; color: var(--text-primary);">{{ comp.carat }} ct • {{ comp.color }} / {{ comp.clarity }}</span>
                             <span class="jewel-badge badge-cyan">{{ comp.similarity_score }}% Match</span>
                         </div>
-                        <div style="font-size: 1.15rem; font-weight: 800; color: var(--gold-light); margin-bottom: 0.35rem;">
+                        <div style="font-size: 1.15rem; font-weight: 800; color: var(--gold); margin-bottom: 0.35rem;">
                             {{ comp.price_inr_formatted }}
                         </div>
                         <div style="font-size: 0.8rem; color: var(--text-dim);">
@@ -350,6 +491,177 @@
             </p>
         {% endif %}
     </div>
+
+    <!-- CLIENT-SIDE RE-CALCULATION FOR AI DEAL ADVISOR & PROFIT CALCULATOR -->
+    <script>
+    function formatInr(num) {
+        var val = Math.round(num);
+        return (val < 0 ? "-" : "") + "₹ " + Math.abs(val).toLocaleString('en-IN');
+    }
+
+    function updateAiDealAdvisor() {
+        var askingInput = document.getElementById('dealAskingPriceInput');
+        if (!askingInput) return;
+        var askingVal = parseFloat(askingInput.value);
+        if (isNaN(askingVal) || askingVal <= 0) return;
+
+        var fairVal = {{ valuation.fair_market_value|default(0) }};
+        var maxBuy = {{ valuation.suggested_buy_price|default(0) }};
+        var highBound = {{ valuation.high_estimate|default(0) }};
+        var suggestedSell = {{ valuation.suggested_sell_price|default(0) }};
+
+        var profit = Math.round(suggestedSell - askingVal);
+        var marginPct = Math.round((profit / Math.max(suggestedSell, 1)) * 1000) / 10;
+
+        var verdict = "BUY";
+        var badgeClass = "badge-emerald";
+        var dealScore = 85;
+        var advice = "";
+
+        if (askingVal <= maxBuy) {
+            dealScore = Math.min(100, Math.max(85, Math.round(85 + 15 * (maxBuy - askingVal) / Math.max(maxBuy * 0.3, 1))));
+            verdict = "BUY";
+            badgeClass = "badge-emerald";
+            advice = "Offered price is at or below recommended Max Buy Price (" + formatInr(maxBuy) + "). High return potential with " + marginPct + "% expected gross margin.";
+        } else if (askingVal <= fairVal) {
+            dealScore = Math.min(84, Math.max(70, Math.round(70 + 14 * (fairVal - askingVal) / Math.max(fairVal - maxBuy, 1))));
+            verdict = "BUY";
+            badgeClass = "badge-emerald";
+            advice = "Offered within competitive Indian wholesale fair value with " + formatInr(profit) + " expected jeweller profit.";
+        } else if (askingVal <= highBound) {
+            dealScore = Math.min(69, Math.max(40, Math.round(40 + 29 * (highBound - askingVal) / Math.max(highBound - fairVal, 1))));
+            verdict = "NEGOTIATE";
+            badgeClass = "badge-warning";
+            advice = "Asking price is " + formatInr(askingVal - fairVal) + " above fair market value. Counter-offer closer to Max Buy Price (" + formatInr(maxBuy) + ").";
+        } else {
+            var overprice = askingVal - highBound;
+            dealScore = Math.max(0, Math.min(39, Math.round(35 - 35 * overprice / Math.max(highBound, 1))));
+            verdict = "WALK AWAY";
+            badgeClass = "badge-danger";
+            advice = "Asking price exceeds upper wholesale market bound by " + formatInr(overprice) + ". Counter-offer at Max Buy Price (" + formatInr(maxBuy) + ") or walk away.";
+        }
+
+        var verdictEl = document.getElementById('dealVerdictBadge');
+        if (verdictEl) {
+            verdictEl.innerText = verdict;
+            verdictEl.className = "jewel-badge " + badgeClass;
+        }
+
+        var scoreVal = document.getElementById('dealScoreVal');
+        if (scoreVal) scoreVal.innerText = dealScore + " / 100";
+
+        var scoreCard = document.getElementById('dealScoreCard');
+        if (scoreCard) scoreCard.innerText = dealScore + "/100";
+
+        var scoreMeter = document.getElementById('dealScoreMeter');
+        if (scoreMeter) scoreMeter.style.width = dealScore + "%";
+
+        var expProf = document.getElementById('dealExpectedProfit');
+        if (expProf) expProf.innerText = (profit >= 0 ? "+" : "") + formatInr(profit);
+
+        var adviceEl = document.getElementById('dealAdviceText');
+        if (adviceEl) adviceEl.innerText = advice;
+
+        // Workshop action box sync
+        var sellRecPriceEl = document.getElementById('sellRecPrice');
+        if (sellRecPriceEl) sellRecPriceEl.innerText = formatInr(suggestedSell);
+
+        var sellRecProfEl = document.getElementById('sellRecProfit');
+        if (sellRecProfEl) sellRecProfEl.innerText = (profit >= 0 ? "+" : "") + formatInr(profit);
+
+        var sellRecMargEl = document.getElementById('sellRecMargin');
+        if (sellRecMargEl) sellRecMargEl.innerText = marginPct + "% margin";
+
+        var sellBuyInput = document.getElementById('sellFormBuyPrice');
+        if (sellBuyInput) sellBuyInput.value = askingVal;
+
+        var sellSellInput = document.getElementById('sellFormSellPrice');
+        if (sellSellInput) sellSellInput.value = suggestedSell;
+
+        // Sync with calcBuyPrice if available
+        var calcBuy = document.getElementById('calcBuyPrice');
+        if (calcBuy && calcBuy.value != askingVal) {
+            calcBuy.value = askingVal;
+            updateCalculator();
+        }
+    }
+
+    function updateCalculator() {
+        var buyPriceInput = document.getElementById('calcBuyPrice');
+        if (!buyPriceInput) return;
+        var buyPrice = parseFloat(buyPriceInput.value) || 0;
+        
+        var markupSlider = document.getElementById('calcMarkupSlider');
+        var markupPct = markupSlider ? parseFloat(markupSlider.value) : 25;
+        
+        var markupValEl = document.getElementById('calcMarkupValue');
+        if (markupValEl) markupValEl.innerText = markupPct + "%";
+
+        var makingChargeInput = document.getElementById('calcMakingCharge');
+        var makingCharge = makingChargeInput ? (parseFloat(makingChargeInput.value) || 0) : 0;
+
+        var fairVal = {{ valuation.fair_market_value|default(0) }};
+        var baseSell = Math.round(fairVal * (1.0 + markupPct / 100.0) + makingCharge);
+        var profit = Math.round(baseSell - buyPrice);
+        var marginPct = Math.round((profit / Math.max(baseSell, 1)) * 1000) / 10;
+        var gstAmount = Math.round(baseSell * 0.03);
+        var finalPrice = Math.round(baseSell + gstAmount);
+
+        var outSell = document.getElementById('outSellPrice');
+        if (outSell) outSell.innerText = formatInr(baseSell);
+
+        var outProf = document.getElementById('outProfit');
+        if (outProf) outProf.innerText = (profit >= 0 ? "+" : "") + formatInr(profit);
+
+        var outMarg = document.getElementById('outMargin');
+        if (outMarg) outMarg.innerText = marginPct + "%";
+
+        var outGst = document.getElementById('outGst');
+        if (outGst) outGst.innerText = formatInr(gstAmount);
+
+        var outFinal = document.getElementById('outFinalCustomerPrice');
+        if (outFinal) outFinal.innerText = formatInr(finalPrice);
+
+        // Update workshop action box from calculator
+        var sellRecPriceEl = document.getElementById('sellRecPrice');
+        if (sellRecPriceEl) sellRecPriceEl.innerText = formatInr(baseSell);
+
+        var sellRecProfEl = document.getElementById('sellRecProfit');
+        if (sellRecProfEl) sellRecProfEl.innerText = (profit >= 0 ? "+" : "") + formatInr(profit);
+
+        var sellRecMargEl = document.getElementById('sellRecMargin');
+        if (sellRecMargEl) sellRecMargEl.innerText = marginPct + "% margin";
+
+        var sellBuyInput = document.getElementById('sellFormBuyPrice');
+        if (sellBuyInput) sellBuyInput.value = buyPrice;
+
+        var sellSellInput = document.getElementById('sellFormSellPrice');
+        if (sellSellInput) sellSellInput.value = baseSell;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var dealInput = document.getElementById('dealAskingPriceInput');
+        if (dealInput) {
+            dealInput.addEventListener('input', updateAiDealAdvisor);
+        }
+        var calcBuy = document.getElementById('calcBuyPrice');
+        if (calcBuy) {
+            calcBuy.addEventListener('input', function() {
+                if (dealInput && dealInput.value != calcBuy.value) {
+                    dealInput.value = calcBuy.value;
+                    updateAiDealAdvisor();
+                } else {
+                    updateCalculator();
+                }
+            });
+        }
+        var slider = document.getElementById('calcMarkupSlider');
+        if (slider) slider.addEventListener('input', updateCalculator);
+        
+        var making = document.getElementById('calcMakingCharge');
+        if (making) making.addEventListener('input', updateCalculator);
+    });
+    </script>
 
 </div>
 {% endblock %}

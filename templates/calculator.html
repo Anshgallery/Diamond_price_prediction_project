@@ -1,128 +1,499 @@
 {% extends "base.html" %}
 {% set active_page = "calculator" %}
 
-{% block title %}Jeweller Buy/Sell, Margin & GST Calculator | GEMFORECAST IGI{% endblock %}
+{% block title %}Master Jewellery Pricing Calculator (Gold, Silver, Platinum, Diamond & Gemstones) | GEMFORECAST IGI{% endblock %}
 
 {% block content %}
 <div class="jewel-container">
 
-    <!-- HEADER -->
-    <div style="text-align: center; max-width: 800px; margin: 0 auto 2.5rem;">
-        <span class="jewel-badge badge-gold" style="margin-bottom: 0.75rem;">Indian Jeweller B2B Calculator</span>
-        <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 800; color: #fff; margin-bottom: 0.75rem;">
-            Buy, Sell, <span style="color: var(--gold);">Profit & 3% GST</span> Calculator
+    <!-- HEADER SECTION -->
+    <div style="text-align: center; max-width: 900px; margin: 0 auto 2.5rem;">
+        <span class="jewel-badge badge-gold" style="margin-bottom: 0.75rem;">👑 Master Indian Jeweller Valuation Engine</span>
+        <h1 style="font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.75rem;">
+            Full-Suite Jewellery Buy, Sell, <span style="color: var(--gold);">Profit &amp; 3% GST</span> Calculator
         </h1>
-        <p style="color: var(--text-muted); font-size: 1rem;">
-            Calculate total jewellery cost including diamond landed cost, gold weight, making charges, custom jeweller margins, and GST for customer quotes.
+        <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.6;">
+            Calculate complete landed acquisition costs, metal purities, wastage, diamond 4Cs, gemstones, making &amp; setting charges, 
+            hallmarking, retail markups, GST invoices, and net profit margins in <strong>Indian Rupees (₹)</strong>.
         </p>
+
+        <!-- QUICK PRESET SELECTORS -->
+        <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 1.25rem;">
+            <button type="button" onclick="loadPreset('bridal_ring')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
+                💎 Diamond Solitaire Ring (18K)
+            </button>
+            <button type="button" onclick="loadPreset('gold_bangle')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
+                🏆 22K Gold Bangle (20g)
+            </button>
+            <button type="button" onclick="loadPreset('platinum_band')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
+                💍 Platinum Pt950 Band
+            </button>
+            <button type="button" onclick="loadPreset('ruby_necklace')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
+                🔴 Ruby &amp; Diamond Necklace
+            </button>
+            <button type="button" onclick="loadPreset('silver_ring')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
+                ✨ 925 Sterling Silver Ring
+            </button>
+        </div>
     </div>
 
-    <div class="jewel-grid-2" style="max-width: 1080px; margin: 0 auto; align-items: start;">
+    <!-- MAIN 2-COLUMN CALCULATOR WORKSPACE -->
+    <div class="jewel-grid-2" style="max-width: 1200px; margin: 0 auto; align-items: start; gap: 2rem;">
 
-        <!-- INPUTS FORM -->
-        <div class="jewel-card">
-            <div class="jewel-card-header">
-                <div class="jewel-card-title">
-                    <span>⚙️</span> Valuation & Mounting Parameters
+        <!-- LEFT COLUMN: INPUT PARAMETERS PANEL -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+            <!-- CARD 1: METAL & PURITY SPECS -->
+            <div class="jewel-card">
+                <div class="jewel-card-header">
+                    <div class="jewel-card-title">
+                        <span>🥇</span> 1. Metal, Purity &amp; Base Weight
+                    </div>
+                    <span class="jewel-badge badge-gold" id="purityRateBadge">₹ 5,887.50 / g</span>
                 </div>
-                <span class="jewel-badge badge-gold">Indian ₹ Currency</span>
+
+                <div class="jewel-grid-2" style="margin-bottom: 1rem;">
+                    <div>
+                        <label class="jewel-label" for="calc_metal_type">Metal Category</label>
+                        <select id="calc_metal_type" class="jewel-select" onchange="onMetalTypeChange()">
+                            <option value="gold" selected>Gold (Au)</option>
+                            <option value="silver">Silver (Ag)</option>
+                            <option value="platinum">Platinum (Pt)</option>
+                            <option value="diamond_only">Diamond Only (No Metal)</option>
+                            <option value="gemstone_only">Gemstone Only (No Metal)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="jewel-label" for="calc_purity">Purity Grade</label>
+                        <select id="calc_purity" class="jewel-select" onchange="recalculateMaster()">
+                            <option value="18K" selected>18K Gold (75.0% Pure)</option>
+                            <option value="22K">22K Gold (91.6% BIS Hallmarked)</option>
+                            <option value="24K">24K Fine Gold (99.9% Pure)</option>
+                            <option value="14K">14K Gold (58.5% Pure)</option>
+                            <option value="10K">10K Gold (41.7% Pure)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="jewel-grid-2" style="margin-bottom: 1rem;">
+                    <div>
+                        <label class="jewel-label" for="calc_base_rate">Base 24K / Fine Rate (₹/gram)</label>
+                        <input type="number" id="calc_base_rate" class="jewel-input" value="7850" oninput="recalculateMaster()">
+                    </div>
+                    <div>
+                        <label class="jewel-label" for="calc_net_weight">Net Metal Weight (Grams)</label>
+                        <input type="number" id="calc_net_weight" class="jewel-input" value="5.00" step="0.01" oninput="recalculateMaster()">
+                    </div>
+                </div>
+
+                <div class="jewel-grid-2">
+                    <div>
+                        <label class="jewel-label" for="calc_wastage_pct">Wastage / Melt Loss (%)</label>
+                        <input type="number" id="calc_wastage_pct" class="jewel-input" value="5.0" step="0.1" oninput="recalculateMaster()">
+                    </div>
+                    <div>
+                        <label class="jewel-label">Effective Gross Weight</label>
+                        <div id="calc_gross_weight_display" style="padding: 0.75rem 0.9rem; background: #FAFAF8; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); font-weight: 700; color: var(--text-primary);">
+                            5.25 grams
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Diamond Cost -->
-            <div class="jewel-input-group">
-                <label class="jewel-label" for="calc_diamond_cost">Diamond Landed / Purchase Cost (₹)</label>
-                <input type="number" id="calc_diamond_cost" class="jewel-input" value="150000" style="font-size: 1.1rem; font-weight: 700; color: var(--gold-light);">
+            <!-- CARD 2: DIAMOND SPECIFICATIONS -->
+            <div class="jewel-card">
+                <div class="jewel-card-header">
+                    <div class="jewel-card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="calc_enable_diamond" checked onchange="toggleSection('diamondSection'); recalculateMaster();" style="width: 18px; height: 18px; accent-color: var(--gold); cursor: pointer;">
+                        <span>💎</span> 2. Diamond Specifications
+                    </div>
+                    <span class="jewel-badge badge-cyan">IGI / GIA Benchmark</span>
+                </div>
+
+                <div id="diamondSection">
+                    <div class="jewel-grid-2" style="margin-bottom: 1rem;">
+                        <div>
+                            <label class="jewel-label" for="calc_diamond_carat">Total Diamond Carat (ct)</label>
+                            <input type="number" id="calc_diamond_carat" class="jewel-input" value="1.02" step="0.01" oninput="recalculateMaster()">
+                        </div>
+                        <div>
+                            <label class="jewel-label" for="calc_diamond_stones">Number of Stones</label>
+                            <input type="number" id="calc_diamond_stones" class="jewel-input" value="1" step="1" oninput="recalculateMaster()">
+                        </div>
+                    </div>
+
+                    <div class="jewel-grid-3" style="margin-bottom: 1rem;">
+                        <div>
+                            <label class="jewel-label" for="calc_diamond_color">Color Grade</label>
+                            <select id="calc_diamond_color" class="jewel-select" onchange="autoCalcDiamondPrice()">
+                                <option value="D">D (Colorless)</option>
+                                <option value="E" selected>E (Colorless)</option>
+                                <option value="F">F (Colorless)</option>
+                                <option value="G">G (Near Colorless)</option>
+                                <option value="H">H (Near Colorless)</option>
+                                <option value="I">I (Near Colorless)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="jewel-label" for="calc_diamond_clarity">Clarity Grade</label>
+                            <select id="calc_diamond_clarity" class="jewel-select" onchange="autoCalcDiamondPrice()">
+                                <option value="FL">FL (Flawless)</option>
+                                <option value="IF">IF (Internally Flawless)</option>
+                                <option value="VVS1" selected>VVS1 (Very Very Slight)</option>
+                                <option value="VVS2">VVS2</option>
+                                <option value="VS1">VS1</option>
+                                <option value="VS2">VS2</option>
+                                <option value="SI1">SI1</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="jewel-label" for="calc_diamond_cut">Cut Grade</label>
+                            <select id="calc_diamond_cut" class="jewel-select" onchange="autoCalcDiamondPrice()">
+                                <option value="Ideal" selected>Ideal</option>
+                                <option value="Excellent">Excellent</option>
+                                <option value="Very Good">Very Good</option>
+                                <option value="Good">Good</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="jewel-grid-2">
+                        <div>
+                            <label class="jewel-label" for="calc_diamond_cert">Certification</label>
+                            <select id="calc_diamond_cert" class="jewel-select" onchange="recalculateMaster()">
+                                <option value="IGI Certified" selected>IGI Certified</option>
+                                <option value="GIA Certified">GIA Certified</option>
+                                <option value="HRD Certified">HRD Certified</option>
+                                <option value="Non-Certified">In-House / Non-Certified</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                                <label class="jewel-label" for="calc_diamond_cost" style="margin: 0;">Diamond Wholesale Cost (₹)</label>
+                                <button type="button" onclick="autoCalcDiamondPrice()" style="background: none; border: none; color: var(--gold); font-size: 0.78rem; cursor: pointer; text-decoration: underline;">Auto BDB Rate</button>
+                            </div>
+                            <input type="number" id="calc_diamond_cost" class="jewel-input" value="300000" style="font-weight: 700; color: var(--gold);" oninput="recalculateMaster()">
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Gold Metal Selection & Rate -->
-            <div class="jewel-grid-2" style="margin-bottom: 1.25rem;">
-                <div>
-                    <label class="jewel-label" for="calc_gold_purity">Gold Metal Purity</label>
-                    <select id="calc_gold_purity" class="jewel-select">
-                        <option value="18K" selected>18K Gold (75.0% Hallmarked)</option>
-                        <option value="14K">14K Gold (58.5% Hallmarked)</option>
-                        <option value="22K">22K Gold (91.6% Hallmarked)</option>
-                        <option value="950Pt">Platinum 950</option>
-                    </select>
+            <!-- CARD 3: GEMSTONES & PRECIOUS STONES -->
+            <div class="jewel-card">
+                <div class="jewel-card-header">
+                    <div class="jewel-card-title" style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="calc_enable_gemstone" onchange="toggleSection('gemstoneSection'); recalculateMaster();" style="width: 18px; height: 18px; accent-color: var(--gold); cursor: pointer;">
+                        <span>🔴</span> 3. Gemstones &amp; Precious Minerals
+                    </div>
+                    <span class="jewel-badge badge-secondary">Ruby / Emerald / Sapphire</span>
                 </div>
-                <div>
-                    <label class="jewel-label" for="calc_gold_weight">Mounting Net Weight (Grams)</label>
-                    <input type="number" id="calc_gold_weight" class="jewel-input" value="4.5" step="0.1">
+
+                <div id="gemstoneSection" style="display: none;">
+                    <div class="jewel-grid-3">
+                        <div>
+                            <label class="jewel-label" for="calc_gem_type">Gemstone Type</label>
+                            <select id="calc_gem_type" class="jewel-select" onchange="recalculateMaster()">
+                                <option value="Ruby (Manik)" selected>Ruby (Manik)</option>
+                                <option value="Emerald (Panna)">Emerald (Panna)</option>
+                                <option value="Blue Sapphire (Neelam)">Blue Sapphire (Neelam)</option>
+                                <option value="Pearl (Moti)">Pearl (Moti)</option>
+                                <option value="Polki / Kundan">Polki / Kundan</option>
+                                <option value="Cubic Zirconia (CZ)">Cubic Zirconia (CZ)</option>
+                                <option value="Other Gemstone">Other Gemstone</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="jewel-label" for="calc_gem_carat">Weight (ct / Ratti)</label>
+                            <input type="number" id="calc_gem_carat" class="jewel-input" value="2.5" step="0.1" oninput="recalculateMaster()">
+                        </div>
+                        <div>
+                            <label class="jewel-label" for="calc_gem_cost">Total Gemstone Value (₹)</label>
+                            <input type="number" id="calc_gem_cost" class="jewel-input" value="25000" oninput="recalculateMaster()">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="jewel-grid-2" style="margin-bottom: 1.25rem;">
-                <div>
-                    <label class="jewel-label" for="calc_gold_rate">Gold Rate (₹ per gram)</label>
-                    <input type="number" id="calc_gold_rate" class="jewel-input" value="6200">
+            <!-- CARD 4: LABOUR, MAKING, SETTING & HALLMARKING -->
+            <div class="jewel-card">
+                <div class="jewel-card-header">
+                    <div class="jewel-card-title">
+                        <span>🔨</span> 4. Making, Setting &amp; Hallmarking Charges
+                    </div>
+                    <span class="jewel-badge badge-gold">Labour &amp; BIS Fee</span>
                 </div>
-                <div>
-                    <label class="jewel-label" for="calc_making_rate">Making Charge (₹ per gram)</label>
-                    <input type="number" id="calc_making_rate" class="jewel-input" value="1200">
+
+                <div class="jewel-grid-2" style="margin-bottom: 1rem;">
+                    <div>
+                        <label class="jewel-label" for="calc_making_mode">Making Charges Mode</label>
+                        <select id="calc_making_mode" class="jewel-select" onchange="recalculateMaster()">
+                            <option value="per_gram" selected>Per Gram (₹/gram)</option>
+                            <option value="fixed">Fixed Amount (Flat ₹)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="jewel-label" for="calc_making_val">Making Charge Amount (₹)</label>
+                        <input type="number" id="calc_making_val" class="jewel-input" value="850" oninput="recalculateMaster()">
+                    </div>
+                </div>
+
+                <div class="jewel-grid-3">
+                    <div>
+                        <label class="jewel-label" for="calc_setting_mode">Setting Charges Mode</label>
+                        <select id="calc_setting_mode" class="jewel-select" onchange="recalculateMaster()">
+                            <option value="per_stone" selected>Per Stone (₹/stone)</option>
+                            <option value="fixed">Fixed Total (₹)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="jewel-label" for="calc_setting_val">Setting Charge (₹)</label>
+                        <input type="number" id="calc_setting_val" class="jewel-input" value="50" oninput="recalculateMaster()">
+                    </div>
+                    <div>
+                        <label class="jewel-label" for="calc_hallmark_fee">BIS Hallmarking Fee (₹)</label>
+                        <input type="number" id="calc_hallmark_fee" class="jewel-input" value="45" oninput="recalculateMaster()">
+                    </div>
+                </div>
+
+                <div style="margin-top: 1rem;">
+                    <label class="jewel-label" for="calc_misc_labour">Labour, Rhodium Plating &amp; Misc Charges (₹)</label>
+                    <input type="number" id="calc_misc_labour" class="jewel-input" value="1000" oninput="recalculateMaster()">
                 </div>
             </div>
 
-            <!-- Retail Markup Slider -->
-            <div class="jewel-input-group">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-                    <label class="jewel-label" style="margin-bottom: 0;">Retail Markup Percentage</label>
-                    <span id="calc_markup_display" style="font-weight: 700; color: var(--emerald); font-size: 1.1rem;">30%</span>
+            <!-- CARD 5: COMMERCIAL STRATEGY (MARKUP, DISCOUNT & TAX) -->
+            <div class="jewel-card">
+                <div class="jewel-card-header">
+                    <div class="jewel-card-title">
+                        <span>📈</span> 5. Markup, Discount &amp; GST Rates
+                    </div>
+                    <span class="jewel-badge badge-emerald">Commercial Profit Engine</span>
                 </div>
-                <input type="range" id="calc_markup_range" min="5" max="80" value="30" step="1" style="width: 100%; accent-color: var(--gold);">
+
+                <div class="jewel-input-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                        <label class="jewel-label" style="margin: 0;">Retail Markup Percentage (%)</label>
+                        <strong id="calc_markup_display" style="color: #2F6B4F; font-size: 1.15rem;">25%</strong>
+                    </div>
+                    <input type="range" id="calc_markup_range" min="0" max="100" value="25" step="1" style="width: 100%; accent-color: var(--gold);" oninput="recalculateMaster()">
+                </div>
+
+                <div class="jewel-grid-3">
+                    <div>
+                        <label class="jewel-label" for="calc_discount_mode">Discount Mode</label>
+                        <select id="calc_discount_mode" class="jewel-select" onchange="recalculateMaster()">
+                            <option value="percentage" selected>Percentage (%)</option>
+                            <option value="fixed">Fixed Amount (₹)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="jewel-label" for="calc_discount_val">Discount Value</label>
+                        <input type="number" id="calc_discount_val" class="jewel-input" value="5.0" step="0.5" oninput="recalculateMaster()">
+                    </div>
+                    <div>
+                        <label class="jewel-label" for="calc_gst_rate">GST Tax Rate</label>
+                        <select id="calc_gst_rate" class="jewel-select" onchange="recalculateMaster()">
+                            <option value="3.0" selected>3% (Jewellery HSN 7113)</option>
+                            <option value="18.0">18% (Labour HSN 9988)</option>
+                            <option value="0.0">0% (Export / Exempt)</option>
+                        </select>
+                    </div>
+                </div>
             </div>
+
         </div>
 
-        <!-- LIVE RESULT BREAKDOWN -->
-        <div class="jewel-card" style="border: 1px solid rgba(245,158,11,0.4); background: linear-gradient(180deg, rgba(17,24,39,0.95) 0%, rgba(15,23,42,0.98) 100%);">
-            <div class="jewel-card-header">
-                <div class="jewel-card-title">
-                    <span>🧾</span> Complete Deal & Customer Quote
-                </div>
-                <span class="jewel-badge badge-emerald">3% GST Calculated</span>
+
+        <!-- RIGHT COLUMN: DUAL VIEW DOSSIER (CUSTOMER QUOTE & JEWELLER PROFIT) -->
+        <div style="position: sticky; top: 1.5rem;">
+
+            <!-- DOSSIER TABS -->
+            <div style="display: flex; background: #FAFAF8; border: 1px solid var(--border-subtle); border-radius: var(--radius-md) var(--radius-md) 0 0; padding: 0.35rem; gap: 0.35rem;">
+                <button type="button" id="tabCustomerBtn" onclick="switchDossierTab('customer')" class="jewel-btn jewel-btn-primary" style="flex: 1; padding: 0.65rem 0.5rem; font-size: 0.9rem;">
+                    🧾 Customer Quote
+                </button>
+                <button type="button" id="tabJewellerBtn" onclick="switchDossierTab('jeweller')" class="jewel-btn jewel-btn-secondary" style="flex: 1; padding: 0.65rem 0.5rem; font-size: 0.9rem;">
+                    📊 Jeweller Profit &amp; Landed
+                </button>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem;">
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">1. Diamond Cost:</span>
-                    <strong id="res_diamond_cost" style="color: #fff;">₹ 1,50,000</strong>
+            <!-- VIEW 1: CUSTOMER QUOTE DOSSIER -->
+            <div id="dossierCustomerView" class="jewel-card" style="border-radius: 0 0 var(--radius-md) var(--radius-md); border-top: none; border-color: var(--gold); background: #FFFFFF; box-shadow: var(--shadow-card);">
+                <div class="jewel-card-header">
+                    <div class="jewel-card-title" style="font-size: 1.15rem;">
+                        <span>🧾</span> Official Customer Retail Quote
+                    </div>
+                    <span class="jewel-badge badge-gold">HSN 7113 • 3% GST</span>
                 </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">2. Gold Metal Value:</span>
-                    <strong id="res_gold_cost" style="color: #fff;">₹ 27,900</strong>
+
+                <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1.5rem; font-size: 0.92rem;">
+                    <!-- Metal -->
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-subtle); padding-bottom: 0.5rem;" id="row_metal">
+                        <div>
+                            <strong style="color: var(--text-primary);" id="out_metal_label">18K Gold Metal (5.00g Net + 5% Wastage)</strong>
+                            <div style="font-size: 0.78rem; color: var(--text-muted);" id="out_metal_sub">5.25g Gross @ ₹ 5,887.50 / g</div>
+                        </div>
+                        <strong style="color: var(--text-primary);" id="out_metal_cost">₹ 30,909</strong>
+                    </div>
+
+                    <!-- Diamond -->
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-subtle); padding-bottom: 0.5rem;" id="row_diamond">
+                        <div>
+                            <strong style="color: var(--text-primary);" id="out_diamond_label">IGI Certified Diamond (1.02 ct)</strong>
+                            <div style="font-size: 0.78rem; color: var(--text-muted);" id="out_diamond_sub">1 Stone • E / VVS1 / Ideal</div>
+                        </div>
+                        <strong style="color: var(--gold);" id="out_diamond_cost">₹ 3,00,000</strong>
+                    </div>
+
+                    <!-- Gemstone -->
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-subtle); padding-bottom: 0.5rem;" id="row_gemstone">
+                        <div>
+                            <strong style="color: var(--text-primary);" id="out_gem_label">Ruby (Manik) Gemstone</strong>
+                            <div style="font-size: 0.78rem; color: var(--text-muted);" id="out_gem_sub">2.5 ct Total Weight</div>
+                        </div>
+                        <strong style="color: var(--text-primary);" id="out_gem_cost">₹ 25,000</strong>
+                    </div>
+
+                    <!-- Making & Setting -->
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-subtle); padding-bottom: 0.5rem;">
+                        <div>
+                            <strong style="color: var(--text-primary);">Making &amp; Stone Setting Charges</strong>
+                            <div style="font-size: 0.78rem; color: var(--text-muted);" id="out_making_sub">Making ₹ 4,250 + Setting ₹ 50</div>
+                        </div>
+                        <strong style="color: var(--text-primary);" id="out_making_cost">₹ 4,300</strong>
+                    </div>
+
+                    <!-- Hallmark & Labour -->
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--border-subtle); padding-bottom: 0.5rem;">
+                        <div>
+                            <strong style="color: var(--text-primary);">BIS Hallmarking &amp; Labour Charges</strong>
+                            <div style="font-size: 0.78rem; color: var(--text-muted);">BIS Fee ₹ 45 + Misc Labour ₹ 1,000</div>
+                        </div>
+                        <strong style="color: var(--text-primary);" id="out_labour_cost">₹ 1,045</strong>
+                    </div>
+
+                    <!-- Subtotal Pre-GST -->
+                    <div style="display: flex; justify-content: space-between; background: #FAFAF8; padding: 0.6rem 0.85rem; border-radius: var(--radius-sm);">
+                        <span style="color: var(--text-muted);">Taxable Retail Subtotal:</span>
+                        <strong style="color: #3A5B72;" id="out_taxable_subtotal">₹ 4,28,737</strong>
+                    </div>
+
+                    <!-- Discount Row -->
+                    <div style="display: flex; justify-content: space-between; color: #A34A4A;" id="row_discount">
+                        <span>Trade / Promo Discount Applied:</span>
+                        <strong id="out_discount_amt">-₹ 22,565</strong>
+                    </div>
+
+                    <!-- GST Tax -->
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);">GST Tax Amount (<span id="out_gst_rate_label">3%</span>):</span>
+                        <strong style="color: var(--text-primary);" id="out_gst_amt">₹ 12,862</strong>
+                    </div>
                 </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">3. Making Charges:</span>
-                    <strong id="res_making_cost" style="color: #fff;">₹ 5,400</strong>
+
+                <!-- FINAL GRAND TOTAL INVOICE BOX -->
+                <div style="background: #FAF8F2; border: 1.5px solid var(--gold); border-radius: var(--radius-md); padding: 1.25rem; text-align: center; margin-bottom: 1.25rem;">
+                    <div style="font-size: 0.85rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 0.25rem;">
+                        Final Customer Amount Payable
+                    </div>
+                    <div id="out_final_invoice" style="font-family: var(--font-display); font-size: 2.3rem; font-weight: 900; color: var(--gold);">
+                        ₹ 4,41,599
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.35rem;">
+                        Inclusive of Metal, Diamonds, Gemstones, Making, Labour &amp; GST.
+                    </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-subtle); padding-top: 0.75rem;">
-                    <span style="font-weight: 600; color: var(--text-primary);">Total Landed Cost:</span>
-                    <strong id="res_total_cost" style="color: var(--diamond-cyan); font-size: 1.05rem;">₹ 1,83,300</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="font-weight: 600; color: #fff;">Retail Selling Price (Pre-GST):</span>
-                    <strong id="res_sell_price" style="color: #fff; font-size: 1.15rem;">₹ 2,38,290</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between; background: rgba(16,185,129,0.08); padding: 0.6rem 0.85rem; border-radius: var(--radius-sm);">
-                    <span style="font-weight: 700; color: #34D399;">Your Gross Profit:</span>
-                    <strong id="res_profit" style="color: #34D399; font-size: 1.2rem;">+₹ 54,990 (23.1%)</strong>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">3% GST Tax (HSN 7113):</span>
-                    <strong id="res_gst" style="color: #fff;">₹ 7,149</strong>
+
+                <div style="display: flex; gap: 0.75rem;">
+                    <button type="button" onclick="window.print()" class="jewel-btn jewel-btn-secondary" style="flex: 1;">
+                        🖨️ Print Quote
+                    </button>
+                    <button type="button" onclick="saveCalculatorToWorkshop()" class="jewel-btn jewel-btn-primary" style="flex: 1;">
+                        🔨 Save to Workshop
+                    </button>
                 </div>
             </div>
 
-            <div style="background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.3); border-radius: var(--radius-md); padding: 1.25rem; text-align: center;">
-                <div style="font-size: 0.85rem; color: var(--gold); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
-                    Final Customer Invoice Total
+
+            <!-- VIEW 2: JEWELLER INTERNAL B2B COST & PROFIT -->
+            <div id="dossierJewellerView" class="jewel-card" style="display: none; border-radius: 0 0 var(--radius-md) var(--radius-md); border-top: none; border-color: var(--border-subtle); background: #FFFFFF;">
+                <div class="jewel-card-header">
+                    <div class="jewel-card-title" style="font-size: 1.15rem;">
+                        <span>📊</span> Jeweller Internal B2B Cost &amp; Profit
+                    </div>
+                    <span class="jewel-badge badge-emerald" id="out_margin_badge">Margin: 23.5%</span>
                 </div>
-                <div id="res_final_quote" style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: var(--gold-light);">
-                    ₹ 2,45,439
+
+                <div style="display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.5rem;">
+
+                    <!-- Landed Cost Breakdown -->
+                    <div style="background: #FAFAF8; padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                        <div style="font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 0.5rem;">
+                            Acquisition / Landed Buy Cost Breakdown
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.3rem;">
+                            <span>Pure Metal Cost:</span>
+                            <strong style="color: var(--text-primary);" id="j_metal_cost">₹ 30,909</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.3rem;">
+                            <span>Diamond Purchase Cost:</span>
+                            <strong style="color: var(--text-primary);" id="j_diamond_cost">₹ 3,00,000</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.3rem;">
+                            <span>Gemstone Purchase Cost:</span>
+                            <strong style="color: var(--text-primary);" id="j_gem_cost">₹ 25,000</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.3rem;">
+                            <span>Making &amp; Setting Cost:</span>
+                            <strong style="color: var(--text-primary);" id="j_making_cost">₹ 4,300</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.88rem; margin-bottom: 0.3rem;">
+                            <span>Hallmark &amp; Labour Cost:</span>
+                            <strong style="color: var(--text-primary);" id="j_labour_cost">₹ 1,045</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem; margin-top: 0.4rem;">
+                            <strong style="color: #3A5B72;">Total Wholesale Landed Cost:</strong>
+                            <strong style="color: #3A5B72; font-size: 1.1rem;" id="j_total_landed">₹ 3,61,254</strong>
+                        </div>
+                    </div>
+
+                    <!-- Retail Selling & Profit -->
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-muted);">Pre-GST Retail Quote:</span>
+                        <strong style="color: var(--text-primary);" id="j_sell_pregst">₹ 4,28,737</strong>
+                    </div>
+
+                    <!-- Gross Profit Box -->
+                    <div style="background: #F0F7F3; border: 1.5px solid rgba(47, 107, 79, 0.3); padding: 1.1rem; border-radius: var(--radius-md); text-align: center;">
+                        <div style="font-size: 0.82rem; color: #2F6B4F; text-transform: uppercase; font-weight: 700; margin-bottom: 0.25rem;">
+                            Expected Jeweller Net Gross Profit
+                        </div>
+                        <div id="j_gross_profit" style="font-family: var(--font-display); font-size: 2.1rem; font-weight: 900; color: #2F6B4F;">
+                            +₹ 67,483
+                        </div>
+                        <div style="font-size: 0.88rem; color: #2F6B4F; margin-top: 0.25rem;">
+                            Realized Gross Margin: <strong id="j_profit_margin">15.7%</strong>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; background: #FAFAF8; padding: 0.75rem; border-radius: var(--radius-sm);">
+                        💡 <strong>Trade Tip:</strong> standard Indian jewellery retail margins range from 15% to 35% depending on design complexity, bridal exclusivity, and brand prestige.
+                    </div>
                 </div>
-                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
-                    Inclusive of diamond, gold mounting, making charges & 3% GST.
-                </div>
+
+                <!-- SAVE TO WORKSHOP FORM -->
+                <form action="/inventory/save-to-workshop" method="POST" id="workshopSaveForm">
+                    <input type="hidden" name="diamond_spec_json" id="w_spec_json" value="{}">
+                    <input type="hidden" name="valuation_json" id="w_val_json" value="{}">
+                    <input type="hidden" name="buying_price_inr" id="w_buy_price" value="0">
+                    <input type="hidden" name="selling_price_inr" id="w_sell_price" value="0">
+
+                    <button type="submit" class="jewel-btn jewel-btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem; font-weight: 700;">
+                        🔨 Save Custom Jewellery to Workshop →
+                    </button>
+                </form>
             </div>
+
         </div>
 
     </div>
@@ -132,61 +503,339 @@
 
 {% block extra_scripts %}
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-    const dCost = document.getElementById("calc_diamond_cost");
-    const gWeight = document.getElementById("calc_gold_weight");
-    const gRate = document.getElementById("calc_gold_rate");
-    const mRate = document.getElementById("calc_making_rate");
-    const markupRange = document.getElementById("calc_markup_range");
-    const markupDisplay = document.getElementById("calc_markup_display");
+// Metal Purity Ratios relative to Fine (24K / 999 / Pt950)
+const PURITY_FACTORS = {
+    "24K": 1.00,
+    "22K": 0.916,
+    "18K": 0.750,
+    "14K": 0.585,
+    "10K": 0.417,
+    "999": 1.00,
+    "925": 0.925,
+    "Pt950": 0.950,
+    "Pt900": 0.900
+};
 
-    const resDiamond = document.getElementById("res_diamond_cost");
-    const resGold = document.getElementById("res_gold_cost");
-    const resMaking = document.getElementById("res_making_cost");
-    const resTotal = document.getElementById("res_total_cost");
-    const resSell = document.getElementById("res_sell_price");
-    const resProfit = document.getElementById("res_profit");
-    const resGst = document.getElementById("res_gst");
-    const resFinal = document.getElementById("res_final_quote");
+// Preset Configuration Definitions
+const PRESETS = {
+    bridal_ring: {
+        metal: "gold", purity: "18K", baseRate: 7850, netWeight: 5.0, wastage: 5.0,
+        enableDiamond: true, carat: 1.02, stones: 1, color: "E", clarity: "VVS1", cut: "Ideal", cert: "IGI Certified", diamondCost: 300000,
+        enableGem: false, gemType: "Ruby (Manik)", gemCarat: 0, gemCost: 0,
+        makingMode: "per_gram", makingVal: 850, settingMode: "per_stone", settingVal: 50, hallmark: 45, miscLabour: 1000,
+        markup: 25, discountMode: "percentage", discountVal: 5.0, gst: "3.0"
+    },
+    gold_bangle: {
+        metal: "gold", purity: "22K", baseRate: 7850, netWeight: 20.0, wastage: 6.0,
+        enableDiamond: false, carat: 0, stones: 0, color: "G", clarity: "VS1", cut: "Excellent", cert: "Non-Certified", diamondCost: 0,
+        enableGem: false, gemType: "Ruby (Manik)", gemCarat: 0, gemCost: 0,
+        makingMode: "per_gram", makingVal: 550, settingMode: "fixed", settingVal: 0, hallmark: 45, miscLabour: 500,
+        markup: 18, discountMode: "percentage", discountVal: 2.0, gst: "3.0"
+    },
+    platinum_band: {
+        metal: "platinum", purity: "Pt950", baseRate: 3600, netWeight: 7.5, wastage: 4.0,
+        enableDiamond: true, carat: 0.70, stones: 1, color: "D", clarity: "VVS2", cut: "Ideal", cert: "IGI Certified", diamondCost: 185000,
+        enableGem: false, gemType: "Ruby (Manik)", gemCarat: 0, gemCost: 0,
+        makingMode: "per_gram", makingVal: 1200, settingMode: "fixed", settingVal: 500, hallmark: 45, miscLabour: 1500,
+        markup: 30, discountMode: "percentage", discountVal: 5.0, gst: "3.0"
+    },
+    ruby_necklace: {
+        metal: "gold", purity: "18K", baseRate: 7850, netWeight: 14.5, wastage: 7.0,
+        enableDiamond: true, carat: 2.40, stones: 36, color: "F", clarity: "VS1", cut: "Excellent", cert: "IGI Certified", diamondCost: 450000,
+        enableGem: true, gemType: "Ruby (Manik)", gemCarat: 8.5, gemCost: 85000,
+        makingMode: "per_gram", makingVal: 950, settingMode: "per_stone", settingVal: 60, hallmark: 45, miscLabour: 3500,
+        markup: 30, discountMode: "percentage", discountVal: 7.5, gst: "3.0"
+    },
+    silver_ring: {
+        metal: "silver", purity: "925", baseRate: 95, netWeight: 8.0, wastage: 8.0,
+        enableDiamond: false, carat: 0, stones: 0, color: "G", clarity: "VS1", cut: "Good", cert: "Non-Certified", diamondCost: 0,
+        enableGem: true, gemType: "Emerald (Panna)", gemCarat: 1.8, gemCost: 4500,
+        makingMode: "fixed", makingVal: 650, settingMode: "fixed", settingVal: 200, hallmark: 45, miscLabour: 250,
+        markup: 40, discountMode: "fixed", discountVal: 200, gst: "3.0"
+    }
+};
 
-    function updateStandaloneCalc() {
-        const diamond = parseFloat(dCost.value) || 0;
-        const weight = parseFloat(gWeight.value) || 0;
-        const goldRate = parseFloat(gRate.value) || 0;
-        const makingRate = parseFloat(mRate.value) || 0;
-        const markup = parseFloat(markupRange.value) || 30;
+function formatInr(num) {
+    var val = Math.round(num);
+    return (val < 0 ? "-" : "") + "₹ " + Math.abs(val).toLocaleString('en-IN');
+}
 
-        markupDisplay.innerText = markup + "%";
+function switchDossierTab(tab) {
+    var custView = document.getElementById('dossierCustomerView');
+    var jewView = document.getElementById('dossierJewellerView');
+    var custBtn = document.getElementById('tabCustomerBtn');
+    var jewBtn = document.getElementById('tabJewellerBtn');
 
-        const goldCost = Math.round(weight * goldRate);
-        const makingCost = Math.round(weight * makingRate);
-        const totalLanded = diamond + goldCost + makingCost;
+    if (tab === 'customer') {
+        custView.style.display = 'block';
+        jewView.style.display = 'none';
+        custBtn.className = 'jewel-btn jewel-btn-primary';
+        jewBtn.className = 'jewel-btn jewel-btn-secondary';
+    } else {
+        custView.style.display = 'none';
+        jewView.style.display = 'block';
+        custBtn.className = 'jewel-btn jewel-btn-secondary';
+        jewBtn.className = 'jewel-btn jewel-btn-primary';
+    }
+}
 
-        const sellPreGst = Math.round(totalLanded * (1 + markup / 100));
-        const profit = sellPreGst - totalLanded;
-        const marginPct = sellPreGst > 0 ? ((profit / sellPreGst) * 100).toFixed(1) : 0;
-        const gst = Math.round(sellPreGst * 0.03);
-        const finalQuote = sellPreGst + gst;
+function onMetalTypeChange() {
+    var mType = document.getElementById('calc_metal_type').value;
+    var puritySel = document.getElementById('calc_purity');
+    var baseRateInput = document.getElementById('calc_base_rate');
 
-        function inr(n) {
-            return "₹ " + Math.round(n).toLocaleString("en-IN");
-        }
+    puritySel.innerHTML = '';
 
-        resDiamond.innerText = inr(diamond);
-        resGold.innerText = inr(goldCost);
-        resMaking.innerText = inr(makingCost);
-        resTotal.innerText = inr(totalLanded);
-        resSell.innerText = inr(sellPreGst);
-        resProfit.innerText = "+" + inr(profit) + " (" + marginPct + "%)";
-        resGst.innerText = inr(gst);
-        resFinal.innerText = inr(finalQuote);
+    if (mType === 'gold') {
+        baseRateInput.value = 7850;
+        puritySel.innerHTML = `
+            <option value="18K" selected>18K Gold (75.0% Pure)</option>
+            <option value="22K">22K Gold (91.6% BIS Hallmarked)</option>
+            <option value="24K">24K Fine Gold (99.9% Pure)</option>
+            <option value="14K">14K Gold (58.5% Pure)</option>
+            <option value="10K">10K Gold (41.7% Pure)</option>
+        `;
+    } else if (mType === 'silver') {
+        baseRateInput.value = 95;
+        puritySel.innerHTML = `
+            <option value="999" selected>999 Fine Silver (99.9%)</option>
+            <option value="925">925 Sterling Silver (92.5%)</option>
+        `;
+    } else if (mType === 'platinum') {
+        baseRateInput.value = 3600;
+        puritySel.innerHTML = `
+            <option value="Pt950" selected>Pt950 Platinum (95.0% Pure)</option>
+            <option value="Pt900">Pt900 Platinum (90.0% Pure)</option>
+        `;
+    } else {
+        baseRateInput.value = 0;
+        puritySel.innerHTML = `<option value="18K" selected>No Metal</option>`;
     }
 
-    [dCost, gWeight, gRate, mRate, markupRange].forEach(el => {
-        if (el) el.addEventListener("input", updateStandaloneCalc);
-    });
+    recalculateMaster();
+}
 
-    updateStandaloneCalc();
+function toggleSection(secId) {
+    var el = document.getElementById(secId);
+    var chk = (secId === 'diamondSection') ? document.getElementById('calc_enable_diamond') : document.getElementById('calc_enable_gemstone');
+    if (el) el.style.display = chk.checked ? 'block' : 'none';
+}
+
+function autoCalcDiamondPrice() {
+    var carat = parseFloat(document.getElementById('calc_diamond_carat').value) || 1.0;
+    var color = document.getElementById('calc_diamond_color').value;
+    var clarity = document.getElementById('calc_diamond_clarity').value;
+    var cut = document.getElementById('calc_diamond_cut').value;
+
+    // Approximate BDB Rate Benchmark Formula
+    var basePpc = 440000;
+    if (carat < 0.5) basePpc = 65000;
+    else if (carat < 0.7) basePpc = 110000;
+    else if (carat < 0.9) basePpc = 195000;
+    else if (carat < 1.0) basePpc = 290000;
+    else if (carat < 1.5) basePpc = 440000;
+    else if (carat < 2.0) basePpc = 680000;
+    else basePpc = 1050000;
+
+    var colorMults = { "D": 1.18, "E": 1.08, "F": 1.00, "G": 0.90, "H": 0.82, "I": 0.74, "J": 0.65 };
+    var clarityMults = { "FL": 1.45, "IF": 1.35, "VVS1": 1.22, "VVS2": 1.12, "VS1": 1.00, "VS2": 0.90, "SI1": 0.76 };
+    var cutMults = { "Ideal": 1.05, "Excellent": 1.00, "Very Good": 0.92, "Good": 0.80 };
+
+    var estPrice = Math.round(basePpc * (colorMults[color]||1.0) * (clarityMults[clarity]||1.0) * (cutMults[cut]||1.0) * carat);
+    document.getElementById('calc_diamond_cost').value = estPrice;
+    recalculateMaster();
+}
+
+function loadPreset(key) {
+    var p = PRESETS[key];
+    if (!p) return;
+
+    document.getElementById('calc_metal_type').value = p.metal;
+    onMetalTypeChange();
+
+    document.getElementById('calc_purity').value = p.purity;
+    document.getElementById('calc_base_rate').value = p.baseRate;
+    document.getElementById('calc_net_weight').value = p.netWeight;
+    document.getElementById('calc_wastage_pct').value = p.wastage;
+
+    document.getElementById('calc_enable_diamond').checked = p.enableDiamond;
+    toggleSection('diamondSection');
+    document.getElementById('calc_diamond_carat').value = p.carat;
+    document.getElementById('calc_diamond_stones').value = p.stones;
+    document.getElementById('calc_diamond_color').value = p.color;
+    document.getElementById('calc_diamond_clarity').value = p.clarity;
+    document.getElementById('calc_diamond_cut').value = p.cut;
+    document.getElementById('calc_diamond_cert').value = p.cert;
+    document.getElementById('calc_diamond_cost').value = p.diamondCost;
+
+    document.getElementById('calc_enable_gemstone').checked = p.enableGem;
+    toggleSection('gemstoneSection');
+    document.getElementById('calc_gem_type').value = p.gemType;
+    document.getElementById('calc_gem_carat').value = p.gemCarat;
+    document.getElementById('calc_gem_cost').value = p.gemCost;
+
+    document.getElementById('calc_making_mode').value = p.makingMode;
+    document.getElementById('calc_making_val').value = p.makingVal;
+    document.getElementById('calc_setting_mode').value = p.settingMode;
+    document.getElementById('calc_setting_val').value = p.settingVal;
+    document.getElementById('calc_hallmark_fee').value = p.hallmark;
+    document.getElementById('calc_misc_labour').value = p.miscLabour;
+
+    document.getElementById('calc_markup_range').value = p.markup;
+    document.getElementById('calc_discount_mode').value = p.discountMode;
+    document.getElementById('calc_discount_val').value = p.discountVal;
+    document.getElementById('calc_gst_rate').value = p.gst;
+
+    recalculateMaster();
+}
+
+function recalculateMaster() {
+    var mType = document.getElementById('calc_metal_type').value;
+    var purity = document.getElementById('calc_purity').value;
+    var baseRate = parseFloat(document.getElementById('calc_base_rate').value) || 0;
+    var netWeight = parseFloat(document.getElementById('calc_net_weight').value) || 0;
+    var wastagePct = parseFloat(document.getElementById('calc_wastage_pct').value) || 0;
+
+    var hasMetal = (mType !== 'diamond_only' && mType !== 'gemstone_only');
+    var purityFactor = PURITY_FACTORS[purity] || 1.0;
+    var purityRate = baseRate * purityFactor;
+
+    var grossWeight = hasMetal ? (netWeight * (1.0 + wastagePct / 100.0)) : 0;
+    var metalCost = Math.round(grossWeight * purityRate);
+
+    // Update Metal Badges
+    document.getElementById('purityRateBadge').innerText = formatInr(purityRate) + " / g";
+    document.getElementById('calc_gross_weight_display').innerText = grossWeight.toFixed(2) + " g (Net " + netWeight.toFixed(2) + "g + " + (grossWeight - netWeight).toFixed(2) + "g Wastage)";
+
+    // Diamonds
+    var enableDia = document.getElementById('calc_enable_diamond').checked;
+    var diaCarat = parseFloat(document.getElementById('calc_diamond_carat').value) || 0;
+    var diaStones = parseInt(document.getElementById('calc_diamond_stones').value) || 1;
+    var diaCost = enableDia ? (parseFloat(document.getElementById('calc_diamond_cost').value) || 0) : 0;
+
+    // Gemstones
+    var enableGem = document.getElementById('calc_enable_gemstone').checked;
+    var gemType = document.getElementById('calc_gem_type').value;
+    var gemCarat = parseFloat(document.getElementById('calc_gem_carat').value) || 0;
+    var gemCost = enableGem ? (parseFloat(document.getElementById('calc_gem_cost').value) || 0) : 0;
+
+    // Making & Setting
+    var makingMode = document.getElementById('calc_making_mode').value;
+    var makingVal = parseFloat(document.getElementById('calc_making_val').value) || 0;
+    var makingCost = (makingMode === 'per_gram' && hasMetal) ? Math.round(netWeight * makingVal) : Math.round(makingVal);
+
+    var settingMode = document.getElementById('calc_setting_mode').value;
+    var settingVal = parseFloat(document.getElementById('calc_setting_val').value) || 0;
+    var settingCost = (settingMode === 'per_stone' && enableDia) ? Math.round(diaStones * settingVal) : Math.round(settingVal);
+
+    var hallmarkFee = parseFloat(document.getElementById('calc_hallmark_fee').value) || 0;
+    var miscLabour = parseFloat(document.getElementById('calc_misc_labour').value) || 0;
+
+    // Wholesale Landed Cost
+    var totalLandedCost = metalCost + diaCost + gemCost + makingCost + settingCost + hallmarkFee + miscLabour;
+
+    // Markup & Discount
+    var markupPct = parseFloat(document.getElementById('calc_markup_range').value) || 25;
+    document.getElementById('calc_markup_display').innerText = markupPct + "%";
+
+    var preDiscountRetail = Math.round(totalLandedCost * (1.0 + markupPct / 100.0));
+
+    var discMode = document.getElementById('calc_discount_mode').value;
+    var discVal = parseFloat(document.getElementById('calc_discount_val').value) || 0;
+    var discountAmt = (discMode === 'percentage') ? Math.round(preDiscountRetail * (discVal / 100.0)) : Math.round(discVal);
+
+    var taxableSubtotal = Math.max(0, preDiscountRetail - discountAmt);
+
+    var gstRate = parseFloat(document.getElementById('calc_gst_rate').value) || 3.0;
+    document.getElementById('out_gst_rate_label').innerText = gstRate + "%";
+    var gstAmt = Math.round(taxableSubtotal * (gstRate / 100.0));
+
+    var finalCustomerInvoice = taxableSubtotal + gstAmt;
+
+    var grossProfit = taxableSubtotal - totalLandedCost;
+    var profitMarginPct = taxableSubtotal > 0 ? Math.round((grossProfit / taxableSubtotal) * 1000) / 10 : 0;
+
+    // UPDATE CUSTOMER QUOTE TAB
+    var metalLabel = purity + " " + mType.toUpperCase() + " Metal (" + netWeight.toFixed(2) + "g Net + " + wastagePct + "% Wastage)";
+    var metalSub = grossWeight.toFixed(2) + "g Gross @ " + formatInr(purityRate) + " / g";
+    document.getElementById('out_metal_label').innerText = hasMetal ? metalLabel : "No Metal";
+    document.getElementById('out_metal_sub').innerText = hasMetal ? metalSub : "0.00g";
+    document.getElementById('out_metal_cost').innerText = formatInr(metalCost);
+    document.getElementById('row_metal').style.display = hasMetal ? 'flex' : 'none';
+
+    var diaColor = document.getElementById('calc_diamond_color').value;
+    var diaClarity = document.getElementById('calc_diamond_clarity').value;
+    var diaCut = document.getElementById('calc_diamond_cut').value;
+    var diaCert = document.getElementById('calc_diamond_cert').value;
+    document.getElementById('out_diamond_label').innerText = diaCert + " Diamond (" + diaCarat.toFixed(2) + " ct)";
+    document.getElementById('out_diamond_sub').innerText = diaStones + " Stone(s) • " + diaColor + " / " + diaClarity + " / " + diaCut;
+    document.getElementById('out_diamond_cost').innerText = formatInr(diaCost);
+    document.getElementById('row_diamond').style.display = enableDia ? 'flex' : 'none';
+
+    document.getElementById('out_gem_label').innerText = gemType + " Gemstone";
+    document.getElementById('out_gem_sub').innerText = gemCarat.toFixed(1) + " ct Total Weight";
+    document.getElementById('out_gem_cost').innerText = formatInr(gemCost);
+    document.getElementById('row_gemstone').style.display = enableGem ? 'flex' : 'none';
+
+    document.getElementById('out_making_sub').innerText = "Making " + formatInr(makingCost) + " + Setting " + formatInr(settingCost);
+    document.getElementById('out_making_cost').innerText = formatInr(makingCost + settingCost);
+
+    document.getElementById('out_labour_cost').innerText = formatInr(hallmarkFee + miscLabour);
+
+    document.getElementById('out_taxable_subtotal').innerText = formatInr(taxableSubtotal);
+    document.getElementById('out_discount_amt').innerText = "-" + formatInr(discountAmt);
+    document.getElementById('row_discount').style.display = discountAmt > 0 ? 'flex' : 'none';
+    document.getElementById('out_gst_amt').innerText = formatInr(gstAmt);
+    document.getElementById('out_final_invoice').innerText = formatInr(finalCustomerInvoice);
+
+    // UPDATE JEWELLER B2B TAB
+    document.getElementById('j_metal_cost').innerText = formatInr(metalCost);
+    document.getElementById('j_diamond_cost').innerText = formatInr(diaCost);
+    document.getElementById('j_gem_cost').innerText = formatInr(gemCost);
+    document.getElementById('j_making_cost').innerText = formatInr(makingCost + settingCost);
+    document.getElementById('j_labour_cost').innerText = formatInr(hallmarkFee + miscLabour);
+    document.getElementById('j_total_landed').innerText = formatInr(totalLandedCost);
+    document.getElementById('j_sell_pregst').innerText = formatInr(taxableSubtotal);
+    document.getElementById('j_gross_profit').innerText = (grossProfit >= 0 ? "+" : "") + formatInr(grossProfit);
+    document.getElementById('j_profit_margin').innerText = profitMarginPct + "%";
+
+    var marginBadge = document.getElementById('out_margin_badge');
+    marginBadge.innerText = "Margin: " + profitMarginPct + "%";
+    marginBadge.className = profitMarginPct >= 20 ? "jewel-badge badge-emerald" : (profitMarginPct >= 12 ? "jewel-badge badge-gold" : "jewel-badge badge-warning");
+
+    // PREPARE FORM HIDDEN INPUTS FOR WORKSHOP SAVE
+    var specObj = {
+        "report_number": enableDia ? ("CALC-" + Date.now().toString().slice(-6)) : "CUSTOM-JEWEL",
+        "origin_type": enableDia ? "Natural" : "Jewellery Piece",
+        "carat": diaCarat,
+        "color": diaColor,
+        "clarity": diaClarity,
+        "cut": diaCut,
+        "shape": "Round Brilliant",
+        "metal_type": mType,
+        "purity": purity,
+        "net_weight": netWeight,
+        "gross_weight": grossWeight
+    };
+    var valObj = {
+        "fair_market_value": totalLandedCost,
+        "suggested_buy_price": totalLandedCost,
+        "suggested_sell_price": taxableSubtotal,
+        "confidence_score": 95
+    };
+    document.getElementById('w_spec_json').value = JSON.stringify(specObj);
+    document.getElementById('w_val_json').value = JSON.stringify(valObj);
+    document.getElementById('w_buy_price').value = totalLandedCost;
+    document.getElementById('w_sell_price').value = taxableSubtotal;
+}
+
+function saveCalculatorToWorkshop() {
+    var form = document.getElementById('workshopSaveForm');
+    if (form) form.submit();
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    recalculateMaster();
 });
 </script>
 {% endblock %}

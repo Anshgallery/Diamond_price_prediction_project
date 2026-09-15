@@ -10,13 +10,13 @@
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
         <div>
             <span class="jewel-badge badge-gold" style="margin-bottom: 0.5rem;">🏢 Certified Jeweller Workspace</span>
-            <h1 style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: #fff;">
+            <h1 style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: var(--text-primary);">
                 {{ session.get('jeweller', {}).get('business_name', 'Jeweller Portfolio & Stock Workspace') }}
             </h1>
             <div style="font-size: 0.9rem; color: var(--text-muted);">
-                Location: <strong style="color: #fff;">{{ session.get('jeweller', {}).get('city', 'Mumbai / Zaveri Bazaar') }}</strong> 
+                Location: <strong style="color: var(--text-primary);">{{ session.get('jeweller', {}).get('city', 'Mumbai / Zaveri Bazaar') }}</strong> 
                 {% if session.get('jeweller', {}).get('gst_number') %}
-                    • GSTIN: <strong style="color: #fff;">{{ session['jeweller']['gst_number'] }}</strong>
+                    • GSTIN: <strong style="color: var(--text-primary);">{{ session['jeweller']['gst_number'] }}</strong>
                 {% endif %}
             </div>
         </div>
@@ -74,6 +74,7 @@
             <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
                 <a href="/workspace?tag=All" class="jewel-btn jewel-btn-sm {% if current_tag == 'All' or not current_tag %}jewel-btn-primary{% else %}jewel-btn-secondary{% endif %}">All</a>
                 <a href="/workspace?tag=Inventory" class="jewel-btn jewel-btn-sm {% if current_tag == 'Inventory' %}jewel-btn-primary{% else %}jewel-btn-secondary{% endif %}">In Stock</a>
+                <a href="/workspace?tag=Workshop" class="jewel-btn jewel-btn-sm {% if current_tag == 'Workshop' %}jewel-btn-primary{% else %}jewel-btn-secondary{% endif %}">🔨 Workshop (Sold)</a>
                 <a href="/workspace?tag=On Memo" class="jewel-btn jewel-btn-sm {% if current_tag == 'On Memo' %}jewel-btn-primary{% else %}jewel-btn-secondary{% endif %}">On Memo</a>
                 <a href="/workspace?tag=Client Inquiry" class="jewel-btn jewel-btn-sm {% if current_tag == 'Client Inquiry' %}jewel-btn-primary{% else %}jewel-btn-secondary{% endif %}">Client Inquiry</a>
                 <a href="/workspace?tag=Watchlist" class="jewel-btn jewel-btn-sm {% if current_tag == 'Watchlist' %}jewel-btn-primary{% else %}jewel-btn-secondary{% endif %}">Watchlist</a>
@@ -99,9 +100,9 @@
                     <tbody>
                         {% for item in items %}
                             <tr>
-                                <td style="font-weight: 700; color: #fff;">{{ item.stock_number }}</td>
+                                <td style="font-weight: 700; color: var(--text-primary);">{{ item.stock_number }}</td>
                                 <td>
-                                    <strong style="color: var(--gold-light);">{{ item.report_number }}</strong>
+                                    <strong style="color: var(--gold);">{{ item.report_number }}</strong>
                                 </td>
                                 <td>
                                     <span class="jewel-badge {% if item.origin_type == 'Natural' %}badge-emerald{% else %}badge-warning{% endif %}">
@@ -113,19 +114,23 @@
                                     <span style="font-size: 0.8rem; color: var(--text-muted);">{{ item.color }} / {{ item.clarity }} / {{ item.cut }}</span>
                                 </td>
                                 <td style="font-weight: 700; color: var(--gold);">{{ item.fair_market_formatted }}</td>
-                                <td style="font-weight: 700; color: #fff;">{{ item.suggested_sell_formatted }}</td>
-                                <td style="font-weight: 700; color: #34D399;">
+                                <td style="font-weight: 700; color: var(--text-primary);">{{ item.suggested_sell_formatted }}</td>
+                                <td style="font-weight: 700; color: #2F6B4F;">
                                     +{{ item.profit_formatted }}
                                     <span style="font-size: 0.75rem; color: var(--text-dim);">({{ item.margin_pct }}%)</span>
                                 </td>
                                 <td>
-                                    <span class="jewel-badge badge-secondary">{{ item.tag }}</span>
+                                    {% if item.status == 'SOLD' or item.tag == 'Workshop' %}
+                                        <span class="jewel-badge badge-emerald">🔨 SOLD (Workshop)</span>
+                                    {% else %}
+                                        <span class="jewel-badge badge-secondary">{{ item.tag }}</span>
+                                    {% endif %}
                                 </td>
                                 <td>
                                     <div style="display: flex; gap: 0.4rem;">
                                         <a href="/workspace/view/{{ item.id }}" class="jewel-btn jewel-btn-secondary jewel-btn-sm">View</a>
                                         <form action="/workspace/delete/{{ item.id }}" method="POST" onsubmit="return confirm('Remove this diamond from workspace?');">
-                                            <button type="submit" class="jewel-btn jewel-btn-secondary jewel-btn-sm" style="color: #F87171;">✕</button>
+                                            <button type="submit" class="jewel-btn jewel-btn-secondary jewel-btn-sm" style="color: #A34A4A;">✕</button>
                                         </form>
                                     </div>
                                 </td>
@@ -137,7 +142,7 @@
         {% else %}
             <div style="text-align: center; padding: 3rem 1rem;">
                 <div style="font-size: 3rem; margin-bottom: 1rem; color: var(--text-dim);">💎</div>
-                <h3 style="font-size: 1.2rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem;">No Diamonds in Workspace Tag</h3>
+                <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">No Diamonds in Workspace Tag</h3>
                 <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
                     Appraise an IGI report number or certificate PDF and click "Save to Workspace" to track stock and profits.
                 </p>
