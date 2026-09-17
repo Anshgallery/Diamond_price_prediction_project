@@ -177,6 +177,16 @@
                             </td>
                         {% endfor %}
                     </tr>
+                    <tr>
+                        <td style="font-weight: 600; color: var(--text-muted);">AI Face / Style-Value Tier</td>
+                        {% for d in comparison.comparison_matrix %}
+                            <td>
+                                <span class="jewel-badge {{ d.ai_face_badge if d.ai_face_badge else 'badge-emerald' }}">
+                                    {{ d.ai_face_label if d.ai_face_label else 'Moderate Tier' }}
+                                </span>
+                            </td>
+                        {% endfor %}
+                    </tr>
                     <tr style="background: #FAF8F2;">
                         <td style="font-weight: 700; color: var(--text-primary);">Wholesale Market Value</td>
                         {% for d in comparison.comparison_matrix %}

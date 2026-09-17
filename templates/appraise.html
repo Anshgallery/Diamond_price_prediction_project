@@ -85,6 +85,82 @@
     </script>
 
 
+    <!-- ✨ AI FACE / STYLE-VALUE LAYER & PRICING PREFERENCE SIGNAL -->
+    <div class="jewel-card" style="margin-bottom: 2rem; background: #FFFFFF; border: 1.5px solid #2F6B4F; box-shadow: var(--shadow-card);">
+        <div class="jewel-card-header" style="flex-wrap: wrap; gap: 0.75rem;">
+            <div class="jewel-card-title" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.25rem;">
+                <span style="font-size: 1.5rem;">✨</span> AI Face / Style-Value Layer &amp; Pricing Preference Signal
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <span class="jewel-badge {{ valuation.style_value_analysis.ai_face_badge_class if valuation.style_value_analysis else 'badge-emerald' }}" style="font-size: 0.88rem; padding: 0.35rem 0.85rem;">
+                    Extracted Tier: {{ valuation.style_value_analysis.ai_face_label if valuation.style_value_analysis else 'Moderate Tier' }}
+                </span>
+                <span class="jewel-badge badge-gold" style="font-size: 0.88rem; padding: 0.35rem 0.85rem;">
+                    Face Rating: {{ valuation.style_value_analysis.face_score if valuation.style_value_analysis else 75 }}/100
+                </span>
+            </div>
+        </div>
+
+        <div style="background: #FAFAF8; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); margin-bottom: 1.25rem;">
+            <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                <span>🎯 Select Active Pricing Preference Signal:</span>
+                <span style="font-size: 0.82rem; font-weight: 400; color: var(--text-muted);">Dynamically predicts Suggested Sell Price, Jeweller Margin &amp; AI Confidence</span>
+            </div>
+
+            <!-- 3 TOGGLE PILLS -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 0.85rem;" id="pricingSignalPills">
+                
+                <button type="button" onclick="setPricingPreference('premium')" id="signalBtn_premium" class="signal-pill-btn {% if valuation.pricing_preference_signal == 'premium' %}active{% endif %}" style="padding: 0.9rem; border-radius: var(--radius-md); border: 2px solid {% if valuation.pricing_preference_signal == 'premium' %}var(--gold){% else %}var(--border-subtle){% endif %}; background: {% if valuation.pricing_preference_signal == 'premium' %}#FFFDF5{% else %}#FFFFFF{% endif %}; text-align: left; cursor: pointer; transition: all 0.2s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                        <strong style="color: var(--text-primary); font-size: 0.95rem;">💎 Premium Luxury</strong>
+                        <span class="jewel-badge badge-gold" style="font-size: 0.75rem;">+38% Target</span>
+                    </div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.35;">
+                        Luxury boutique retail positioning. Higher retail markup for top visual brilliance.
+                    </div>
+                </button>
+
+                <button type="button" onclick="setPricingPreference('moderate')" id="signalBtn_moderate" class="signal-pill-btn {% if valuation.pricing_preference_signal == 'moderate' or not valuation.pricing_preference_signal %}active{% endif %}" style="padding: 0.9rem; border-radius: var(--radius-md); border: 2px solid {% if valuation.pricing_preference_signal == 'moderate' or not valuation.pricing_preference_signal %}#2F6B4F{% else %}var(--border-subtle){% endif %}; background: {% if valuation.pricing_preference_signal == 'moderate' or not valuation.pricing_preference_signal %}#F0F7F3{% else %}#FFFFFF{% endif %}; text-align: left; cursor: pointer; transition: all 0.2s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                        <strong style="color: var(--text-primary); font-size: 0.95rem;">⚖️ Moderate Commercial</strong>
+                        <span class="jewel-badge badge-emerald" style="font-size: 0.75rem;">+25% Target</span>
+                    </div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.35;">
+                        Standard retail positioning. Balanced profit margin and steady commercial sales.
+                    </div>
+                </button>
+
+                <button type="button" onclick="setPricingPreference('value-oriented')" id="signalBtn_value-oriented" class="signal-pill-btn {% if valuation.pricing_preference_signal == 'value-oriented' %}active{% endif %}" style="padding: 0.9rem; border-radius: var(--radius-md); border: 2px solid {% if valuation.pricing_preference_signal == 'value-oriented' %}#3A5B72{% else %}var(--border-subtle){% endif %}; background: {% if valuation.pricing_preference_signal == 'value-oriented' %}#F4F8FA{% else %}#FFFFFF{% endif %}; text-align: left; cursor: pointer; transition: all 0.2s ease;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                        <strong style="color: var(--text-primary); font-size: 0.95rem;">🏷️ Value-Oriented</strong>
+                        <span class="jewel-badge badge-cyan" style="font-size: 0.75rem;">+14% Target</span>
+                    </div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.35;">
+                        Fast turnover / wholesale discount tier for volume selling and price-conscious buyers.
+                    </div>
+                </button>
+
+            </div>
+        </div>
+
+        <!-- STYLE DRIVERS SUMMARY -->
+        <div style="background: #FAF8F2; padding: 0.9rem 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--gold); margin-bottom: 0.35rem;">
+                Gemological AI Face Attributes:
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;" id="styleDriversContainer">
+                {% if valuation.style_value_analysis and valuation.style_value_analysis.style_drivers %}
+                    {% for driver in valuation.style_value_analysis.style_drivers %}
+                        <span class="jewel-badge badge-secondary" style="font-size: 0.8rem; font-weight: 500;">🔹 {{ driver }}</span>
+                    {% endfor %}
+                {% else %}
+                    <span class="jewel-badge badge-secondary">🔹 Standard commercial diamond proportions</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+
     <!-- 🤖 AI DEAL ADVISOR SECTION -->
     <div class="jewel-card" style="margin-bottom: 2rem; background: #FFFFFF; border: 1.5px solid var(--gold); box-shadow: var(--shadow-card);">
         <div class="jewel-card-header" style="flex-wrap: wrap; gap: 0.75rem;">
@@ -258,7 +334,7 @@
                 <!-- 2. FAIR BUY PRICE -->
                 <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #F4F8FA;">
                     <div class="stat-label" style="font-weight: 700;">Fair Buy Price</div>
-                    <div class="stat-value cyan" style="font-size: 1.4rem;">{{ valuation.suggested_buy_price_formatted }}</div>
+                    <div id="gridFairBuyPrice" class="stat-value cyan" style="font-size: 1.4rem;">{{ valuation.suggested_buy_price_formatted }}</div>
                     <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
                         Per Carat: {{ valuation.price_per_carat_formatted }}/ct
                     </div>
@@ -267,25 +343,25 @@
                 <!-- 3. SUGGESTED SELL PRICE -->
                 <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #F0F7F3;">
                     <div class="stat-label" style="font-weight: 700;">Suggested Sell Price</div>
-                    <div class="stat-value emerald" style="font-size: 1.4rem;">{{ valuation.suggested_sell_price_formatted }}</div>
-                    <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
-                        Standard 25% Retail Margin
+                    <div id="gridSuggestedSellPrice" class="stat-value emerald" style="font-size: 1.4rem;">{{ valuation.suggested_sell_price_formatted }}</div>
+                    <div id="gridSellSubtext" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
+                        Target {{ valuation.active_markup_pct|default(25) }}% Retail Margin
                     </div>
                 </div>
 
                 <!-- 4. EXPECTED PROFIT & MARGIN -->
                 <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #F0F7F3;">
                     <div class="stat-label" style="font-weight: 700;">Expected Profit / Margin</div>
-                    <div class="stat-value emerald" style="font-size: 1.4rem;">+{{ valuation.expected_profit_formatted }}</div>
+                    <div id="gridExpectedProfit" class="stat-value emerald" style="font-size: 1.4rem;">+{{ valuation.expected_profit_formatted }}</div>
                     <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
-                        Margin: <strong style="color: #2F6B4F;">{{ valuation.expected_margin_pct }}%</strong>
+                        Margin: <strong id="gridMarginPct" style="color: #2F6B4F;">{{ valuation.expected_margin_pct }}%</strong>
                     </div>
                 </div>
 
                 <!-- 5. AI CONFIDENCE SCORE -->
                 <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #FAFAF8;">
                     <div class="stat-label" style="font-weight: 700;">AI Confidence</div>
-                    <div class="stat-value gold" style="font-size: 1.4rem;">{{ valuation.confidence_score }}%</div>
+                    <div id="gridConfidenceScore" class="stat-value gold" style="font-size: 1.4rem;">{{ valuation.confidence_score }}%</div>
                     <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">
                         Level: <strong style="color: var(--text-primary);">{{ valuation.confidence_grade }}</strong>
                     </div>
@@ -494,9 +570,82 @@
 
     <!-- CLIENT-SIDE RE-CALCULATION FOR AI DEAL ADVISOR & PROFIT CALCULATOR -->
     <script>
+    var currentPricingSignal = "{{ valuation.pricing_preference_signal or 'moderate' }}";
+    var fairMarketVal = {{ valuation.fair_market_value|default(0) }};
+    var currentSuggestedBuy = {{ valuation.suggested_buy_price|default(0) }};
+    var currentSuggestedSell = {{ valuation.suggested_sell_price|default(0) }};
+
     function formatInr(num) {
         var val = Math.round(num);
         return (val < 0 ? "-" : "") + "₹ " + Math.abs(val).toLocaleString('en-IN');
+    }
+
+    function setPricingPreference(signal) {
+        currentPricingSignal = signal;
+
+        var markupPct = 25.0;
+        var buyFactor = 0.90;
+        var borderColors = {
+            'premium': 'var(--gold)',
+            'moderate': '#2F6B4F',
+            'value-oriented': '#3A5B72'
+        };
+        var bgColors = {
+            'premium': '#FFFDF5',
+            'moderate': '#F0F7F3',
+            'value-oriented': '#F4F8FA'
+        };
+
+        if (signal === 'premium') {
+            markupPct = 38.0;
+            buyFactor = 0.94;
+        } else if (signal === 'value-oriented') {
+            markupPct = 14.0;
+            buyFactor = 0.85;
+        }
+
+        ['premium', 'moderate', 'value-oriented'].forEach(function(code) {
+            var btn = document.getElementById('signalBtn_' + code);
+            if (btn) {
+                if (code === signal) {
+                    btn.style.borderColor = borderColors[code];
+                    btn.style.background = bgColors[code];
+                    btn.classList.add('active');
+                } else {
+                    btn.style.borderColor = 'var(--border-subtle)';
+                    btn.style.background = '#FFFFFF';
+                    btn.classList.remove('active');
+                }
+            }
+        });
+
+        currentSuggestedSell = Math.round(fairMarketVal * (1.0 + markupPct / 100.0));
+        currentSuggestedBuy = Math.round(fairMarketVal * buyFactor);
+
+        var gridSell = document.getElementById('gridSuggestedSellPrice');
+        if (gridSell) gridSell.innerText = formatInr(currentSuggestedSell);
+
+        var gridBuy = document.getElementById('gridFairBuyPrice');
+        if (gridBuy) gridBuy.innerText = formatInr(currentSuggestedBuy);
+
+        var gridSellSubtext = document.getElementById('gridSellSubtext');
+        if (gridSellSubtext) gridSellSubtext.innerText = "Target " + markupPct + "% Retail Margin";
+
+        var askingInput = document.getElementById('dealAskingPriceInput');
+        var askingVal = askingInput ? (parseFloat(askingInput.value) || currentSuggestedBuy) : currentSuggestedBuy;
+        var profit = Math.round(currentSuggestedSell - askingVal);
+        var marginPct = Math.round((profit / Math.max(currentSuggestedSell, 1)) * 1000) / 10;
+
+        var gridProf = document.getElementById('gridExpectedProfit');
+        if (gridProf) gridProf.innerText = (profit >= 0 ? "+" : "") + formatInr(profit);
+
+        var gridMarg = document.getElementById('gridMarginPct');
+        if (gridMarg) gridMarg.innerText = marginPct + "%";
+
+        var dealMaxBuy = document.getElementById('dealMaxBuyPrice');
+        if (dealMaxBuy) dealMaxBuy.innerText = formatInr(currentSuggestedBuy);
+
+        updateAiDealAdvisor();
     }
 
     function updateAiDealAdvisor() {
@@ -505,10 +654,10 @@
         var askingVal = parseFloat(askingInput.value);
         if (isNaN(askingVal) || askingVal <= 0) return;
 
-        var fairVal = {{ valuation.fair_market_value|default(0) }};
-        var maxBuy = {{ valuation.suggested_buy_price|default(0) }};
+        var fairVal = fairMarketVal || {{ valuation.fair_market_value|default(0) }};
+        var maxBuy = currentSuggestedBuy || {{ valuation.suggested_buy_price|default(0) }};
         var highBound = {{ valuation.high_estimate|default(0) }};
-        var suggestedSell = {{ valuation.suggested_sell_price|default(0) }};
+        var suggestedSell = currentSuggestedSell || {{ valuation.suggested_sell_price|default(0) }};
 
         var profit = Math.round(suggestedSell - askingVal);
         var marginPct = Math.round((profit / Math.max(suggestedSell, 1)) * 1000) / 10;
@@ -522,12 +671,12 @@
             dealScore = Math.min(100, Math.max(85, Math.round(85 + 15 * (maxBuy - askingVal) / Math.max(maxBuy * 0.3, 1))));
             verdict = "BUY";
             badgeClass = "badge-emerald";
-            advice = "Offered price is at or below recommended Max Buy Price (" + formatInr(maxBuy) + "). High return potential with " + marginPct + "% expected gross margin.";
+            advice = "Offered price is at or below recommended Max Buy Price (" + formatInr(maxBuy) + "). High return potential with " + marginPct + "% expected gross margin under " + currentPricingSignal.toUpperCase() + " pricing strategy.";
         } else if (askingVal <= fairVal) {
             dealScore = Math.min(84, Math.max(70, Math.round(70 + 14 * (fairVal - askingVal) / Math.max(fairVal - maxBuy, 1))));
             verdict = "BUY";
             badgeClass = "badge-emerald";
-            advice = "Offered within competitive Indian wholesale fair value with " + formatInr(profit) + " expected jeweller profit.";
+            advice = "Offered within competitive Indian wholesale fair value with " + formatInr(profit) + " expected jeweller profit (" + marginPct + "% margin).";
         } else if (askingVal <= highBound) {
             dealScore = Math.min(69, Math.max(40, Math.round(40 + 29 * (highBound - askingVal) / Math.max(highBound - fairVal, 1))));
             verdict = "NEGOTIATE";

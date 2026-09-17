@@ -61,9 +61,11 @@ def appraise():
         if request.method == "GET":
             report_num = request.args.get("report_number", "").strip()
             asking_price_raw = request.args.get("asking_price")
+            pricing_pref = request.args.get("pricing_preference")
         else:
             report_num = request.form.get("report_number", "").strip()
             asking_price_raw = request.form.get("asking_price_inr")
+            pricing_pref = request.form.get("pricing_preference")
 
         asking_price = float(asking_price_raw) if asking_price_raw and asking_price_raw.strip() else None
 
@@ -137,13 +139,14 @@ def appraise():
         ml_pred_arr = prediction_pipeline.prediction(features_df)
         raw_ml_usd = float(ml_pred_arr[0])
 
-        # 6. Composite Valuation, Suggested Buy, Suggested Sell, Profit & GST
+        # 6. Composite Valuation, Suggested Buy, Suggested Sell, Profit & GST + AI Face Layer
         valuation = ValuationEngine.calculate_valuation(
             diamond_spec=diamond_spec,
             ml_prediction_usd=raw_ml_usd,
             comps_data=comps_data,
             market_quote_inr=market_quote,
-            asking_price_inr=asking_price
+            asking_price_inr=asking_price,
+            pricing_preference=pricing_pref
         )
 
         timestamp_str = datetime.now(timezone.utc).strftime("%d %b %Y, %I:%M %p IST")
@@ -190,6 +193,7 @@ def parse_igi_pdf():
 
         asking_price_raw = request.form.get("asking_price_inr") or request.form.get("asking_price")
         asking_price = float(asking_price_raw) if asking_price_raw and asking_price_raw.strip() else None
+        pricing_pref = request.form.get("pricing_preference")
 
         # Extract diamond characteristics
         parsed_result = IGIService.extract_from_pdf(pdf_bytes)
@@ -235,7 +239,8 @@ def parse_igi_pdf():
             ml_prediction_usd=raw_ml_usd,
             comps_data=comps_data,
             market_quote_inr=market_quote,
-            asking_price_inr=asking_price
+            asking_price_inr=asking_price,
+            pricing_preference=pricing_pref
         )
 
         igi_verification = {

@@ -2,6 +2,7 @@ import math
 from typing import Dict, Any, Optional, List
 from DiamondPricePrediction.utils.logger import logging
 from DiamondPricePrediction.services.indian_market_service import IndianMarketService
+from DiamondPricePrediction.services.style_value_service import StyleValueService
 
 class ValuationEngine:
     """
@@ -11,6 +12,7 @@ class ValuationEngine:
       Pillar 1: Current Indian Wholesale Market Benchmark (BDB Mumbai / Surat LGD)
       Pillar 2: Empirical Historical Database Comparables (193.5k records in ₹)
       Pillar 3: Machine Learning Historical Baseline Model
+      Pillar 4: AI Face / Style-Value Layer & Pricing Preference Signal
       
     Outputs actionable business decisions:
       - Wholesale Fair Market Range (₹ Low – High)
@@ -30,7 +32,8 @@ class ValuationEngine:
         market_quote_inr: Dict[str, Any],
         asking_price_inr: Optional[float] = None,
         custom_markup_pct: float = 25.0,
-        making_charges_inr: float = 0.0
+        making_charges_inr: float = 0.0,
+        pricing_preference: Optional[str] = None
     ) -> Dict[str, Any]:
         """Synthesizes all valuation pillars into an India-first jeweller appraisal dossier."""
         try:
@@ -74,13 +77,25 @@ class ValuationEngine:
 
             price_per_carat_inr = round(fair_market_val / max(carat, 0.01))
 
-            # 5. Jeweller Buy / Sell Pricing Strategy
-            # Suggested Buy: ~10% to 15% below wholesale fair market (wholesaler discount)
-            buy_discount_rate = 0.88 if is_lab else 0.90
+            # 5. Pillar 4: AI Face / Style-Value Layer & Pricing Preference Signal
+            style_analysis = StyleValueService.evaluate_ai_face_layer(
+                diamond_spec=diamond_spec,
+                user_preference_override=pricing_preference
+            )
+
+            # Active markup & pricing multipliers based on preference signal
+            if custom_markup_pct != 25.0 and custom_markup_pct is not None and custom_markup_pct > 0:
+                active_markup_pct = custom_markup_pct
+            else:
+                active_markup_pct = style_analysis.get("target_markup_pct", 25.0)
+
+            # Suggested Buy: ~10% to 15% below wholesale fair market
+            base_buy_discount = style_analysis.get("buy_discount_factor", 0.90)
+            buy_discount_rate = base_buy_discount * (0.98 if is_lab else 1.0)
             suggested_buy_price = round(fair_market_val * buy_discount_rate)
 
-            # Suggested Sell / Customer Price: Fair wholesale + markup (default 25%)
-            retail_markup_mult = 1.0 + (custom_markup_pct / 100.0)
+            # Suggested Sell / Customer Price: Fair wholesale + preference markup
+            retail_markup_mult = 1.0 + (active_markup_pct / 100.0)
             suggested_sell_price = round(fair_market_val * retail_markup_mult + making_charges_inr)
 
             # Expected Jeweller Gross Profit & Margin
@@ -91,11 +106,12 @@ class ValuationEngine:
             gst_amount_inr = round(suggested_sell_price * 0.03)
             customer_price_with_gst = round(suggested_sell_price + gst_amount_inr)
 
-            # 6. Confidence Score
+            # 6. Confidence Score (includes AI Face & Style-Value Alignment)
             confidence = cls._compute_confidence_score(
                 diamond_spec=diamond_spec,
                 sample_count=sample_count,
-                has_igi=bool(diamond_spec.get("report_number"))
+                has_igi=bool(diamond_spec.get("report_number")),
+                style_analysis=style_analysis
             )
 
             # 7. Deal Analysis (AI Deal Advisor)
@@ -130,6 +146,51 @@ class ValuationEngine:
                 "status": "Valuation Computed" if data_avail else "Live Market Pricing Unavailable",
                 "data_available": data_avail,
                 "currency": "INR",
+                "currency_symbol": "₹",
+                "origin_type": "Lab-Grown" if is_lab else "Natural",
+                
+                # Core Indian Pricing Numbers
+                "today_market_price": fair_market_val,
+                "today_market_price_formatted": IndianMarketService.format_inr(fair_market_val),
+                "fair_market_value": fair_market_val,
+                "fair_market_value_formatted": IndianMarketService.format_inr(fair_market_val),
+                "fair_market_lakhs": IndianMarketService.format_inr_lakhs(fair_market_val),
+                "low_estimate": low_market_val,
+                "low_estimate_formatted": IndianMarketService.format_inr(low_market_val),
+                "high_estimate": high_market_val,
+                "high_estimate_formatted": IndianMarketService.format_inr(high_market_val),
+                "price_per_carat": price_per_carat_inr,
+                "price_per_carat_formatted": IndianMarketService.format_inr(price_per_carat_inr),
+                
+                # Jeweller Business Strategy & Pricing Preference Signal
+                "suggested_buy_price": suggested_buy_price,
+                "suggested_buy_price_formatted": IndianMarketService.format_inr(suggested_buy_price),
+                "suggested_sell_price": suggested_sell_price,
+                "suggested_sell_price_formatted": IndianMarketService.format_inr(suggested_sell_price),
+                "expected_profit": expected_profit_inr,
+                "expected_profit_formatted": IndianMarketService.format_inr(expected_profit_inr),
+                "expected_margin_pct": expected_margin_pct,
+                "active_markup_pct": active_markup_pct,
+                "gst_amount": gst_amount_inr,
+                "gst_amount_formatted": IndianMarketService.format_inr(gst_amount_inr),
+                "customer_price_with_gst": customer_price_with_gst,
+                "customer_price_with_gst_formatted": IndianMarketService.format_inr(customer_price_with_gst),
+                
+                # AI Face / Style-Value Layer Data
+                "style_value_analysis": style_analysis,
+                "ai_face_tier": style_analysis.get("ai_face_tier"),
+                "ai_face_label": style_analysis.get("ai_face_label"),
+                "ai_face_score": style_analysis.get("face_score"),
+                "pricing_preference_signal": style_analysis.get("pricing_preference_signal"),
+                
+                # Evidence & Confidence & Source Metadata
+                "confidence_score": confidence["total_score"],
+                "confidence_grade": confidence["grade"],
+                "confidence_breakdown": confidence["details"],
+                "quality_score": quality_score,
+                "source": market_quote_inr.get("source", "Bharat Diamond Bourse / Surat LGD Benchmark"),
+                "timestamp": market_quote_inr.get("timestamp", ""),
+                "market_date": market_quote_inr.get("market_date", ""),
                 "currency_symbol": "₹",
                 "origin_type": "Lab-Grown" if is_lab else "Natural",
                 
@@ -210,38 +271,55 @@ class ValuationEngine:
             }
 
     @classmethod
-    def _compute_confidence_score(cls, diamond_spec: Dict[str, Any], sample_count: int, has_igi: bool) -> Dict[str, Any]:
-        """Derive confidence score (0-100) based on verified parameters and data density."""
+    def _compute_confidence_score(
+        cls,
+        diamond_spec: Dict[str, Any],
+        sample_count: int,
+        has_igi: bool,
+        style_analysis: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """Derive confidence score (0-100) based on verified parameters, AI Face tier, and data density."""
         score = 0
         details = []
 
-        # 1. IGI Verification Integrity (Max 35 pts)
+        # 1. IGI Verification Integrity (Max 30 pts)
         if has_igi:
-            verif_pts = 35
-            details.append({"factor": "Official IGI Report Verified", "points": 35, "max": 35, "note": "IGI report number / certificate verified."})
+            verif_pts = 30
+            details.append({"factor": "Official IGI Report Verified", "points": 30, "max": 30, "note": "IGI report number / certificate verified."})
         else:
-            verif_pts = 15
-            details.append({"factor": "Unverified Specification", "points": 15, "max": 35, "note": "Manual input without verified IGI certificate."})
+            verif_pts = 12
+            details.append({"factor": "Unverified Specification", "points": 12, "max": 30, "note": "Manual input without verified IGI certificate."})
         score += verif_pts
 
-        # 2. Specification Completeness (Max 35 pts)
+        # 2. Specification Completeness (Max 30 pts)
         spec_fields = ["carat", "color", "clarity", "cut", "depth", "table", "x", "y", "z"]
         present = sum(1 for k in spec_fields if diamond_spec.get(k) is not None)
-        comp_pts = int((present / len(spec_fields)) * 35)
+        comp_pts = int((present / len(spec_fields)) * 30)
         score += comp_pts
-        details.append({"factor": "Diamond Spec Completeness", "points": comp_pts, "max": 35, "note": f"{present}/{len(spec_fields)} standard geometric & grading attributes present."})
+        details.append({"factor": "Diamond Spec Completeness", "points": comp_pts, "max": 30, "note": f"{present}/{len(spec_fields)} standard geometric & grading attributes present."})
 
-        # 3. Benchmark Cluster Density (Max 30 pts)
+        # 3. Benchmark Cluster Density (Max 25 pts)
         if sample_count >= 30:
-            density_pts = 30
+            density_pts = 25
         elif sample_count >= 10:
-            density_pts = 24
+            density_pts = 20
         elif sample_count >= 4:
-            density_pts = 16
+            density_pts = 14
         else:
             density_pts = 8
         score += density_pts
-        details.append({"factor": "Historical Wholesale Comp Density", "points": density_pts, "max": 30, "note": f"{sample_count} matching sales records in trade cluster."})
+        details.append({"factor": "Historical Wholesale Comp Density", "points": density_pts, "max": 25, "note": f"{sample_count} matching sales records in trade cluster."})
+
+        # 4. AI Face & Style-Value Alignment (Max 15 pts)
+        if style_analysis:
+            face_score = style_analysis.get("face_score", 70)
+            style_pts = min(15, max(5, int((face_score / 100.0) * 15)))
+            tier_label = style_analysis.get("active_preference_label", "Moderate Tier")
+            details.append({"factor": "AI Face & Style-Value Alignment", "points": style_pts, "max": 15, "note": f"{tier_label} (Face Score: {face_score}/100) aligned with pricing signal."})
+        else:
+            style_pts = 10
+            details.append({"factor": "AI Face & Style-Value Alignment", "points": 10, "max": 15, "note": "Standard commercial face alignment."})
+        score += style_pts
 
         total = min(100, max(15, score))
         if total >= 85:

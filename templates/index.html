@@ -52,6 +52,16 @@
                             <input type="number" id="askingPrice" name="asking_price_inr" class="jewel-input" placeholder="e.g. 350000 (To calculate your profit & margin)">
                         </div>
 
+                        <div class="jewel-input-group">
+                            <label class="jewel-label" for="pricingPref1">Pricing Preference Signal</label>
+                            <select id="pricingPref1" name="pricing_preference" class="jewel-input" style="font-size: 0.92rem;">
+                                <option value="">⚡ Auto-Detect AI Face Layer (Recommended)</option>
+                                <option value="premium">💎 Premium Luxury (+38% Target Markup)</option>
+                                <option value="moderate">⚖️ Moderate Commercial (+25% Target Markup)</option>
+                                <option value="value-oriented">🏷️ Value-Oriented (+14% Target Markup)</option>
+                            </select>
+                        </div>
+
                         <button type="submit" id="igiSearchBtn" class="jewel-btn jewel-btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem;">
                             Appraise & Verify IGI Report →
                         </button>
@@ -76,9 +86,19 @@
                     <form action="/parse-igi-pdf" method="POST" enctype="multipart/form-data" id="igiUploadForm">
                         <input type="file" id="igiFileInput" name="igi_pdf" accept=".pdf" style="display: none;">
                         
-                        <div class="jewel-input-group" style="margin-bottom: 0.85rem;">
+                        <div class="jewel-input-group" style="margin-bottom: 0.65rem;">
                             <label class="jewel-label" for="pdfAskingPrice" style="font-size: 0.82rem;">Seller's Asking / Offer Price (Optional ₹)</label>
                             <input type="number" id="pdfAskingPrice" name="asking_price_inr" class="jewel-input" placeholder="e.g. 350000 (To get instant AI Deal Advisor verdict)" style="font-size: 0.95rem;">
+                        </div>
+
+                        <div class="jewel-input-group" style="margin-bottom: 0.85rem;">
+                            <label class="jewel-label" for="pricingPref2" style="font-size: 0.82rem;">Pricing Preference Signal</label>
+                            <select id="pricingPref2" name="pricing_preference" class="jewel-input" style="font-size: 0.88rem;">
+                                <option value="">⚡ Auto-Detect AI Face Layer (Recommended)</option>
+                                <option value="premium">💎 Premium Luxury (+38% Target Markup)</option>
+                                <option value="moderate">⚖️ Moderate Commercial (+25% Target Markup)</option>
+                                <option value="value-oriented">🏷️ Value-Oriented (+14% Target Markup)</option>
+                            </select>
                         </div>
 
                         <div class="igi-dropzone" id="igiDropzone">

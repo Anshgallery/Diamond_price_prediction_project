@@ -253,6 +253,12 @@ class AIAssistantService:
             cut_rank = cls.CUT_ORDER.get(cut, 4)
             quality_index = (color_rank * 3) + (clarity_rank * 3.5) + (cut_rank * 3) + (10 if not is_lab else 0)
 
+            # AI Face / Style-Value Layer Extraction
+            style_analysis = val.get("style_value_analysis", {})
+            ai_face_label = style_analysis.get("ai_face_label", val.get("ai_face_label", "Moderate Commercial Tier"))
+            ai_face_tier = style_analysis.get("ai_face_tier", val.get("ai_face_tier", "moderate"))
+            ai_face_badge = style_analysis.get("ai_face_badge_class", "badge-emerald")
+
             # Value for money: quality score relative to per-carat price
             ppc = fair_market / max(carat, 0.01)
             value_ratio = round((quality_score * 1000) / max(ppc, 1000), 2)
@@ -266,6 +272,10 @@ class AIAssistantService:
                 "clarity": clarity,
                 "cut": cut,
                 "origin_type": "Lab-Grown" if is_lab else "Natural",
+                "ai_face_tier": ai_face_tier,
+                "ai_face_label": ai_face_label,
+                "ai_face_badge": ai_face_badge,
+                "pricing_preference_signal": val.get("pricing_preference_signal", ai_face_tier),
                 "fair_market_inr": fair_market,
                 "fair_market_formatted": IndianMarketService.format_inr(fair_market),
                 "suggested_buy_inr": suggested_buy,
