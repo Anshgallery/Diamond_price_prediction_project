@@ -1,0 +1,11 @@
+{
+  "usd_inr_rate": 95.91,
+  "provider": "OpenFacet Live Wholesale Index (data.openfacet.net) & Frankfurter FX API",
+  "api_key_configured": false,
+  "last_sync": "2026-09-17 19:14:23 UTC",
+  "status": "Live OpenFacet & Frankfurter FX Connected",
+  "markets": {
+    "natural": "OpenFacet Live Index / Mumbai Bharat Diamond Bourse (BDB)",
+    "lab_grown": "Surat Diamond Bourse (SDB) CVD/HPHT Hub"
+  }
+}
