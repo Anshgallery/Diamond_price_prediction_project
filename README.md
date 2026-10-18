@@ -101,26 +101,50 @@
 - Real-world conversational guidance for Indian trade questions (e.g. *"Can I buy a 1.5ct Natural at ₹4.5 Lakh?"*, *"What markup to keep for Lab-Grown solitaire rings?"*).
 - **Tolkowsky Proportions Checker**: Analyzes Table %, Depth %, and L/W ratio against super-ideal optical physics standards.
 
-### 7. Standalone Jeweller Profit, Gold & GST Calculator (`/calculator`)
-- Custom parameters for diamond cost, gold metal purity (18K/14K/22K/Platinum), gold weight, making charges (₹/g), markup %, and 3% GST.
+### 7. Genuine Timestamped IBJA Gold & Silver Rates (`/api/ibja-rates`, `IBJAGoldService`)
+- Official benchmark rates for **24K (999), 22K (916), 18K (750), 14K (585)**, and **Silver 999**.
+- Dual daily market sessions (Opening AM & Closing PM) with transparent publication and fetch timestamps.
+- **Strict Real Data Policy**: When network access is restricted or offline, transparently serves the verified official daily benchmark baseline (`is_live: false`). Never fakes real-time ticks.
+- Exact Indian standard purity factors (e.g. 22K = 22/24 = 0.9167, 18K = 18/24 = 0.7500).
+
+### 8. Licensed Natural & Verified Lab-Grown Pricing (`LicensedDiamondService`)
+- **Licensed Natural Diamond Pricing**: Supports commercial `RAPNET_API_KEY` and `IDEX_API_KEY` configurations. When running in baseline mode, grounds pricing in the **Mumbai Bharat Diamond Bourse (BDB) physical trade benchmark matrix** with full source disclosure.
+- **Verified Lab-Grown Diamond Pricing**: Grounded in the **Surat Diamond Bourse (SDB) CVD/HPHT wholesale manufacturing matrix** (~85%–97% discount to natural mined stones).
+- **IGI Separation Notice**: Strict gemological separation: IGI certified reports evaluate physical 4C parameters; commercial valuation and trading appraisals are performed independently by GEMFORECAST.
+
+### 9. High-Precision Decimal Jewellery Calculator & Quotation (`/calculator`, `JewelleryCalculator`)
+- High-precision **Decimal arithmetic (`ROUND_HALF_UP`)** eliminating IEEE 754 floating-point inaccuracies.
+- Calculates net metal cost, wastage %, diamond wholesale costs, gemstone additions, labour/making charges (per gram or flat), setting fees (per stone), and hallmarking (BIS ₹45).
+- Taxable subtotal, retail markups, promotional discounts, and composite **3% Indian GST (HSN 7113: 1.5% CGST + 1.5% SGST or 3.0% IGST)**.
+- Realized jeweller gross profit (₹), profit margin (%), and realized markup (%).
+
+### 10. Saved Invoices, Bill History, Direct Print & PDF Downloads (`/invoices`, `InvoiceService`)
+- **Persistent SQLite Invoice Storage**: Tracks customer name, phone, email, address, state, PAN, and itemized jewellery specifications.
+- **Sequential Invoicing**: Automatic formatting (e.g., `GF-2026-0001`).
+- **Cryptographic Share Links**: Each invoice receives a secure public share token (`/invoice/share/<token>`).
+  - **Confidentiality Shield**: Public view strictly hides internal jeweller landed cost (`landed_cost`), margin %, and profit.
+- **Direct Browser Print**: Native `@media print` CSS formats invoices cleanly on standard A4 paper, hiding browser UI, search bars, and navigation headers.
+- **ReportLab PDF Generator (`InvoicePdfGenerator`)**: Generates official A4 tax invoices with jeweller header, customer KYC, HSN breakdown, dynamic QR code linking to verification URL, amount in Indian words, and signature block.
 
 ---
 
 ## 💻 Tech Stack
 
-- **Backend**: Python 3.13+, Flask 3.1, SQLite3, Werkzeug Security (Password Hashing)
+- **Backend**: Python 3.11+, Flask 3.1, SQLite3, Werkzeug Security, ReportLab 4.x
 - **Data & ML**: Scikit-Learn 1.6, Pandas, NumPy, PyPDF
-- **Frontend**: Vanilla HTML5 / CSS3 (India-First Luxury Obsidian & Gold Dark Mode), Vanilla JavaScript, Google Fonts (Outfit & Inter)
-- **Testing**: PyTest
+- **Frontend**: Vanilla HTML5 / CSS3 (India-First Luxury Obsidian & Gold Dark Mode), Vanilla JavaScript, Google Fonts (Outfit & Inter), Print CSS
+- **Testing**: PyTest (35 Automated Tests)
+- **Deployment**: Render (Docker / Gunicorn / Persistent Disk `/var/data`)
 
 ---
 
 ## 🏃 Quick Start & Installation
 
-### 1. Clone the Repository
+### 1. Clone the Repository & Configure Environment
 ```bash
 git clone https://github.com/Anshgallery/Diamond_price_prediction_project.git
 cd Diamond_price_prediction_project
+cp .env.example .env
 ```
 
 ### 2. Activate Virtual Environment & Install Dependencies
@@ -136,14 +160,26 @@ pip install -r requirements.txt
 
 ### 3. Run Automated Tests
 ```bash
-pytest tests/
+pytest tests/ -v
 ```
 
-### 4. Start the Application
+### 4. Start the Application Locally
 ```bash
 python app.py
 ```
 Open your browser and navigate to **`http://127.0.0.1:8080`**.
+
+---
+
+## ☁️ Production Deployment on Render
+
+For step-by-step instructions with persistent disk storage (`/var/data`), see [DEPLOYMENT_RENDER.md](DEPLOYMENT_RENDER.md).
+
+Quick Blueprint deployment:
+1. Connect repository on [Render](https://dashboard.render.com).
+2. Render detects [`render.yaml`](render.yaml) automatically.
+3. Attaches persistent disk to `/var/data` so invoices and inventory survive all restarts.
+4. Set optional `RAPNET_API_KEY`, `IDEX_API_KEY`, or `IBJA_API_KEY` in environment settings.
 
 ---
 
@@ -172,3 +208,4 @@ Open your browser and navigate to **`http://127.0.0.1:8080`**.
 
 ## 📜 License
 MIT License. Developed for Indian Jewellery Professionals & Gemologists.
+

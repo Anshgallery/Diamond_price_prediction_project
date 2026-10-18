@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tax Invoice #{{ invoice.invoice_number }} | {{ invoice.customer_name }}</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Base Platform CSS for action buttons -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/jeweller_platform.css') }}">
+    
+    <style>
+        body {
+            background: #F4F6F9;
+            margin: 0;
+            padding: 1.5rem 1rem 3rem;
+            color: #1E293B;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .share-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* Strictly Black & White Invoice Paper */
+        .invoice-paper-bw {
+            background: #ffffff !important;
+            color: #000000 !important;
+            font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
+            border: 1.5px solid #000000;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            margin: 0 auto;
+            padding: 0;
+            max-width: 850px;
+            box-sizing: border-box;
+        }
+
+        /* Base table reset */
+        .bw-grid-table, .bw-subtable, .bw-items-table, .bw-box-table, .bw-hsn-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #000000 !important;
+            font-size: 7.5pt;
+            line-height: 1.25;
+        }
+
+        .bw-grid-table {
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+        }
+        .bw-grid-table > tbody > tr > td {
+            border: 1px solid #000;
+        }
+
+        .party-block {
+            padding: 4px 6px;
+            font-size: 7.2pt;
+            line-height: 1.35;
+        }
+        .party-name {
+            font-size: 8.5pt;
+            font-weight: bold;
+            margin-bottom: 1px;
+        }
+
+        .bw-subtable td {
+            border: 1px solid #000;
+            padding: 2.5px 4px;
+            vertical-align: top;
+            font-size: 7.2pt;
+        }
+        .meta-label {
+            font-size: 6.8pt;
+            color: #222;
+            margin-bottom: 1px;
+        }
+        .meta-val {
+            font-size: 7.2pt;
+            font-weight: bold;
+        }
+
+        .bw-items-table th {
+            border: 1px solid #000;
+            border-top: none;
+            padding: 3px 4px;
+            font-size: 7.2pt;
+            font-weight: bold;
+            background: #fff !important;
+            color: #000 !important;
+        }
+        .bw-items-table td {
+            border-left: 1px solid #000;
+            border-right: 1px solid #000;
+            border-top: none;
+            border-bottom: none;
+            padding: 3px 4px;
+            vertical-align: top;
+            font-size: 7.2pt;
+        }
+        .bw-items-table tr.bw-total-row td {
+            border-top: 1px solid #000 !important;
+            border-bottom: 1px solid #000 !important;
+            padding: 4px;
+        }
+
+        .bw-box-table td {
+            border: 1px solid #000;
+            padding: 3px 6px;
+        }
+
+        .bw-hsn-table th, .bw-hsn-table td {
+            border: 1px solid #000;
+            padding: 2.5px 4px;
+            font-size: 7.2pt;
+        }
+        .bw-hsn-table th {
+            background: #fff !important;
+            color: #000 !important;
+            font-weight: bold;
+        }
+
+        /* PRINT MEDIA STYLESHEET (ONE-CLICK DIRECT PRINT) */
+        @media print {
+            body, html {
+                background: #ffffff !important;
+                color: #000000 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .share-container {
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .invoice-paper-bw {
+                width: 100% !important;
+                max-width: 100% !important;
+                border: 1.5px solid #000000 !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                page-break-after: avoid;
+                page-break-inside: avoid;
+            }
+            @page {
+                size: A4 portrait;
+                margin: 8mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="share-container">
+
+        <!-- TOP BAR (HIDDEN IN PRINT) -->
+        <div class="no-print" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <span class="jewel-badge badge-emerald">✓ Verified Digital Tax Invoice</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted);">
+                    Invoice #<strong>{{ invoice.invoice_number }}</strong>
+                </span>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+                <button type="button" onclick="window.print()" class="jewel-btn jewel-btn-secondary">
+                    🖨️ Direct Print
+                </button>
+                <a href="/invoice/share/{{ invoice.share_token }}/pdf" class="jewel-btn jewel-btn-primary">
+                    📥 Download PDF Invoice
+                </a>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!-- OFFICIAL BLACK & WHITE TAX INVOICE                            -->
+        <!-- ============================================================ -->
+        <div class="invoice-paper-bw" id="printableInvoice">
+
+            <!-- TOP HEADER: IRN (LEFT), TAX INVOICE (CENTER), E-INVOICE & QR CODE (RIGHT) -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 8px 10px 4px;">
+                
+                <!-- LEFT: IRN, ACK NO, ACK DATE -->
+                <div style="flex: 1.4; font-size: 7.5pt; line-height: 1.35; padding-top: 2px;">
+                    <div>
+                        <b>IRN &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</b> <span style="font-family: monospace; font-size: 7pt; word-break: break-all;">{{ invoice.einvoice.irn_line1 }}-<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ invoice.einvoice.irn_line2 }}</span>
+                    </div>
+                    <div style="margin-top: 3px;">
+                        <b>Ack No. &nbsp;:</b> <span style="font-family: monospace;">{{ invoice.einvoice.ack_no }}</span>
+                    </div>
+                    <div style="margin-top: 2px;">
+                        <b>Ack Date:</b> <span>{{ invoice.einvoice.ack_date }}</span>
+                    </div>
+                </div>
+
+                <!-- CENTER: TAX INVOICE -->
+                <div style="flex: 1; text-align: center; padding-top: 4px;">
+                    <div style="font-size: 14pt; font-weight: bold; text-transform: capitalize;">
+                        Tax Invoice
+                    </div>
+                </div>
+
+                <!-- RIGHT: E-INVOICE + QR CODE -->
+                <div style="flex: 0.7; text-align: right; display: flex; flex-direction: column; align-items: flex-end;">
+                    <div style="font-size: 10pt; font-weight: bold; margin-bottom: 2px; padding-right: 4px;">
+                        e-Invoice
+                    </div>
+                    {% if invoice.einvoice.qr_svg_data_uri %}
+                        <img src="{{ invoice.einvoice.qr_svg_data_uri }}" alt="e-Invoice QR" style="width: 72px; height: 72px; display: block; border: none;">
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 2-COLUMN PARTY & DISPATCH GRID TABLE -->
+            <table class="bw-grid-table">
+                <tbody>
+                    <tr>
+                        <!-- LEFT COLUMN: SELLER, CONSIGNEE, BUYER -->
+                        <td style="width: 50%; vertical-align: top; padding: 0;">
+                            <!-- SELLER -->
+                            <div class="party-block">
+                                <div class="party-name">{{ jeweller.business_name if jeweller else 'Shree Ganesh Gems & Jewels' }}</div>
+                                <div>{{ jeweller.address if jeweller else '142 Shaikh Memon Street, Zaveri Bazaar' }}</div>
+                                <div>{{ jeweller.city if jeweller else 'Mumbai 400002' }}</div>
+                                <div>GSTIN/UIN: <b>{{ jeweller.gst_number if jeweller else '27AABCS1429B1Z8' }}</b></div>
+                                <div>State Name : <b>{{ invoice.einvoice.seller_state }}</b>, Code : <b>{{ invoice.einvoice.seller_state_code }}</b></div>
+                            </div>
+
+                            <!-- CONSIGNEE (SHIP TO) -->
+                            <div class="party-block" style="border-top: 1px solid #000;">
+                                <div style="font-weight: bold; font-size: 7.5pt; margin-bottom: 2px;">Consignee (Ship to)</div>
+                                <div class="party-name">{{ invoice.customer_name }}</div>
+                                <div>{{ invoice.customer_address or 'Over-The-Counter In-Store Delivery' }}</div>
+                                <div>GSTIN/UIN &nbsp;&nbsp;: <b>{{ invoice.customer_gstin or 'Unregistered Consumer' }}</b></div>
+                                <div>State Name &nbsp;: <b>{{ invoice.einvoice.buyer_state }}</b>, Code : <b>{{ invoice.einvoice.buyer_state_code }}</b></div>
+                            </div>
+
+                            <!-- BUYER (BILL TO) -->
+                            <div class="party-block" style="border-top: 1px solid #000;">
+                                <div style="font-weight: bold; font-size: 7.5pt; margin-bottom: 2px;">Buyer (Bill to)</div>
+                                <div class="party-name">{{ invoice.customer_name }}</div>
+                                <div>{{ invoice.customer_address or 'Over-The-Counter In-Store Purchase' }}</div>
+                                <div>
+                                    GSTIN/UIN &nbsp;&nbsp;: <b>{{ invoice.customer_gstin or 'Unregistered Consumer' }}</b>
+                                    {% if invoice.customer_pan %} | PAN: <b>{{ invoice.customer_pan }}</b>{% endif %}
+                                </div>
+                                <div>State Name &nbsp;: <b>{{ invoice.einvoice.buyer_state }}</b>, Code : <b>{{ invoice.einvoice.buyer_state_code }}</b></div>
+                            </div>
+                        </td>
+
+                        <!-- RIGHT COLUMN: DISPATCH METADATA -->
+                        <td style="width: 50%; vertical-align: top; padding: 0;">
+                            <table class="bw-subtable">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 50%;">
+                                            <div class="meta-label">Invoice No.</div>
+                                            <div class="meta-val">{{ invoice.invoice_number }}</div>
+                                        </td>
+                                        <td style="width: 50%;">
+                                            <div class="meta-label">Dated</div>
+                                            <div class="meta-val">{{ invoice.dispatch.dated }}</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="meta-label">Delivery Note</div>
+                                            <div class="meta-val">{{ invoice.dispatch.delivery_note or '&nbsp;'|safe }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="meta-label">Mode/Terms of Payment</div>
+                                            <div class="meta-val">{{ invoice.dispatch.mode_terms_of_payment }}</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="meta-label">Reference No. &amp; Date.</div>
+                                            <div class="meta-val">{{ invoice.dispatch.reference_no_date or '&nbsp;'|safe }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="meta-label">Other References</div>
+                                            <div class="meta-val">{{ invoice.dispatch.other_references or '&nbsp;'|safe }}</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="meta-label">Buyer's Order No.</div>
+                                            <div class="meta-val">{{ invoice.dispatch.buyer_order_no or '&nbsp;'|safe }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="meta-label">Dated</div>
+                                            <div class="meta-val">{{ invoice.dispatch.order_dated or '&nbsp;'|safe }}</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="meta-label">Dispatch Doc No.</div>
+                                            <div class="meta-val">{{ invoice.dispatch.dispatch_doc_no or '&nbsp;'|safe }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="meta-label">Delivery Note Date</div>
+                                            <div class="meta-val">{{ invoice.dispatch.delivery_note_date or '&nbsp;'|safe }}</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="meta-label">Dispatched through</div>
+                                            <div class="meta-val">{{ invoice.dispatch.dispatched_through }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="meta-label">Destination</div>
+                                            <div class="meta-val">{{ invoice.dispatch.destination }}</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">
+                                            <div class="meta-label">Terms of Delivery</div>
+                                            <div class="meta-val" style="font-size: 7.2pt; line-height: 1.3;">{{ invoice.dispatch.terms_of_delivery }}</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- DESCRIPTION OF GOODS TABLE -->
+            <table class="bw-items-table">
+                <thead>
+                    <tr>
+                        <th style="width: 4%;">Sl<br/>No.</th>
+                        <th style="width: 43%; text-align: left;">Description of Goods</th>
+                        <th style="width: 10%;">HSN/SAC</th>
+                        <th style="width: 11%;">Quantity</th>
+                        <th style="width: 11%; text-align: right;">Rate</th>
+                        <th style="width: 5%;">per</th>
+                        <th style="width: 6%;">Disc. %</th>
+                        <th style="width: 10%; text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in invoice.calc.line_items %}
+                        <tr>
+                            <td style="text-align: center;">{{ item.sr }}</td>
+                            <td>
+                                <b>{{ item.title }}</b>
+                                {% if item.specifications %}
+                                    <div style="font-size: 7pt; color: #222; margin-top: 1px;">
+                                        {{ item.specifications }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: center;">{{ item.hsn }}</td>
+                            <td style="text-align: center;">{{ item.quantity }}</td>
+                            <td style="text-align: right;">{{ item.formatted_rate }}</td>
+                            <td style="text-align: center;">{{ item.per }}</td>
+                            <td style="text-align: center;">{{ item.disc_pct_str }}</td>
+                            <td style="text-align: right; font-weight: 600;">{{ item.formatted_amount }}</td>
+                        </tr>
+                    {% endfor %}
+
+                    <!-- CGST & SGST / IGST BREAKUP ROWS INSIDE TABLE -->
+                    {% if invoice.calc.is_interstate %}
+                        <tr>
+                            <td></td>
+                            <td style="text-align: right; font-style: italic; font-weight: bold; padding-right: 15px;">IGST ({{ invoice.calc.gst_rate }}%)</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td style="text-align: right; font-weight: bold;">{{ "%.2f"|format(invoice.calc.igst_amount) }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td></td>
+                            <td style="text-align: right; font-style: italic; font-weight: bold; padding-right: 15px;">CGST ({{ (invoice.calc.gst_rate / 2)|round(1) }}%)</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td style="text-align: right; font-weight: bold;">{{ "%.2f"|format(invoice.calc.cgst_amount) }}</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td style="text-align: right; font-style: italic; font-weight: bold; padding-right: 15px;">SGST ({{ (invoice.calc.gst_rate / 2)|round(1) }}%)</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td style="text-align: right; font-weight: bold;">{{ "%.2f"|format(invoice.calc.sgst_amount) }}</td>
+                        </tr>
+                    {% endif %}
+
+                    <!-- FINAL TOTAL ROW -->
+                    <tr class="bw-total-row">
+                        <td></td>
+                        <td style="text-align: right; font-weight: bold;">Total</td>
+                        <td></td>
+                        <td style="text-align: center; font-weight: bold;">
+                            {% if invoice.calc.line_items and invoice.calc.line_items|length > 0 %}
+                                {{ invoice.calc.line_items[0].quantity }}
+                            {% endif %}
+                        </td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td style="text-align: right; font-weight: bold; font-size: 9.5pt;">₹ {{ "%.2f"|format(invoice.grand_total) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- AMOUNT CHARGEABLE IN WORDS & E. & O.E -->
+            <table class="bw-box-table">
+                <tbody>
+                    <tr>
+                        <td style="width: 80%; border-right: none; padding-bottom: 2px;">
+                            <span style="font-size: 7pt; color: #333;">Amount Chargeable (in words)</span>
+                        </td>
+                        <td style="width: 20%; text-align: right; border-left: none; padding-bottom: 2px;">
+                            <span style="font-size: 7.5pt; font-style: italic;">E. &amp; O.E</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="font-size: 8.5pt; font-weight: bold; padding-top: 1px; padding-bottom: 4px;">
+                            {{ invoice.calc.amount_chargeable_words }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- HSN/SAC TAX BREAKUP TABLE -->
+            <table class="bw-hsn-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2" style="width: 14%;">HSN/SAC</th>
+                        <th rowspan="2" style="width: 18%; text-align: right;">Taxable<br/>Value</th>
+                        <th colspan="2" style="width: 24%; text-align: center;">Central Tax</th>
+                        <th colspan="2" style="width: 24%; text-align: center;">
+                            {% if invoice.calc.is_interstate %}Integrated Tax{% else %}State Tax{% endif %}
+                        </th>
+                        <th rowspan="2" style="width: 20%; text-align: right;">Total<br/>Tax Amount</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 10%; text-align: center;">Rate</th>
+                        <th style="width: 14%; text-align: right;">Amount</th>
+                        <th style="width: 10%; text-align: center;">Rate</th>
+                        <th style="width: 14%; text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in invoice.calc.hsn_summary %}
+                        <tr>
+                            <td style="text-align: center;">{{ h.hsn }}</td>
+                            <td style="text-align: right;">{{ h.formatted_taxable_value }}</td>
+                            <td style="text-align: center;">{{ h.central_tax_rate }}</td>
+                            <td style="text-align: right;">{{ h.formatted_central_tax_amount }}</td>
+                            <td style="text-align: center;">{{ h.state_tax_rate }}</td>
+                            <td style="text-align: right;">{{ h.formatted_state_tax_amount }}</td>
+                            <td style="text-align: right;">{{ h.formatted_total_tax_amount }}</td>
+                        </tr>
+                    {% endfor %}
+                    <tr class="bw-total-row">
+                        <td style="text-align: center; font-weight: bold;">Total</td>
+                        <td style="text-align: right; font-weight: bold;">{{ invoice.calc.formatted_total_taxable_hsn }}</td>
+                        <td></td>
+                        <td style="text-align: right; font-weight: bold;">{{ invoice.calc.formatted_total_central_tax }}</td>
+                        <td></td>
+                        <td style="text-align: right; font-weight: bold;">{{ invoice.calc.formatted_total_state_tax }}</td>
+                        <td style="text-align: right; font-weight: bold;">{{ invoice.calc.formatted_total_hsn_tax }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- TAX AMOUNT IN WORDS -->
+            <table class="bw-box-table" style="border-top: none;">
+                <tbody>
+                    <tr>
+                        <td style="font-size: 8pt; padding: 3px 6px;">
+                            Tax Amount (in words) : <b>{{ invoice.calc.tax_amount_words }}</b>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- DECLARATION & SIGNATORY -->
+            <table class="bw-grid-table" style="border-top: none;">
+                <tbody>
+                    <tr>
+                        <td style="width: 50%; vertical-align: top; padding: 6px 8px; font-size: 7.2pt; line-height: 1.4;">
+                            <b>Declaration</b><br/>
+                            We declare that this invoice shows the actual price of the goods described and that all particulars are true and correct.
+                        </td>
+                        <td style="width: 50%; vertical-align: top; padding: 6px 8px; text-align: right; font-size: 7.5pt;">
+                            <div>for <b>{{ jeweller.business_name if jeweller else 'Shree Ganesh Gems & Jewels' }}</b></div>
+                            <div style="height: 40px;"></div>
+                            <div style="font-weight: bold;">Authorised Signatory</div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- FOOTNOTE -->
+            <div style="text-align: center; font-size: 7pt; padding: 6px 0; color: #000;">
+                This is a Computer Generated Invoice
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

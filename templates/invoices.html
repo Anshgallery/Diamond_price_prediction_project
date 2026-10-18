@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% set active_page = "invoices" %}
+
+{% block title %}Jeweller Bill History & GST Tax Invoices | GEMFORECAST IGI{% endblock %}
+
+{% block content %}
+<div class="jewel-container">
+
+    <!-- HEADER -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+        <div>
+            <span class="jewel-badge badge-gold" style="margin-bottom: 0.5rem;">👑 Official Jeweller Ledger</span>
+            <h1 style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: var(--text-primary); margin-top: 0.25rem;">
+                Saved Invoices &amp; <span style="color: var(--gold);">GST Bill History</span>
+            </h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">
+                Manage customer quotations, track 3% GST compliance, view profits, generate customer share links, and download print-ready PDFs.
+            </p>
+        </div>
+        <div>
+            <a href="/calculator" class="jewel-btn jewel-btn-primary" style="padding: 0.8rem 1.4rem; font-size: 0.95rem;">
+                + Create New Tax Invoice
+            </a>
+        </div>
+    </div>
+
+    <!-- STATS SUMMARY CARDS -->
+    <div class="jewel-grid-4" style="margin-bottom: 2rem;">
+        <div class="stat-box">
+            <div class="stat-label">Total Saved Invoices</div>
+            <div class="stat-value gold">{{ stats.total_invoices }}</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">Customer Bills Generated</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Total B2C Revenue</div>
+            <div class="stat-value cyan">{{ stats.formatted_revenue }}</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">Gross Invoiced Value</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Total 3% GST Invoiced</div>
+            <div class="stat-value amber">{{ stats.formatted_gst }}</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">CGST + SGST Compliant</div>
+        </div>
+
+        <div class="stat-box">
+            <div class="stat-label">Total Realized Profit</div>
+            <div class="stat-value emerald">{{ stats.formatted_profit }}</div>
+            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.25rem;">Jeweller Net Earnings</div>
+        </div>
+    </div>
+
+    <!-- SEARCH & FILTER BAR -->
+    <div class="jewel-card" style="padding: 1.25rem; margin-bottom: 2rem;">
+        <form method="GET" action="/invoices" style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+            <div style="flex: 1; min-width: 250px;">
+                <input type="text" name="q" value="{{ query }}" placeholder="Search by customer name, phone, or invoice number (e.g. GF-2026-0001)..." class="jewel-input" style="padding: 0.65rem 1rem;">
+            </div>
+
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                <a href="/invoices?status=All{% if query %}&q={{ query }}{% endif %}" class="jewel-btn {% if current_status == 'All' %}jewel-btn-primary{% else %}jewel-btn-secondary{% endif %} jewel-btn-sm">
+                    All Bills
+                </a>
+                <a href="/invoices?status=Issued{% if query %}&q={{ query }}{% endif %}" class="jewel-btn {% if current_status == 'Issued' %}jewel-btn-primary{% else %}jewel-btn-secondary{% endif %} jewel-btn-sm">
+                    Issued
+                </a>
+                <a href="/invoices?status=Paid{% if query %}&q={{ query }}{% endif %}" class="jewel-btn {% if current_status == 'Paid' %}jewel-btn-primary{% else %}jewel-btn-secondary{% endif %} jewel-btn-sm">
+                    Paid
+                </a>
+                <a href="/invoices?status=Draft{% if query %}&q={{ query }}{% endif %}" class="jewel-btn {% if current_status == 'Draft' %}jewel-btn-primary{% else %}jewel-btn-secondary{% endif %} jewel-btn-sm">
+                    Draft
+                </a>
+            </div>
+
+            <button type="submit" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
+                🔍 Filter
+            </button>
+            {% if query or current_status != 'All' %}
+                <a href="/invoices" class="jewel-btn jewel-btn-secondary jewel-btn-sm" style="color: var(--ruby);">
+                    ✕ Reset
+                </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- INVOICE TABLE -->
+    <div class="jewel-card" style="overflow-x: auto; padding: 0;">
+        {% if invoices and invoices|length > 0 %}
+            <table class="jewel-table">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Jewellery Description</th>
+                        <th>Taxable (₹)</th>
+                        <th>GST (3%)</th>
+                        <th>Grand Total</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inv in invoices %}
+                        <tr>
+                            <td>
+                                <a href="/invoice/{{ inv.id }}" style="font-weight: 700; color: var(--gold); text-decoration: none;">
+                                    {{ inv.invoice_number }}
+                                </a>
+                            </td>
+                            <td style="font-size: 0.85rem; color: var(--text-muted); white-space: nowrap;">
+                                {{ inv.invoice_date }}
+                            </td>
+                            <td>
+                                <strong style="color: var(--text-primary);">{{ inv.customer_name }}</strong>
+                                {% if inv.customer_phone %}
+                                    <div style="font-size: 0.78rem; color: var(--text-muted);">📞 {{ inv.customer_phone }}</div>
+                                {% endif %}
+                            </td>
+                            <td style="max-width: 220px; font-size: 0.85rem;">
+                                <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ inv.item_description }}">
+                                    {{ inv.item_description }}
+                                </div>
+                            </td>
+                            <td style="font-weight: 600; color: var(--text-primary);">
+                                {{ inv.formatted_taxable }}
+                            </td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">
+                                {{ inv.formatted_gst }}
+                            </td>
+                            <td style="font-weight: 800; color: var(--gold); font-size: 1.05rem;">
+                                {{ inv.formatted_grand_total }}
+                            </td>
+                            <td>
+                                {% if inv.status == 'Paid' %}
+                                    <span class="jewel-badge badge-emerald">✓ Paid</span>
+                                {% elif inv.status == 'Issued' %}
+                                    <span class="jewel-badge badge-gold">● Issued</span>
+                                {% elif inv.status == 'Draft' %}
+                                    <span class="jewel-badge badge-secondary">Draft</span>
+                                {% else %}
+                                    <span class="jewel-badge badge-ruby">{{ inv.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: right; white-space: nowrap;">
+                                <div style="display: inline-flex; gap: 0.35rem; align-items: center;">
+                                    <a href="/invoice/{{ inv.id }}" class="jewel-btn jewel-btn-secondary jewel-btn-sm" title="View Full Details & Internal Margins">
+                                        👁️ View
+                                    </a>
+                                    <a href="/invoice/share/{{ inv.share_token }}" target="_blank" class="jewel-btn jewel-btn-secondary jewel-btn-sm" title="Open Customer Public Share Link">
+                                        🔗 Share
+                                    </a>
+                                    <a href="/invoice/{{ inv.id }}/pdf" class="jewel-btn jewel-btn-secondary jewel-btn-sm" title="Download Official PDF">
+                                        📥 PDF
+                                    </a>
+                                    <form action="/invoice/{{ inv.id }}/delete" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete invoice {{ inv.invoice_number }}?');">
+                                        <button type="submit" class="jewel-btn jewel-btn-secondary jewel-btn-sm" style="color: var(--ruby); padding: 0.35rem 0.6rem;" title="Delete Invoice">
+                                            🗑️
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div style="text-align: center; padding: 4rem 2rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🧾</div>
+                <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.5rem;">
+                    No Invoices Found
+                </h3>
+                <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 450px; margin: 0 auto 1.5rem;">
+                    {% if query or current_status != 'All' %}
+                        No saved bills match your filter. Try clearing the search query or status filter.
+                    {% else %}
+                        You haven't generated any customer invoices yet. Use the Jewellery Pricing Calculator to draft and save your first tax invoice!
+                    {% endif %}
+                </p>
+                <a href="/calculator" class="jewel-btn jewel-btn-primary">
+                    Go to Pricing Calculator →
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

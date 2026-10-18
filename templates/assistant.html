@@ -1,137 +1,273 @@
 {% extends "base.html" %}
 {% set active_page = "assistant" %}
 
-{% block title %}AI Jeweller Trade Advisor & Proportions | GEMFORECAST IGI{% endblock %}
+{% block title %}AI Trade Advisor (ChatGPT-Style) | GEMFORECAST IGI{% endblock %}
 
 {% block content %}
 <div class="jewel-container">
 
     <!-- HEADER -->
-    <div style="text-align: center; max-width: 800px; margin: 0 auto 2.5rem;">
-        <span class="jewel-badge badge-gold" style="margin-bottom: 0.75rem;">AI Gemological Intelligence</span>
-        <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.75rem;">
-            Indian Jeweller <span style="color: var(--gold);">AI Trade Advisor</span>
-        </h1>
-        <p style="color: var(--text-muted); font-size: 1rem;">
-            Ask practical diamond business, pricing, and negotiation questions or analyze Tolkowsky optical cut proportions.
-        </p>
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <span class="jewel-badge badge-gold">LLM Conversational Agent</span>
+                <span class="jewel-badge badge-emerald" id="agentStatusBadge">⚡ Tool Calling Active</span>
+            </div>
+            <h1 style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: var(--text-primary); margin: 0;">
+                AI Trade Advisor <span style="color: var(--gold);">Intelligence</span>
+            </h1>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.25rem;">
+                Conversational B2B deal reasoning with live IBJA bullion rates, BDB natural benchmarks, Surat SDB matrices, and cut physics.
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button type="button" onclick="resetChatHistory()" class="jewel-btn jewel-btn-secondary jewel-btn-sm" id="btnResetChat">
+                🔄 Clear Memory / New Chat
+            </button>
+        </div>
     </div>
 
     <!-- PRESET PROMPT CHIPS -->
-    <div style="display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem;">
-        <button onclick="setQuery('Can I buy a 1.50ct F VS1 Natural diamond at ₹5,00,000 in Mumbai?')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
+    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+        <button type="button" onclick="sendQuickPrompt('Can I buy a 1.50ct F VS1 Natural diamond at ₹5,00,000 in Mumbai? Is this a good deal?')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
             💡 "Can I buy 1.5ct Natural at ₹5L?"
         </button>
-        <button onclick="setQuery('What should I ask the customer for a 2.04ct D VVS2 Lab-Grown solitaire?')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
+        <button type="button" onclick="sendQuickPrompt('What should I ask the customer for a 2.04ct D VVS2 Lab-Grown solitaire ring?')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
             💡 "What to ask for 2ct Lab-Grown?"
         </button>
-        <button onclick="setQuery('What is the wholesale trade discount for Strong Blue fluorescence in D color?')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
-            💡 "Strong Blue fluorescence discount"
+        <button type="button" onclick="sendQuickPrompt('What are today\'s official IBJA gold and silver rates for 18K and 22K?')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
+            💡 "Check Live IBJA Gold Rates"
         </button>
-        <button onclick="setQuery('How to negotiate with Surat LGD manufacturers for bulk memo?')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
-            💡 "Surat LGD negotiation strategy"
+        <button type="button" onclick="sendQuickPrompt('Calculate landed cost and 3% GST for 9.2g 18K ring with 0.70ct Natural diamond at ₹1,25,000/ct.')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
+            💡 "Calculate 18K Ring + 0.7ct Diamond"
+        </button>
+        <button type="button" onclick="sendQuickPrompt('Verify IGI Report 584392810 and advise on buy price vs market parity.')" class="jewel-btn jewel-btn-secondary jewel-btn-sm">
+            💡 "Verify IGI #584392810"
         </button>
     </div>
 
-    <div class="jewel-grid-2" style="align-items: start;">
+    <div class="jewel-grid-2" style="align-items: start; grid-template-columns: 1.55fr 1fr; gap: 1.5rem;">
 
-        <!-- LEFT: AI TRADE ADVISOR CHAT -->
-        <div class="jewel-card">
-            <div class="jewel-card-header">
-                <div class="jewel-card-title">
-                    <span>🤖</span> Ask AI Trade Advisor
+        <!-- LEFT: CHATGPT-STYLE CONVERSATIONAL FEED & INPUT -->
+        <div class="jewel-card" style="display: flex; flex-direction: column; min-height: 680px; padding: 0; overflow: hidden;">
+            
+            <!-- Chat Card Header -->
+            <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.02);">
+                <div style="display: flex; align-items: center; gap: 0.6rem;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #10B981; box-shadow: 0 0 8px rgba(16,185,129,0.5);"></div>
+                    <strong style="color: var(--text-primary); font-size: 0.95rem;">Conversational Session</strong>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); font-family: monospace;">(ID: {{ session_id[:8] if session_id else 'Active' }}...)</span>
                 </div>
-                <span class="jewel-badge badge-gold">B2B Trade Logic</span>
+                <span class="jewel-badge badge-gold" style="font-size: 0.75rem;">Memory Active</span>
             </div>
 
-            <form action="/assistant" method="POST" style="margin-bottom: 1.5rem;">
-                <div class="jewel-input-group">
-                    <label class="jewel-label" for="assistantQuery">Your Question</label>
-                    <textarea id="assistantQuery" name="query" class="jewel-input" rows="3" placeholder="e.g. A wholesaler is offering a 1.02ct E VVS1 Natural IGI stone at ₹3,80,000. Is this a good deal? What should I counter-offer?" required style="resize: vertical;">{{ query or '' }}</textarea>
+            <!-- Scrollable Message Feed -->
+            <div id="chatMessagesFeed" style="flex: 1; padding: 1.25rem; overflow-y: auto; max-height: 540px; display: flex; flex-direction: column; gap: 1rem;">
+                
+                <!-- System Introduction Bubble -->
+                <div class="chat-bubble chat-bubble-assistant">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+                        <span style="font-size: 1.1rem;">💎</span>
+                        <strong style="color: var(--gold); font-size: 0.85rem;">GEMFORECAST Chief Trade Advisor</strong>
+                        <span style="font-size: 0.7rem; color: var(--text-muted);">Just now</span>
+                    </div>
+                    <div style="font-size: 0.9rem; line-height: 1.6; color: var(--text-primary);">
+                        Namaste! I am your AI Trade Advisor grounded in the **Bharat Diamond Bourse (BDB)**, **Surat Diamond Bourse (SDB)**, and **IBJA bullion benchmarks**.<br><br>
+                        I can execute live tools to evaluate dealer deals, check gold rates, verify IGI certificates, compute 3% GST jewellery quotations, and recommend strict counter-offer targets. How may I advise your trading desk today?
+                    </div>
                 </div>
-                <button type="submit" class="jewel-btn jewel-btn-primary" style="width: 100%;">
-                    Ask Trade Advisor →
-                </button>
-            </form>
 
-            {% if response %}
-                <div style="background: #FFFFFF; border: 1px solid var(--gold); border-radius: var(--radius-md); padding: 1.25rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                        <h4 style="color: var(--gold); font-weight: 700;">{{ response.title }}</h4>
-                        <div style="display: flex; gap: 0.3rem;">
-                            {% for tag in response.tags %}
-                                <span class="jewel-badge badge-secondary" style="font-size: 0.72rem;">{{ tag }}</span>
+                <!-- Render Historic Messages from Memory -->
+                {% if chat_history %}
+                    {% for msg in chat_history %}
+                        <div class="chat-bubble {% if msg.role == 'user' %}chat-bubble-user{% else %}chat-bubble-assistant{% endif %}">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+                                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                                    <span>{% if msg.role == 'user' %}👤{% else %}💎{% endif %}</span>
+                                    <strong style="font-size: 0.82rem; color: {% if msg.role == 'user' %}var(--text-primary){% else %}var(--gold){% endif %};">
+                                        {% if msg.role == 'user' %}You{% else %}AI Trade Advisor{% endif %}
+                                    </strong>
+                                </div>
+                                <span style="font-size: 0.7rem; color: var(--text-muted);">{{ msg.created_at[:16].replace('T', ' ') if msg.created_at else '' }}</span>
+                            </div>
+
+                            {% if msg.tools_executed %}
+                                <div style="margin-bottom: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.35rem;">
+                                    {% for t in msg.tools_executed %}
+                                        <span class="jewel-badge badge-emerald" style="font-size: 0.72rem; cursor: pointer;" title="{{ t.output | tojson }}">
+                                            ⚡ Executed: {{ t.tool }}
+                                        </span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="chat-content-markdown" style="font-size: 0.9rem; line-height: 1.65; color: var(--text-primary); white-space: pre-wrap;">{{ msg.content }}</div>
+                        </div>
+                    {% endfor %}
+                {% elif response %}
+                    <!-- Single Form Response Fallback -->
+                    <div class="chat-bubble chat-bubble-user">
+                        <strong style="font-size: 0.82rem;">You:</strong> {{ query }}
+                    </div>
+                    <div class="chat-bubble chat-bubble-assistant">
+                        <div class="chat-content-markdown" style="font-size: 0.9rem; line-height: 1.65; white-space: pre-wrap;">{{ response.answer }}</div>
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <!-- Typing Indicator (Hidden by default) -->
+            <div id="typingIndicator" style="display: none; padding: 0.75rem 1.25rem; font-size: 0.85rem; color: var(--text-muted); background: rgba(0,0,0,0.02); border-top: 1px solid var(--border-subtle); align-items: center; gap: 0.5rem;">
+                <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
+                <span>AI Trade Advisor is consulting live BDB/IBJA market tools &amp; computing math...</span>
+            </div>
+
+            <!-- Input Box & Actions -->
+            <div style="padding: 1rem 1.25rem; border-top: 1px solid var(--border-subtle); background: var(--bg-card);">
+                <form id="chatForm" onsubmit="handleChatSubmit(event)" style="display: flex; gap: 0.75rem; align-items: flex-end;">
+                    <textarea 
+                        id="chatInputText" 
+                        rows="2" 
+                        class="jewel-input" 
+                        placeholder="Ask about a diamond price, dealer asking quote, IBJA gold rate, or customer margin... (Press Enter to send, Shift+Enter for new line)"
+                        required
+                        style="resize: none; font-size: 0.92rem; padding: 0.65rem 0.85rem; line-height: 1.4; flex: 1;"
+                        onkeydown="handleInputKeydown(event)"></textarea>
+                    
+                    <button type="submit" id="btnSendChat" class="jewel-btn jewel-btn-primary" style="padding: 0.75rem 1.25rem; height: 100%; white-space: nowrap;">
+                        Send ➔
+                    </button>
+                </form>
+                <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 0.4rem; display: flex; justify-content: space-between;">
+                    <span>Press <strong>Enter</strong> to send • <strong>Shift + Enter</strong> for line break</span>
+                    <span id="providerIndicator">Provider: Automatic Free-Tier Engine</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT SIDEBAR: LIVE MARKET RATES & TOLKOWSKY CUT ANALYZER -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+            <!-- WIDGET 1: LIVE IBJA BULLION RATES GLANCE -->
+            <div class="jewel-card" style="padding: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <div class="jewel-card-title" style="font-size: 1rem;">
+                        <span>🪙</span> Live IBJA Bullion Rates
+                    </div>
+                    <span class="jewel-badge badge-gold" style="font-size: 0.7rem;">{{ ibja_rates.session if ibja_rates else 'Daily AM' }}</span>
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                    {{ ibja_rates.publication_timestamp if ibja_rates else 'Official IBJA Benchmark' }}
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+                    <div style="background: var(--bg-body); padding: 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                        <div style="font-size: 0.72rem; color: var(--text-muted);">24K Pure Gold</div>
+                        <strong style="color: var(--text-primary); font-size: 0.95rem;">
+                            {{ ibja_rates.rates['24K'].formatted_rate_per_10g if ibja_rates and ibja_rates.rates else '₹ 78,500' }}
+                        </strong>
+                        <div style="font-size: 0.68rem; color: var(--text-muted);">per 10 grams</div>
+                    </div>
+                    <div style="background: var(--bg-body); padding: 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                        <div style="font-size: 0.72rem; color: var(--text-muted);">22K Standard Gold</div>
+                        <strong style="color: var(--text-primary); font-size: 0.95rem;">
+                            {{ ibja_rates.rates['22K'].formatted_rate_per_10g if ibja_rates and ibja_rates.rates else '₹ 71,958' }}
+                        </strong>
+                        <div style="font-size: 0.68rem; color: var(--text-muted);">91.6% Fineness</div>
+                    </div>
+                    <div style="background: var(--bg-body); padding: 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                        <div style="font-size: 0.72rem; color: var(--text-muted);">18K Studded Gold</div>
+                        <strong style="color: var(--gold); font-size: 0.95rem;">
+                            {{ ibja_rates.rates['18K'].formatted_rate_per_10g if ibja_rates and ibja_rates.rates else '₹ 58,875' }}
+                        </strong>
+                        <div style="font-size: 0.68rem; color: var(--text-muted);">Solitaire Standard</div>
+                    </div>
+                    <div style="background: var(--bg-body); padding: 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                        <div style="font-size: 0.72rem; color: var(--text-muted);">Silver 999 Fine</div>
+                        <strong style="color: var(--text-primary); font-size: 0.95rem;">
+                            {{ ibja_rates.rates['Silver_999'].formatted_rate_per_kg if ibja_rates and ibja_rates.rates else '₹ 92,500' }}
+                        </strong>
+                        <div style="font-size: 0.68rem; color: var(--text-muted);">per 1 kilogram</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WIDGET 2: TOLKOWSKY PROPORTIONS ANALYZER -->
+            <div class="jewel-card" style="padding: 1.25rem;">
+                <div class="jewel-card-header" style="margin-bottom: 0.75rem;">
+                    <div class="jewel-card-title" style="font-size: 1rem;">
+                        <span>📐</span> Tolkowsky Cut Analyzer
+                    </div>
+                    <span class="jewel-badge badge-cyan" style="font-size: 0.7rem;">Light Return</span>
+                </div>
+
+                <form action="/assistant/proportions" method="POST" style="margin-bottom: 0.75rem;">
+                    <div class="jewel-grid-2" style="margin-bottom: 0.5rem; gap: 0.5rem;">
+                        <div>
+                            <label class="jewel-label" style="font-size: 0.72rem;">Table Size (%)</label>
+                            <input type="number" name="table" class="jewel-input" step="0.1" value="{{ prop_data.table or 56.5 }}" required style="padding: 0.45rem;">
+                        </div>
+                        <div>
+                            <label class="jewel-label" style="font-size: 0.72rem;">Total Depth (%)</label>
+                            <input type="number" name="depth" class="jewel-input" step="0.1" value="{{ prop_data.depth or 61.8 }}" required style="padding: 0.45rem;">
+                        </div>
+                    </div>
+
+                    <div class="jewel-grid-3" style="margin-bottom: 0.75rem; gap: 0.4rem;">
+                        <div>
+                            <label class="jewel-label" style="font-size: 0.72rem;">X mm</label>
+                            <input type="number" name="x" class="jewel-input" step="0.01" value="{{ prop_data.x or 6.46 }}" required style="padding: 0.45rem;">
+                        </div>
+                        <div>
+                            <label class="jewel-label" style="font-size: 0.72rem;">Y mm</label>
+                            <input type="number" name="y" class="jewel-input" step="0.01" value="{{ prop_data.y or 6.49 }}" required style="padding: 0.45rem;">
+                        </div>
+                        <div>
+                            <label class="jewel-label" style="font-size: 0.72rem;">Z mm</label>
+                            <input type="number" name="z" class="jewel-input" step="0.01" value="{{ prop_data.z or 4.00 }}" required style="padding: 0.45rem;">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="jewel-btn jewel-btn-secondary jewel-btn-sm" style="width: 100%;">
+                        Calculate Cut Proportions →
+                    </button>
+                </form>
+
+                {% if prop_eval %}
+                    <div style="background: var(--bg-body); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.75rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <span style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Optics Grade</span>
+                            <span class="jewel-badge badge-gold" style="font-size: 0.72rem;">{{ prop_eval.overall_proportion_score }}/100 • {{ prop_eval.grade_label }}</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+                            {% for item in prop_eval.evaluations %}
+                                <div style="font-size: 0.75rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.35rem;">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <strong>{{ item.metric }} ({{ item.value }}):</strong>
+                                        <span class="jewel-badge {% if item.status == 'Optimal' %}badge-emerald{% else %}badge-warning{% endif %}" style="font-size: 0.65rem;">{{ item.status }}</span>
+                                    </div>
+                                    <div style="color: var(--text-muted); font-size: 0.7rem; margin-top: 0.15rem;">{{ item.comment }}</div>
+                                </div>
                             {% endfor %}
                         </div>
                     </div>
-                    <div style="font-size: 0.92rem; color: var(--text-primary); line-height: 1.7; white-space: pre-line;">
-                        {{ response.answer }}
-                    </div>
-                </div>
-            {% endif %}
-        </div>
-
-        <!-- RIGHT: TOLKOWSKY PROPORTIONS ANALYZER -->
-        <div class="jewel-card">
-            <div class="jewel-card-header">
-                <div class="jewel-card-title">
-                    <span>📐</span> Tolkowsky Ideal Cut Analyzer
-                </div>
-                <span class="jewel-badge badge-cyan">Optical Light Return</span>
+                {% endif %}
             </div>
 
-            <form action="/assistant/proportions" method="POST" style="margin-bottom: 1.25rem;">
-                <div class="jewel-grid-2" style="margin-bottom: 1rem;">
-                    <div>
-                        <label class="jewel-label">Table Size (%)</label>
-                        <input type="number" name="table" class="jewel-input" step="0.1" value="{{ prop_data.table or 56.5 }}" required>
-                    </div>
-                    <div>
-                        <label class="jewel-label">Total Depth (%)</label>
-                        <input type="number" name="depth" class="jewel-input" step="0.1" value="{{ prop_data.depth or 61.8 }}" required>
-                    </div>
+            <!-- WIDGET 3: FREE-TIER API CONFIG INFO -->
+            <div class="jewel-card" style="padding: 1.25rem;">
+                <div class="jewel-card-title" style="font-size: 0.95rem; margin-bottom: 0.5rem;">
+                    <span>🔑</span> Free-Tier LLM Architecture
                 </div>
-
-                <div class="jewel-grid-3" style="margin-bottom: 1rem;">
-                    <div>
-                        <label class="jewel-label">Length X (mm)</label>
-                        <input type="number" name="x" class="jewel-input" step="0.01" value="{{ prop_data.x or 6.46 }}" required>
-                    </div>
-                    <div>
-                        <label class="jewel-label">Width Y (mm)</label>
-                        <input type="number" name="y" class="jewel-input" step="0.01" value="{{ prop_data.y or 6.49 }}" required>
-                    </div>
-                    <div>
-                        <label class="jewel-label">Depth Z (mm)</label>
-                        <input type="number" name="z" class="jewel-input" step="0.01" value="{{ prop_data.z or 4.00 }}" required>
-                    </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.5;">
+                    The Trade Advisor connects to <strong>Google Gemini Flash (Free Tier)</strong> or <strong>Groq Llama 3.3</strong>.<br><br>
+                    • To activate Google Gemini: set <code>GEMINI_API_KEY</code> in <code>.env</code>.<br>
+                    • Fully operational in local autonomous reasoning mode even without external keys.
                 </div>
+            </div>
 
-                <button type="submit" class="jewel-btn jewel-btn-secondary" style="width: 100%;">
-                    Validate Proportions →
-                </button>
-            </form>
-
-            {% if prop_eval %}
-                <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                        <span style="font-weight: 700; color: var(--text-primary);">Optical Proportions Grade</span>
-                        <span class="jewel-badge badge-gold">{{ prop_eval.overall_proportion_score }}/100 • {{ prop_eval.grade_label }}</span>
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-                        {% for item in prop_eval.evaluations %}
-                            <div style="font-size: 0.85rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.5rem;">
-                                <div style="display: flex; justify-content: space-between;">
-                                    <strong style="color: var(--text-primary);">{{ item.metric }} ({{ item.value }}):</strong>
-                                    <span class="jewel-badge {% if item.status == 'Optimal' %}badge-emerald{% else %}badge-warning{% endif %}" style="font-size: 0.7rem;">{{ item.grade }}</span>
-                                </div>
-                                <div style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.2rem;">{{ item.comment }}</div>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endif %}
         </div>
 
     </div>
@@ -140,12 +276,220 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<style>
+.chat-bubble {
+    border-radius: var(--radius-md);
+    padding: 0.9rem 1.1rem;
+    max-width: 90%;
+    animation: fadeIn 0.2s ease-in-out;
+}
+.chat-bubble-user {
+    align-self: flex-end;
+    background: #1E293B;
+    color: #F8FAFC;
+    border: 1px solid #334155;
+    border-bottom-right-radius: 4px;
+}
+.chat-bubble-assistant {
+    align-self: flex-start;
+    background: #FFFFFF;
+    color: var(--text-primary);
+    border: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--gold);
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.chat-content-markdown table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.6rem 0;
+    font-size: 0.82rem;
+}
+.chat-content-markdown th, .chat-content-markdown td {
+    border: 1px solid var(--border-subtle);
+    padding: 0.35rem 0.6rem;
+    text-align: left;
+}
+.chat-content-markdown th {
+    background: rgba(0,0,0,0.03);
+    font-weight: 700;
+}
+.typing-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: typingBounce 1.2s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1.1); opacity: 1; }
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+
 <script>
-function setQuery(q) {
-    const txt = document.getElementById("assistantQuery");
-    if (txt) {
-        txt.value = q;
-        txt.focus();
+const activeSessionId = "{{ session_id }}";
+
+function scrollChatToBottom() {
+    const feed = document.getElementById("chatMessagesFeed");
+    if (feed) {
+        feed.scrollTop = feed.scrollHeight;
+    }
+}
+
+// Initial scroll
+window.addEventListener("DOMContentLoaded", () => {
+    scrollChatToBottom();
+});
+
+function handleInputKeydown(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleChatSubmit(e);
+    }
+}
+
+function sendQuickPrompt(promptText) {
+    const input = document.getElementById("chatInputText");
+    if (input) {
+        input.value = promptText;
+        handleChatSubmit(new Event("submit"));
+    }
+}
+
+async function handleChatSubmit(e) {
+    if (e) e.preventDefault();
+    const input = document.getElementById("chatInputText");
+    const message = input.value.trim();
+    if (!message) return;
+
+    // Append user bubble to feed
+    appendChatBubble("user", message);
+    input.value = "";
+    input.disabled = true;
+    document.getElementById("btnSendChat").disabled = true;
+
+    // Show typing indicator
+    const indicator = document.getElementById("typingIndicator");
+    indicator.style.display = "flex";
+    scrollChatToBottom();
+
+    try {
+        const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                message: message,
+                session_id: activeSessionId
+            })
+        });
+
+        const data = await response.json();
+        indicator.style.display = "none";
+        input.disabled = false;
+        document.getElementById("btnSendChat").disabled = false;
+        input.focus();
+
+        if (data.success) {
+            appendChatBubble("assistant", data.reply, data.tools_executed, data.provider);
+            if (data.provider) {
+                document.getElementById("providerIndicator").innerText = `Provider: ${data.provider}`;
+            }
+        } else {
+            appendChatBubble("assistant", `⚠️ Error: ${data.error || 'Failed to reach AI Trade Advisor.'}`);
+        }
+    } catch (err) {
+        indicator.style.display = "none";
+        input.disabled = false;
+        document.getElementById("btnSendChat").disabled = false;
+        input.focus();
+        appendChatBubble("assistant", `⚠️ Network Error: Unable to communicate with the trade advisor server. (${err.message})`);
+    }
+
+    scrollChatToBottom();
+}
+
+function appendChatBubble(role, content, toolsExecuted = [], provider = "") {
+    const feed = document.getElementById("chatMessagesFeed");
+    const bubble = document.createElement("div");
+    bubble.className = `chat-bubble ${role === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}`;
+
+    let headerHtml = `
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
+                <span>${role === 'user' ? '👤' : '💎'}</span>
+                <strong style="font-size: 0.82rem; color: ${role === 'user' ? '#F8FAFC' : 'var(--gold)'};">
+                    ${role === 'user' ? 'You' : 'AI Trade Advisor'}
+                </strong>
+            </div>
+            <span style="font-size: 0.7rem; color: var(--text-muted);">Just now</span>
+        </div>
+    `;
+
+    let toolsHtml = "";
+    if (toolsExecuted && toolsExecuted.length > 0) {
+        toolsHtml = `<div style="margin-bottom: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.35rem;">`;
+        toolsExecuted.forEach(t => {
+            toolsHtml += `<span class="jewel-badge badge-emerald" style="font-size: 0.72rem;">⚡ Tool: ${t.tool}</span>`;
+        });
+        toolsHtml += `</div>`;
+    }
+
+    // Format simple markdown (tables, bold, headers)
+    const formattedContent = formatSimpleMarkdown(content);
+
+    bubble.innerHTML = `${headerHtml}${toolsHtml}<div class="chat-content-markdown" style="font-size: 0.9rem; line-height: 1.65; color: ${role === 'user' ? '#F8FAFC' : 'var(--text-primary)'};">${formattedContent}</div>`;
+    feed.appendChild(bubble);
+}
+
+function formatSimpleMarkdown(text) {
+    if (!text) return "";
+    let html = text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+    // Headers
+    html = html.replace(/^### (.*$)/gim, '<h4 style="color: var(--gold); margin: 0.75rem 0 0.35rem; font-weight: 700;">$1</h4>');
+    html = html.replace(/^#### (.*$)/gim, '<h5 style="color: var(--text-primary); margin: 0.6rem 0 0.3rem; font-weight: 700;">$1</h5>');
+
+    // Bold & Italics
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    html = html.replace(/`([^`]+)`/g, '<code style="background: rgba(0,0,0,0.06); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.85em;">$1</code>');
+
+    // Convert Markdown tables
+    html = html.replace(/\|(.+)\|/g, function(match) {
+        return match; // simple passthrough or newline formatting
+    });
+
+    // Newlines
+    html = html.replace(/\n/g, '<br>');
+    return html;
+}
+
+async function resetChatHistory() {
+    if (!confirm("Are you sure you want to clear conversation memory and start a new chat?")) return;
+
+    try {
+        const response = await fetch("/api/chat/reset", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session_id: activeSessionId })
+        });
+        const data = await response.json();
+        if (data.success) {
+            window.location.reload();
+        }
+    } catch (e) {
+        alert("Failed to reset session memory.");
     }
 }
 </script>

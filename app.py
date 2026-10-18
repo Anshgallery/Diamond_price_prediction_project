@@ -2,7 +2,7 @@ import os
 import sys
 import json
 from datetime import datetime, timezone
-from flask import Flask, request, render_template, redirect, url_for, flash, session, make_response
+from flask import Flask, request, render_template, redirect, url_for, flash, session, make_response, jsonify
 
 from DiamondPricePrediction.utils.logger import logging
 from DiamondPricePrediction.utils.exception import CustomException
@@ -14,6 +14,12 @@ from DiamondPricePrediction.services.valuation_engine import ValuationEngine
 from DiamondPricePrediction.services.inventory_service import InventoryService
 from DiamondPricePrediction.services.auth_service import AuthService
 from DiamondPricePrediction.services.ai_assistant_service import AIAssistantService
+from DiamondPricePrediction.services.ai_trade_advisor_agent import AITradeAdvisorAgent
+from DiamondPricePrediction.services.ibja_gold_service import IBJAGoldService
+from DiamondPricePrediction.services.licensed_diamond_service import LicensedDiamondService
+from DiamondPricePrediction.services.jewellery_calculator import JewelleryCalculator
+from DiamondPricePrediction.services.invoice_service import InvoiceService
+from DiamondPricePrediction.services.invoice_pdf_generator import InvoicePdfGenerator
 
 # ============================================================
 # FLASK APPLICATION INITIALIZATION
@@ -25,6 +31,8 @@ app.secret_key = os.environ.get("FLASK_SECRET_KEY", "jeweller-ai-mumbai-surat-20
 # Initialize database schemas & demo jeweller account
 AuthService.init_users_table()
 InventoryService.init_db()
+InvoiceService.init_db()
+AITradeAdvisorAgent.init_db()
 
 # Pre-load Historical ML baseline pipeline
 prediction_pipeline = PredictionPipeline()
@@ -508,13 +516,165 @@ def delete_workspace_item(item_id):
 
 
 # ============================================================
-# 6. STANDALONE JEWELLER PROFIT & GST CALCULATOR
+# 6. STANDALONE JEWELLER PROFIT & GST CALCULATOR & INVOICES
 # ============================================================
 
 @app.route("/calculator")
 def calculator():
     market_config = IndianMarketService.get_config()
-    return render_template("calculator.html", market_config=market_config)
+    ibja_rates = IBJAGoldService.get_current_rates()
+    return render_template("calculator.html", market_config=market_config, ibja_rates=ibja_rates)
+
+
+@app.route("/api/ibja-rates")
+def api_ibja_rates():
+    """Live API endpoint for genuine timestamped IBJA rates."""
+    rates = IBJAGoldService.get_current_rates()
+    return jsonify(rates)
+
+
+@app.route("/api/calculate-jewellery", methods=["POST"])
+def api_calculate_jewellery():
+    """API endpoint for Decimal-precision jewellery quotation."""
+    try:
+        data = request.get_json() or request.form.to_dict()
+        res = JewelleryCalculator.calculate(data)
+        return jsonify({"success": True, "data": res})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+
+@app.route("/invoice/create", methods=["POST"])
+def create_invoice_route():
+    """Create and persist GST tax invoice with unique share link."""
+    try:
+        jeweller_id = session.get("jeweller", {}).get("id", "default")
+        form_data = request.form.to_dict()
+        res = InvoiceService.create_invoice(form_data, jeweller_id=jeweller_id)
+        if res.get("success"):
+            flash(f"Tax Invoice #{res['invoice_number']} created successfully!", "success")
+            return redirect(url_for("view_invoice", invoice_id=res["invoice_id"]))
+        else:
+            flash(f"Failed to create invoice: {res.get('error')}", "danger")
+            return redirect(url_for("calculator"))
+    except Exception as e:
+        logging.error(f"Error creating invoice: {e}")
+        flash("An error occurred while generating the invoice.", "danger")
+        return redirect(url_for("calculator"))
+
+
+@app.route("/invoices")
+def list_invoices():
+    """Bill History & saved invoices management."""
+    jeweller_id = session.get("jeweller", {}).get("id", "default")
+    query = request.args.get("q", "")
+    status_filter = request.args.get("status", "All")
+
+    invoices = InvoiceService.list_invoices(jeweller_id=jeweller_id, query=query, status_filter=status_filter)
+    stats = InvoiceService.get_invoice_stats(jeweller_id=jeweller_id)
+
+    return render_template(
+        "invoices.html",
+        invoices=invoices,
+        stats=stats,
+        query=query,
+        current_status=status_filter
+    )
+
+
+@app.route("/invoice/<invoice_id>")
+def view_invoice(invoice_id):
+    """Internal jeweller view of invoice with profit/margin metrics & share link."""
+    jeweller_id = session.get("jeweller", {}).get("id", "default")
+    invoice = InvoiceService.get_invoice_by_id(invoice_id, jeweller_id=jeweller_id)
+    if not invoice:
+        flash("Invoice not found.", "warning")
+        return redirect(url_for("list_invoices"))
+
+    jeweller = session.get("jeweller")
+    return render_template("invoice_view.html", invoice=invoice, jeweller=jeweller)
+
+
+@app.route("/invoice/<invoice_id>/pdf")
+def download_invoice_pdf(invoice_id):
+    """Download GST Tax Invoice PDF for jeweller (supports customer vs internal store copy)."""
+    try:
+        jeweller_id = session.get("jeweller", {}).get("id", "default")
+        invoice = InvoiceService.get_invoice_by_id(invoice_id, jeweller_id=jeweller_id)
+        if not invoice:
+            return "Invoice not found", 404
+
+        mode = request.args.get("mode", "customer").lower()
+        is_internal = (mode == "internal")
+        jeweller = session.get("jeweller")
+        base_url = request.host_url
+        pdf_bytes = InvoicePdfGenerator.generate_invoice_pdf(
+            invoice,
+            jeweller_profile=jeweller,
+            base_url=base_url,
+            is_internal=is_internal
+        )
+
+        response = make_response(pdf_bytes)
+        response.headers['Content-Type'] = 'application/pdf'
+        suffix = "_StoreCopy" if is_internal else ""
+        response.headers['Content-Disposition'] = f'inline; filename="Invoice_{invoice["invoice_number"]}{suffix}.pdf"'
+        return response
+    except Exception as e:
+        logging.error(f"Error generating invoice PDF: {e}")
+        return "PDF generation error", 500
+
+
+@app.route("/invoice/share/<share_token>")
+def share_invoice(share_token):
+    """Public customer shareable link (confidential jeweller margins hidden)."""
+    invoice = InvoiceService.get_invoice_by_share_token(share_token)
+    if not invoice:
+        flash("The requested invoice link is invalid or has expired.", "warning")
+        return redirect(url_for("home_page"))
+
+    jeweller = None
+    return render_template("invoice_share.html", invoice=invoice, jeweller=jeweller)
+
+
+@app.route("/invoice/share/<share_token>/pdf")
+def share_invoice_pdf(share_token):
+    """Public customer PDF download stream."""
+    try:
+        invoice = InvoiceService.get_invoice_by_share_token(share_token)
+        if not invoice:
+            return "Invoice not found or link expired", 404
+
+        base_url = request.host_url
+        pdf_bytes = InvoicePdfGenerator.generate_invoice_pdf(invoice, jeweller_profile=None, base_url=base_url)
+
+        response = make_response(pdf_bytes)
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = f'attachment; filename="Invoice_{invoice["invoice_number"]}.pdf"'
+        return response
+    except Exception as e:
+        logging.error(f"Error generating shared invoice PDF: {e}")
+        return "PDF generation error", 500
+
+
+@app.route("/invoice/<invoice_id>/status", methods=["POST"])
+def update_invoice_status_route(invoice_id):
+    """Update invoice payment or issue status."""
+    jeweller_id = session.get("jeweller", {}).get("id", "default")
+    status = request.form.get("status", "Issued")
+    InvoiceService.update_status(invoice_id, status, jeweller_id=jeweller_id)
+    flash(f"Invoice status updated to '{status}'.", "info")
+    return redirect(url_for("view_invoice", invoice_id=invoice_id))
+
+
+@app.route("/invoice/<invoice_id>/delete", methods=["POST"])
+def delete_invoice_route(invoice_id):
+    """Delete invoice from database."""
+    jeweller_id = session.get("jeweller", {}).get("id", "default")
+    InvoiceService.delete_invoice(invoice_id, jeweller_id=jeweller_id)
+    flash("Invoice removed from ledger.", "info")
+    return redirect(url_for("list_invoices"))
+
 
 
 # ============================================================
@@ -523,24 +683,93 @@ def calculator():
 
 @app.route("/assistant", methods=["GET", "POST"])
 def assistant():
+    """Interactive LLM-powered AI Trade Advisor with conversation memory & tools."""
+    # Ensure stable session_id per client session
+    session_id = session.get("chat_session_id")
+    if not session_id:
+        import uuid
+        session_id = str(uuid.uuid4())
+        session["chat_session_id"] = session_id
+
     response = None
     query = ""
     if request.method == "POST":
         query = request.form.get("query", "")
         if query:
-            response = AIAssistantService.ask_assistant(query)
+            response = AIAssistantService.ask_assistant(query, session_id=session_id)
+
+    chat_history = AITradeAdvisorAgent.get_conversation_history(session_id)
+    ibja_rates = IBJAGoldService.get_current_rates()
+    market_config = IndianMarketService.get_config()
 
     return render_template(
         "assistant.html",
         query=query,
         response=response,
+        chat_history=chat_history,
+        session_id=session_id,
+        ibja_rates=ibja_rates,
+        market_config=market_config,
         prop_data={},
         prop_eval=None
     )
 
 
+@app.route("/api/chat", methods=["POST"])
+def api_chat():
+    """Live interactive chat API for ChatGPT-style real-time messaging."""
+    try:
+        data = request.get_json(force=True, silent=True) or request.form.to_dict()
+        user_msg = (data.get("message") or data.get("query") or "").strip()
+        if not user_msg:
+            return jsonify({"success": False, "error": "Message cannot be empty."}), 400
+
+        session_id = data.get("session_id") or session.get("chat_session_id")
+        if not session_id:
+            import uuid
+            session_id = str(uuid.uuid4())
+            session["chat_session_id"] = session_id
+
+        context_diamond = data.get("context_diamond")
+
+        res = AITradeAdvisorAgent.chat(
+            user_message=user_msg,
+            session_id=session_id,
+            context_diamond=context_diamond
+        )
+        return jsonify(res)
+    except Exception as e:
+        logging.error(f"Error in api_chat: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/chat/history", methods=["GET"])
+def api_chat_history():
+    """Retrieves conversation history for current session."""
+    session_id = request.args.get("session_id") or session.get("chat_session_id")
+    if not session_id:
+        return jsonify({"success": True, "history": []})
+    history = AITradeAdvisorAgent.get_conversation_history(session_id)
+    return jsonify({"success": True, "session_id": session_id, "history": history})
+
+
+@app.route("/api/chat/reset", methods=["POST"])
+def api_chat_reset():
+    """Clears conversation memory for current session."""
+    data = request.get_json(force=True, silent=True) or {}
+    session_id = data.get("session_id") or session.get("chat_session_id")
+    if session_id:
+        AITradeAdvisorAgent.reset_session(session_id)
+    return jsonify({"success": True, "message": "Conversation memory reset successfully."})
+
+
 @app.route("/assistant/proportions", methods=["POST"])
 def evaluate_proportions():
+    session_id = session.get("chat_session_id")
+    chat_history = AITradeAdvisorAgent.get_conversation_history(session_id) if session_id else []
+    ibja_rates = IBJAGoldService.get_current_rates()
+    market_config = IndianMarketService.get_config()
+
     table = float(request.form.get("table", 56.5))
     depth = float(request.form.get("depth", 61.8))
     x = float(request.form.get("x", 6.46))
@@ -554,6 +783,10 @@ def evaluate_proportions():
         "assistant.html",
         query="",
         response=None,
+        chat_history=chat_history,
+        session_id=session_id,
+        ibja_rates=ibja_rates,
+        market_config=market_config,
         prop_data=prop_data,
         prop_eval=prop_eval
     )

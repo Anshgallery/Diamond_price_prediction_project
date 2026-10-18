@@ -137,77 +137,34 @@ class AIAssistantService:
         }
 
     @classmethod
-    def ask_assistant(cls, query: str, context_diamond: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        """Answers practical jeweller business, pricing, and negotiation questions in Indian trade context."""
-        q = query.lower().strip()
-        response_title = "Indian Jeweller AI Trade Advisory"
+    def ask_assistant(cls, query: str, context_diamond: Optional[Dict[str, Any]] = None, session_id: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Answers practical jeweller business, pricing, and negotiation questions in Indian trade context
+        using the real LLM-powered AITradeAdvisorAgent with live tool calling and conversation memory.
+        """
+        from DiamondPricePrediction.services.ai_trade_advisor_agent import AITradeAdvisorAgent
 
-        # 1. Buying / Negotiation advice at a specific price (e.g. "Can I buy at ₹X?", "Supplier is asking ₹X")
-        price_match = re.search(r'(?:₹|rs\.?|inr)?\s*(\d+(?:,\d+)*(?:\.\d+)?)\s*(?:lakh|k)?', q)
-        if any(w in q for w in ["buy at", "supplier asking", "can i buy", "what should i pay", "counter offer", "negotiate"]):
-            response_text = (
-                "**Indian Wholesale Negotiation & Buying Guidelines:**\n\n"
-                "• **Bharat Diamond Bourse (BDB) Wholesale Rule:** Always target acquiring at **8% to 12% below the fair wholesale market benchmark** for Natural stones, and **15% below** for Lab-Grown (LGD) to ensure safety against market fluctuations.\n"
-                "• **Payment Terms:** If purchasing in full cash/instant RTGS on Surat/Mumbai counters, insist on an additional **1.5% to 2.0% cash discount**.\n"
-                "• **Memo Verification:** Always verify the IGI laser inscription on the girdle under 20x loupe against the official IGI digital certificate before releasing payment.\n"
-                "• **GST Impact:** Add 3% GST on polished diamonds when factoring input tax credit (ITC)."
-            )
-            tags = ["Negotiation Tactics", "BDB Trading", "Cash Discount", "GST 3%"]
+        chat_res = AITradeAdvisorAgent.chat(
+            user_message=query,
+            session_id=session_id,
+            context_diamond=context_diamond
+        )
 
-        # 2. What should I ask the customer? (Retail asking price & margins)
-        elif any(w in q for w in ["what should i ask", "customer price", "retail price", "how much to sell", "markup"]):
-            response_text = (
-                "**Retail Pricing & Customer Quote Formula:**\n\n"
-                "• **Solitaire Rings (Natural):** Apply a **20% to 30% gross markup** over your wholesale landed cost. For instance, a ₹4,00,000 wholesale stone should retail between **₹4,80,000 and ₹5,20,000 + 3% GST**.\n"
-                "• **Lab-Grown Solitaires:** Apply a **40% to 60% gross markup** since base per-carat prices are lower (₹15k-₹28k/ct), allowing healthy absolute profit while remaining attractive to young buyers.\n"
-                "• **Jewellery Making Charges:** Standard 18K/14K hallmarked gold mountings typically charge **₹850 to ₹1,400 per gram** making charge + casting losses."
-            )
-            tags = ["Retail Asking Price", "Markup Strategy", "Making Charges", "Solitaire Rings"]
-
-        # 3. Lab-Grown vs Natural Dynamics in India
-        elif any(w in q for w in ["lab-grown", "lab grown", "cvd", "hpht", "natural vs lab", "surat"]):
-            response_text = (
-                "**Indian Market: Natural vs. Lab-Grown (LGD) Trade Dynamics:**\n\n"
-                "• **Natural Diamonds (BDB Mumbai):** Backed by geological scarcity and long-term resale liquidity. Preferred for traditional Indian bridal jewellery and high-value family heirlooms.\n"
-                "• **Lab-Grown Diamonds (Surat SDB):** Rapidly expanding in urban metros (Delhi, Mumbai, Bengaluru) for fashion and budget-conscious engagement rings. Trades at an **85% to 92% wholesale discount** compared to Natural.\n"
-                "• **Trade Advice:** Maintain separate inventory showcases. Clearly state IGI Lab-Grown certification to ensure 100% customer trust and BIS compliance."
-            )
-            tags = ["Natural vs LGD", "Surat Hub", "Bridal Solitaires", "Customer Trust"]
-
-        # 4. Fluorescence Trade Impact in India
-        elif any(w in q for w in ["fluorescence", "blue", "medium blue", "strong blue", "milky"]):
-            response_text = (
-                "**Fluorescence Discount Matrix in Indian Trade:**\n\n"
-                "• **On D–F (Colorless) Diamonds:** Strong Blue fluorescence carries an **8% to 12% wholesale discount** in Mumbai/Surat markets due to consumer preference for zero haze in bright daylight.\n"
-                "• **On I–K (Near-Colorless/Warm) Diamonds:** Medium to Strong Blue fluorescence actually cancels yellow tint and makes the stone look **1 to 2 color shades whiter** face-up without penalty.\n"
-                "• **Trade Tip:** Always inspect under 365nm UV lamp and natural sunlight before finalizing wholesale purchases."
-            )
-            tags = ["Fluorescence", "Colorless Discount", "UV Inspection"]
-
-        # 5. Which diamond is better? (Comparison query)
-        elif any(w in q for w in ["which is better", "compare", "better buy", "difference"]):
-            response_text = (
-                "**Diamond Decision Framework for Jewellers:**\n\n"
-                "• **For Investment / High Resale Value:** Prioritize Natural Mined, Triple Excellent (3EX), D-F Color, VVS clarity with IGI certificate and None fluorescence.\n"
-                "• **For Maximum Visual Size at Best Value:** Choose G-H Color, VS2 Clarity (100% eye-clean) with Ideal Cut. The cut quality masks the slight color drop while saving 25-35% in cost.\n"
-                "• **For Budget Luxury / High Jeweller Margin:** Choose IGI Lab-Grown (CVD) D-E VVS2. Retail with 45%+ gross margin."
-            )
-            tags = ["Comparison Logic", "Quality vs Value", "Resale Liquidity"]
-
-        # Default General Jeweller Intelligence
-        else:
-            response_text = (
-                f"**Gemological Trade Advisory for '{query}':**\n\n"
-                "In the Indian jewellery trade, accurate diamond appraisal requires cross-examining the **IGI Certificate Number**, verified proportions (Table 54-57.5%, Depth 61-62.5%), and current Mumbai BDB / Surat wholesale price benchmarks.\n\n"
-                "• **Recommendation:** Check the IGI Report Number in the platform's appraisal portal to generate instant Suggested Buy, Suggested Sell, and Expected Jeweller Profit in Indian Rupees (₹)."
-            )
-            tags = ["IGI Verification", "Indian Wholesale", "Jeweller Decisions"]
+        reply_text = chat_res.get("reply", "")
+        tools_used = chat_res.get("tools_executed", [])
+        tags = [t.get("tool", "Trade Analysis") for t in tools_used]
+        if not tags:
+            tags = ["BDB Benchmark", "Trade Advisory", "Risk Assessment"]
 
         return {
-            "title": response_title,
-            "answer": response_text,
+            "title": "Indian Jeweller AI Trade Advisory",
+            "answer": reply_text,
             "tags": tags,
-            "context_attached": bool(context_diamond)
+            "context_attached": bool(context_diamond),
+            "tools_executed": tools_used,
+            "session_id": chat_res.get("session_id"),
+            "provider": chat_res.get("provider", "Local Engine"),
+            "is_live_llm": chat_res.get("is_live_llm", False)
         }
 
     @classmethod

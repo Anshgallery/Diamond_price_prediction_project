@@ -1,14 +1,30 @@
-# A Dockerfile is a text file containing a *set of instructions* used to build a Docker image for an application. The Docker image packages the application code, dependencies, libraries, runtime, and configuration needed to run the application consistently in any environment.
-# Think of Docker Hub as an online storage/library for Docker Images.
+# Multi-stage / Production Dockerfile for GEMFORECAST IGI Platform
+FROM python:3.11-slim
 
-FROM python:3.9-slim-buster 
-#"Go to Docker Hub, find the python image with the 3.9-slim-buster tag, and use it as the base image for my application."
+# Prevent Python from writing .pyc files & enable unbuffered logs
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PORT=8080
 
-#Different containers are separated from each other, so one container's application, dependencies, or processes do not directly interfere with another container.
+WORKDIR /app
 
-WORKDIR /service
-COPY . ./
-RUN pip install -r requirements.txt
-ENTRYPOINT ["python3","app.py"]
+# Install system dependencies for reportlab, cryptography & fonts
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libfreetype6-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
 
+# Copy dependency definition and install
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy application source
+COPY . .
+
+# Expose web service port
+EXPOSE 8080
+
+# Run with high performance gunicorn WSGI server
+CMD exec gunicorn --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120 app:app

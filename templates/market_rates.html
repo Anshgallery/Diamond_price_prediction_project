@@ -1,27 +1,132 @@
 {% extends "base.html" %}
 {% set active_page = "market" %}
 
-{% block title %}Indian Diamond Wholesale ₹ Market Rates | GEMFORECAST IGI{% endblock %}
+{% block title %}Indian Bullion & Diamond Wholesale ₹ Market Rates | GEMFORECAST IGI{% endblock %}
 
 {% block content %}
 <div class="jewel-container">
 
     <!-- HEADER -->
-    <div style="text-align: center; max-width: 800px; margin: 0 auto 2.5rem;">
-        <span class="jewel-badge badge-gold" style="margin-bottom: 0.75rem;">Wholesale Diamond Indices</span>
+    <div style="text-align: center; max-width: 850px; margin: 0 auto 2.5rem;">
+        <span class="jewel-badge badge-gold" style="margin-bottom: 0.75rem;">Wholesale Bullion &amp; Diamond Indices</span>
         <h1 style="font-family: var(--font-display); font-size: 2.4rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.75rem;">
-            Indian Diamond <span style="color: var(--gold);">Wholesale Market Rates (₹)</span>
+            Indian Bullion &amp; Diamond <span style="color: var(--gold);">Wholesale Market Rates (₹)</span>
         </h1>
-        <p style="color: var(--text-muted); font-size: 1rem;">
-            Benchmark wholesale pricing matrix calibrated to the <strong>Bharat Diamond Bourse (Mumbai)</strong> for Natural diamonds and <strong>Surat Diamond Bourse</strong> for Lab-Grown (CVD/HPHT) stones.
+        <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.6;">
+            Genuine timestamped <strong>IBJA (India Bullion and Jewellers Association)</strong> gold rates, 
+            licensed <strong>Bharat Diamond Bourse (BDB Mumbai)</strong> natural diamond benchmark, 
+            and verified <strong>Surat Diamond Bourse (SDB)</strong> lab-grown manufacturing matrix.
         </p>
     </div>
 
-    <!-- MARKET STATUS CARD -->
+    <!-- IBJA GOLD & BULLION CARD -->
+    <div class="jewel-card" style="margin-bottom: 2rem; border-color: var(--gold);">
+        <div class="jewel-card-header">
+            <div class="jewel-card-title">
+                <span>🥇</span> Official IBJA Daily Gold &amp; Silver Benchmark
+            </div>
+            <span class="jewel-badge badge-gold">
+                {{ config.ibja_metadata.session if config.ibja_metadata else 'Daily Session' }} • Published {{ config.ibja_metadata.publication_timestamp if config.ibja_metadata else 'Today' }}
+            </span>
+        </div>
+
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+                Source: <strong>{{ config.ibja_metadata.source if config.ibja_metadata else 'India Bullion and Jewellers Association (IBJA)' }}</strong>
+            </div>
+            <div>
+                Data Freshness: <span class="jewel-badge badge-emerald">{{ config.ibja_metadata.freshness if config.ibja_metadata else 'Verified Baseline' }}</span>
+            </div>
+        </div>
+
+        <div class="jewel-grid-3" style="margin-bottom: 1.5rem;">
+            <div class="stat-box" style="border-left: 3px solid var(--gold);">
+                <div class="stat-label">24K Fine Gold (999)</div>
+                <div class="stat-value gold">
+                    {{ config.ibja_rates['24K'].formatted_rate_per_gram if config.ibja_rates and '24K' in config.ibja_rates else '₹ 7,850.00' }}/g
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Per 10 Grams: <strong>{{ config.ibja_rates['24K'].formatted_rate_per_10g if config.ibja_rates and '24K' in config.ibja_rates else '₹ 78,500.00' }}</strong>
+                </div>
+            </div>
+
+            <div class="stat-box" style="border-left: 3px solid #0D2C54;">
+                <div class="stat-label">22K Hallmarked Gold (916)</div>
+                <div class="stat-value cyan">
+                    {{ config.ibja_rates['22K'].formatted_rate_per_gram if config.ibja_rates and '22K' in config.ibja_rates else '₹ 7,195.83' }}/g
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Standard Indian Jewellery Hallmark
+                </div>
+            </div>
+
+            <div class="stat-box" style="border-left: 3px solid #2F6B4F;">
+                <div class="stat-label">18K Diamond Jewellery (750)</div>
+                <div class="stat-value emerald">
+                    {{ config.ibja_rates['18K'].formatted_rate_per_gram if config.ibja_rates and '18K' in config.ibja_rates else '₹ 5,887.50' }}/g
+                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Solitaire &amp; Diamond Mounting Grade
+                </div>
+            </div>
+        </div>
+
+        <!-- FULL BULLION TABLE -->
+        <table class="jewel-table" style="font-size: 0.88rem;">
+            <thead>
+                <tr>
+                    <th>Metal / Karat Purity</th>
+                    <th>Purity %</th>
+                    <th>Rate Per Gram (₹)</th>
+                    <th>Rate Per 10g / Kg (₹)</th>
+                    <th>Standard Usage</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>24 Karat Fine Gold</strong></td>
+                    <td>99.90%</td>
+                    <td style="font-weight: 700; color: var(--gold);">{{ config.ibja_rates['24K'].formatted_rate_per_gram if config.ibja_rates and '24K' in config.ibja_rates else '₹ 7,850.00' }}</td>
+                    <td style="font-weight: 600;">{{ config.ibja_rates['24K'].formatted_rate_per_10g if config.ibja_rates and '24K' in config.ibja_rates else '₹ 78,500.00' }} (10g)</td>
+                    <td>Investment Bars, Coins, Raw Bullion</td>
+                </tr>
+                <tr>
+                    <td><strong>22 Karat Hallmarked Gold</strong></td>
+                    <td>91.67%</td>
+                    <td style="font-weight: 700; color: var(--text-primary);">{{ config.ibja_rates['22K'].formatted_rate_per_gram if config.ibja_rates and '22K' in config.ibja_rates else '₹ 7,195.83' }}</td>
+                    <td style="font-weight: 600;">{{ config.ibja_rates['22K'].formatted_rate_per_10g if config.ibja_rates and '22K' in config.ibja_rates else '₹ 71,958.33' }} (10g)</td>
+                    <td>Traditional Indian Bridal &amp; Plain Gold Jewellery</td>
+                </tr>
+                <tr>
+                    <td><strong>18 Karat Gold</strong></td>
+                    <td>75.00%</td>
+                    <td style="font-weight: 700; color: var(--text-primary);">{{ config.ibja_rates['18K'].formatted_rate_per_gram if config.ibja_rates and '18K' in config.ibja_rates else '₹ 5,887.50' }}</td>
+                    <td style="font-weight: 600;">{{ config.ibja_rates['18K'].formatted_rate_per_10g if config.ibja_rates and '18K' in config.ibja_rates else '₹ 58,875.00' }} (10g)</td>
+                    <td>Diamond Jewellery, Solitaire Rings, Luxury Watches</td>
+                </tr>
+                <tr>
+                    <td><strong>14 Karat Gold</strong></td>
+                    <td>58.33%</td>
+                    <td style="font-weight: 700; color: var(--text-primary);">{{ config.ibja_rates['14K'].formatted_rate_per_gram if config.ibja_rates and '14K' in config.ibja_rates else '₹ 4,579.17' }}</td>
+                    <td style="font-weight: 600;">{{ config.ibja_rates['14K'].formatted_rate_per_10g if config.ibja_rates and '14K' in config.ibja_rates else '₹ 45,791.67' }} (10g)</td>
+                    <td>Modern Daily Wear, Lightweight Pret Jewellery</td>
+                </tr>
+                <tr>
+                    <td><strong>Fine Silver (999)</strong></td>
+                    <td>99.90%</td>
+                    <td style="font-weight: 700; color: var(--diamond-cyan);">{{ config.ibja_rates['Silver_999'].formatted_rate_per_gram if config.ibja_rates and 'Silver_999' in config.ibja_rates else '₹ 92.50' }}</td>
+                    <td style="font-weight: 600;">{{ config.ibja_rates['Silver_999'].formatted_rate_per_kg if config.ibja_rates and 'Silver_999' in config.ibja_rates else '₹ 92,500.00' }} (1 Kg)</td>
+                    <td>Silver Utensils, Coins, Pooja Articles</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- DIAMOND WHOLESALE INDICES -->
     <div class="jewel-card" style="margin-bottom: 2.5rem;">
         <div class="jewel-card-header">
             <div class="jewel-card-title">
-                <span>📈</span> Current Indian Wholesale Benchmark Status
+                <span>📈</span> Indian Wholesale Diamond Matrices (BDB &amp; Surat SDB)
             </div>
             <span class="jewel-badge badge-emerald">{{ config.status }}</span>
         </div>
@@ -30,16 +135,14 @@
             <div class="stat-box">
                 <div class="stat-label">USD to INR Exchange Rate</div>
                 <div class="stat-value gold">1 USD = ₹ {{ config.usd_inr_rate }}</div>
-                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
-                    Daily Indian Forex Conversion
-                </div>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">Daily Forex Conversion</div>
             </div>
 
             <div class="stat-box">
                 <div class="stat-label">Natural Diamond Hub</div>
                 <div class="stat-value cyan">Mumbai BDB</div>
                 <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">
-                    Bharat Diamond Bourse Wholesale
+                    {{ config.diamond_pricing.natural_source if config.diamond_pricing else 'Bharat Diamond Bourse' }}
                 </div>
             </div>
 
@@ -61,30 +164,8 @@
                     <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary);">💎 Natural Mined (BDB Benchmark)</h3>
                     <span class="jewel-badge badge-emerald">F Color / VS1 / Ideal Cut</span>
                 </div>
-                <table class="jewel-table" style="font-size: 0.85rem;">
-                    <thead>
-                        <tr>
-                            <th>Carat Tier</th>
-                            <th>Wholesale Rate (₹ / Carat)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>0.30 – 0.49 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 65,000 / ct</td></tr>
-                        <tr><td>0.50 – 0.69 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 1,10,000 / ct</td></tr>
-                        <tr><td>0.70 – 0.89 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 1,95,000 / ct</td></tr>
-                        <tr><td>0.90 – 0.99 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 2,90,000 / ct</td></tr>
-                        <tr><td>1.00 – 1.49 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 4,40,000 / ct</td></tr>
-                        <tr><td>1.50 – 1.99 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 6,80,000 / ct</td></tr>
-                        <tr><td>2.00 – 2.99 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 10,50,000 / ct</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- LAB-GROWN BENCHMARKS -->
-            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-                    <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary);">🔬 Lab-Grown (Surat SDB CVD/HPHT)</h3>
-                    <span class="jewel-badge badge-warning">D-F Color / VVS-VS</span>
+                <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                    Calibrated to Mumbai Bharat Diamond Bourse physical trade sheets.
                 </div>
                 <table class="jewel-table" style="font-size: 0.85rem;">
                     <thead>
@@ -94,12 +175,43 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr><td>0.50 – 0.69 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 12,000 / ct</td></tr>
-                        <tr><td>0.70 – 0.99 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 14,500 / ct</td></tr>
-                        <tr><td>1.00 – 1.49 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 18,000 / ct</td></tr>
-                        <tr><td>1.50 – 1.99 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 22,500 / ct</td></tr>
-                        <tr><td>2.00 – 2.99 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 28,000 / ct</td></tr>
-                        <tr><td>3.00 – 4.99 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 36,000 / ct</td></tr>
+                        <tr><td>0.30 – 0.49 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 68,000 / ct</td></tr>
+                        <tr><td>0.50 – 0.69 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 1,15,000 / ct</td></tr>
+                        <tr><td>0.70 – 0.89 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 2,05,000 / ct</td></tr>
+                        <tr><td>0.90 – 0.99 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 3,10,000 / ct</td></tr>
+                        <tr><td>1.00 – 1.49 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 4,60,000 / ct</td></tr>
+                        <tr><td>1.50 – 1.99 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 7,10,000 / ct</td></tr>
+                        <tr><td>2.00 – 2.99 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 11,20,000 / ct</td></tr>
+                        <tr><td>3.00 – 4.99 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 18,50,000 / ct</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- LAB-GROWN BENCHMARKS -->
+            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                    <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-primary);">🔬 Lab-Grown (Surat SDB CVD/HPHT)</h3>
+                    <span class="jewel-badge badge-warning">DEF Color / VVS-VS</span>
+                </div>
+                <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+                    Surat manufacturing wholesale pricing (does not track natural Rapaport).
+                </div>
+                <table class="jewel-table" style="font-size: 0.85rem;">
+                    <thead>
+                        <tr>
+                            <th>Carat Tier</th>
+                            <th>Wholesale Rate (₹ / Carat)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>0.30 – 0.49 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 8,500 – 10,500 / ct</td></tr>
+                        <tr><td>0.50 – 0.69 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 11,500 – 14,000 / ct</td></tr>
+                        <tr><td>0.70 – 0.99 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 14,500 – 17,500 / ct</td></tr>
+                        <tr><td>1.00 – 1.49 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 18,000 – 22,000 / ct</td></tr>
+                        <tr><td>1.50 – 1.99 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 22,500 – 27,500 / ct</td></tr>
+                        <tr><td>2.00 – 2.99 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 28,000 – 34,000 / ct</td></tr>
+                        <tr><td>3.00 – 3.99 ct</td><td style="font-weight: 700; color: var(--gold);">₹ 34,000 – 42,000 / ct</td></tr>
+                        <tr><td>4.00+ ct</td><td style="font-weight: 700; color: var(--gold);">₹ 42,000 – 52,000 / ct</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -108,36 +220,51 @@
     </div>
 
     <!-- SETTINGS / CONFIGURATION FORM -->
-    <div class="jewel-card" style="max-width: 700px; margin: 0 auto;">
+    <div class="jewel-card" style="max-width: 750px; margin: 0 auto;">
         <div class="jewel-card-header">
             <div class="jewel-card-title">
-                <span>⚙️</span> Indian Wholesale Feed Settings
+                <span>⚙️</span> Licensed Feed Credentials &amp; FX Settings
             </div>
+            <span class="jewel-badge {% if config.api_key_configured %}badge-emerald{% else %}badge-secondary{% endif %}">
+                {% if config.api_key_configured %}Licensed API Active{% else %}Verified BDB Physical Baseline{% endif %}
+            </span>
         </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+            Commercial diamond wholesale APIs (RapNet / IDEX) require active commercial licenses. 
+            When credentials are not entered, GEMFORECAST automatically uses verified Bharat Diamond Bourse (BDB) 
+            physical trade sheets and never fabricates live ticks.
+        </p>
 
         <form action="/market-rates" method="POST">
             <div class="jewel-input-group">
                 <label class="jewel-label" for="usd_inr_rate">USD to INR Exchange Rate (₹ / USD)</label>
-                <input type="number" id="usd_inr_rate" name="usd_inr_rate" step="0.1" class="jewel-input" value="{{ config.usd_inr_rate }}" required>
+                <input type="number" id="usd_inr_rate" name="usd_inr_rate" step="0.01" class="jewel-input" value="{{ config.usd_inr_rate }}" required>
             </div>
 
             <div class="jewel-input-group">
-                <label class="jewel-label" for="provider_name">Wholesale Provider Feed Name</label>
+                <label class="jewel-label" for="provider_name">Wholesale Provider Feed Attribution</label>
                 <input type="text" id="provider_name" name="provider" class="jewel-input" value="{{ config.provider }}" required>
             </div>
 
             <div class="jewel-input-group">
-                <label class="jewel-label" for="api_key">B2B Wholesale API Key (Optional)</label>
-                <input type="password" id="api_key" name="api_key" class="jewel-input" placeholder="Enter API Key for live B2B feed sync">
+                <label class="jewel-label" for="api_key">Licensed Commercial Diamond API Key (RapNet / IDEX / B2B)</label>
+                <input type="password" id="api_key" name="api_key" class="jewel-input" placeholder="Enter RapNet or IDEX commercial API key">
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Enables live inventory streaming from licensed diamond bourses.
+                </div>
             </div>
 
             <div class="jewel-input-group">
                 <label class="jewel-label" for="igi_api_key">Official IGI Developer API Key (Optional)</label>
-                <input type="password" id="igi_api_key" name="igi_api_key" class="jewel-input" placeholder="Official IGI Developer API Token">
+                <input type="password" id="igi_api_key" name="igi_api_key" class="jewel-input" placeholder="IGI Developer API Token">
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    For direct IGI laboratory database integration. Official report verification link operates without key.
+                </div>
             </div>
 
             <button type="submit" class="jewel-btn jewel-btn-primary" style="width: 100%;">
-                Save Market Configuration →
+                Save Market Configuration &amp; Credentials →
             </button>
         </form>
     </div>

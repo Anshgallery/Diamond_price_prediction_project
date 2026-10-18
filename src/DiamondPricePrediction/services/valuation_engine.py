@@ -98,13 +98,22 @@ class ValuationEngine:
             retail_markup_mult = 1.0 + (active_markup_pct / 100.0)
             suggested_sell_price = round(fair_market_val * retail_markup_mult + making_charges_inr)
 
-            # Expected Jeweller Gross Profit & Margin
-            expected_profit_inr = round(suggested_sell_price - suggested_buy_price)
-            expected_margin_pct = round((expected_profit_inr / max(suggested_sell_price, 1.0)) * 100.0, 1)
+            # Expected Jeweller Gross Profit & Margin (Decimal Arithmetic)
+            from decimal import Decimal, ROUND_HALF_UP
+            sell_dec = Decimal(str(suggested_sell_price))
+            buy_dec = Decimal(str(suggested_buy_price))
+            profit_dec = (sell_dec - buy_dec).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+            expected_profit_inr = int(profit_dec)
 
-            # GST (3% on polished diamonds in India)
-            gst_amount_inr = round(suggested_sell_price * 0.03)
-            customer_price_with_gst = round(suggested_sell_price + gst_amount_inr)
+            if sell_dec > 0:
+                expected_margin_pct = float(((profit_dec / sell_dec) * Decimal("100")).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP))
+            else:
+                expected_margin_pct = 0.0
+
+            # 3% GST on Diamond / Jewellery
+            gst_dec = (sell_dec * Decimal("0.03")).quantize(Decimal("1"), rounding=ROUND_HALF_UP)
+            gst_amount_inr = int(gst_dec)
+            customer_price_with_gst = int(sell_dec + gst_dec)
 
             # 6. Confidence Score (includes AI Face & Style-Value Alignment)
             confidence = cls._compute_confidence_score(
@@ -148,6 +157,9 @@ class ValuationEngine:
                 "currency": "INR",
                 "currency_symbol": "₹",
                 "origin_type": "Lab-Grown" if is_lab else "Natural",
+                
+                # IGI Independence & Separation Notice
+                "igi_separation_notice": "IGI (International Gemological Institute) is an independent gemological laboratory certifying diamond grading specs (4Cs) only. IGI does not perform monetary appraisals. Valuations and jeweller trade margins are computed independently by the GEMFORECAST Indian wholesale engine.",
                 
                 # Core Indian Pricing Numbers
                 "today_market_price": fair_market_val,

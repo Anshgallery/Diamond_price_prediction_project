@@ -93,4 +93,142 @@ def test_save_to_workshop_endpoint(client):
     assert res.status_code == 200
     assert b"successfully saved to Workshop" in res.data or b"Workshop" in res.data
 
+def test_ibja_rates_api(client):
+    res = client.get("/api/ibja-rates")
+    assert res.status_code == 200
+    data = res.get_json()
+    assert "rates" in data
+    assert "24K" in data["rates"]
+    assert "22K" in data["rates"]
+    assert "18K" in data["rates"]
+    assert "14K" in data["rates"]
+    assert "Silver_999" in data["rates"]
+    assert "publication_timestamp" in data
+    assert "source" in data
+
+def test_calculate_jewellery_api(client):
+    payload = {
+        "net_gold_weight": 8.5,
+        "purity_str": "18K",
+        "wastage_pct": 5.0,
+        "custom_gold_rate": 70000,
+        "diamond_carat": 0.75,
+        "diamond_rate_per_carat": 120000,
+        "gemstone_cost": 5000,
+        "making_charge_per_gram": 650,
+        "hallmarking_fee": 45,
+        "retail_markup_pct": 18.0,
+        "discount_pct": 2.0,
+        "is_interstate": False
+    }
+    res = client.post("/api/calculate-jewellery", json=payload)
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data["success"] is True
+    calc = data["data"]
+    assert "landed_cost" in calc
+    assert "grand_total" in calc
+    assert "cgst_amount" in calc
+    assert "sgst_amount" in calc
+    assert calc["cgst_amount"] == calc["sgst_amount"]
+    assert calc["total_gst"] > 0
+    assert calc["profit_amount"] > 0
+    assert calc["margin_pct"] > 0
+
+def test_invoices_full_lifecycle(client):
+    from DiamondPricePrediction.services.invoice_service import InvoiceService
+
+    # 1. Access invoices ledger
+    res_list = client.get("/invoices")
+    assert res_list.status_code == 200
+    assert b"Bill History" in res_list.data or b"Tax Invoices" in res_list.data
+
+    # 2. Create invoice
+    invoice_payload = {
+        "customer_name": "Deepak Verma",
+        "customer_phone": "+91 98765 43210",
+        "customer_email": "deepak@example.com",
+        "customer_address": "404, Bandra West, Mumbai 400050",
+        "customer_state": "Maharashtra",
+        "customer_pan": "ABCDE1234F",
+        "item_title": "18K Diamond Solitaire Engagement Ring",
+        "jewellery_type": "Ring",
+        "hsn_code": "7113",
+        "purity": "18K",
+        "gross_weight": "9.200",
+        "net_gold_weight": "8.500",
+        "wastage_pct": "5.00",
+        "gold_rate": "72000.00",
+        "diamond_carat": "0.700",
+        "diamond_rate_per_carat": "125000.00",
+        "diamond_clarity": "VVS1",
+        "diamond_color": "F",
+        "diamond_cut": "Ideal",
+        "diamond_origin": "Natural",
+        "diamond_cert_number": "584392810",
+        "gemstone_name": "Emerald Accent",
+        "gemstone_weight": "0.300",
+        "gemstone_cost": "4500.00",
+        "making_type": "per_gram",
+        "making_rate": "700.00",
+        "hallmarking_fee": "45.00",
+        "certification_fee": "2500.00",
+        "retail_markup_pct": "18.00",
+        "discount_pct": "3.00",
+        "is_interstate": "0",
+        "notes": "Complimentary yearly ultrasonic cleaning included."
+    }
+
+    res_create = client.post("/invoice/create", data=invoice_payload, follow_redirects=True)
+    assert res_create.status_code == 200
+    assert b"Deepak Verma" in res_create.data
+    assert b"GF-" in res_create.data
+
+    # Retrieve created invoice from db
+    invoices = InvoiceService.list_invoices(jeweller_id="default", limit=1)
+    assert len(invoices) >= 1
+    inv = invoices[0]
+    inv_id = inv["id"]
+    share_token = inv["share_token"]
+
+    # 3. View internal invoice
+    res_view = client.get(f"/invoice/{inv_id}")
+    assert res_view.status_code == 200
+    assert b"Confidential Jeweller Metrics" in res_view.data or b"Margin" in res_view.data
+    assert b"Direct Print" in res_view.data
+    assert b"Download PDF" in res_view.data
+
+    # 4. Download PDF from internal view
+    res_pdf = client.get(f"/invoice/{inv_id}/pdf")
+    assert res_pdf.status_code == 200
+    assert res_pdf.content_type == "application/pdf"
+    assert res_pdf.data.startswith(b"%PDF")
+    assert inv['invoice_number'] in res_pdf.headers.get("Content-Disposition", "")
+
+    # 5. Access public share link (Confidential metrics MUST NOT be present)
+    res_share = client.get(f"/invoice/share/{share_token}")
+    assert res_share.status_code == 200
+    assert b"Deepak Verma" in res_share.data
+    assert b"Confidential Jeweller Metrics" not in res_share.data
+    assert b"Profit" not in res_share.data
+    assert b"Landed Cost" not in res_share.data
+
+    # 6. Public share PDF download
+    res_share_pdf = client.get(f"/invoice/share/{share_token}/pdf")
+    assert res_share_pdf.status_code == 200
+    assert res_share_pdf.content_type == "application/pdf"
+    assert res_share_pdf.data.startswith(b"%PDF")
+
+    # 7. Update status to Paid
+    res_status = client.post(f"/invoice/{inv_id}/status", data={"status": "Paid"}, follow_redirects=True)
+    assert res_status.status_code == 200
+    updated_inv = InvoiceService.get_invoice_by_id(inv_id)
+    assert updated_inv["status"] == "Paid"
+
+    # 8. Delete invoice
+    res_delete = client.post(f"/invoice/{inv_id}/delete", follow_redirects=True)
+    assert res_delete.status_code == 200
+    assert InvoiceService.get_invoice_by_id(inv_id) is None
+
+
 
