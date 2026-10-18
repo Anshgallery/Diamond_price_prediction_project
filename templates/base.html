@@ -16,6 +16,58 @@
 </head>
 <body>
 
+    <!-- TOP LIVE BULLION BENCHMARK TICKER -->
+    <div class="bullion-ticker-bar" id="globalBullionBar" style="background: #0F172A; color: #F1F5F9; font-size: 0.8rem; padding: 0.45rem 1.25rem; border-bottom: 1px solid rgba(217, 119, 6, 0.4); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.35rem;">
+                <span style="color: var(--gold); font-weight: 700;">🪙 LIVE BULLION:</span>
+                {% if bullion_rates and bullion_rates.is_stale %}
+                    <span class="jewel-badge badge-ruby" style="font-size: 0.68rem; padding: 0.15rem 0.5rem;" title="Market feed offline; showing last valid rates">⚠️ STALE</span>
+                {% else %}
+                    <span class="jewel-badge badge-emerald" style="font-size: 0.68rem; padding: 0.15rem 0.5rem;">● LIVE</span>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; font-family: var(--font-mono, monospace);">
+                <span title="Gold 24K (999 Fine) per gram">
+                    <strong style="color: #FBBF24;">Gold 24K:</strong> 
+                    <span id="tickerGold24k">{{ bullion_rates.rates['24K'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates and '24K' in bullion_rates.rates else '₹ 14,828.00' }}/g</span>
+                </span>
+                <span title="Gold 22K (916 Hallmarked) per gram">
+                    <strong style="color: #FCD34D;">22K:</strong> 
+                    <span id="tickerGold22k">{{ bullion_rates.rates['22K'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates and '22K' in bullion_rates.rates else '₹ 13,592.00' }}/g</span>
+                </span>
+                <span title="Gold 18K (750 Diamond Std) per gram">
+                    <strong style="color: #FDE68A;">18K:</strong> 
+                    <span id="tickerGold18k">{{ bullion_rates.rates['18K'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates and '18K' in bullion_rates.rates else '₹ 11,121.00' }}/g</span>
+                </span>
+                <span title="Silver 999 Fine per gram">
+                    <strong style="color: #38BDF8;">Silver 999:</strong> 
+                    <span id="tickerSilver999">{{ bullion_rates.rates['Silver_999'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates and 'Silver_999' in bullion_rates.rates else '₹ 212.00' }}/g</span>
+                </span>
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.75rem;">
+            <span style="color: #94A3B8;">
+                Src: <strong style="color: #F8FAFC;">{{ bullion_rates.source if bullion_rates else 'Bullions.co.in Live' }}</strong>
+                (<span id="tickerTimestamp">{{ bullion_rates.fetched_timestamp if bullion_rates else 'Today' }}</span>)
+            </span>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <a href="https://bullions.co.in/" target="_blank" rel="noopener noreferrer" style="color: #FCD34D; font-weight: 600; text-decoration: none;" title="Open Bullions.co.in live portal in new tab">
+                    Bullions ↗
+                </a>
+                <span style="color: #475569;">|</span>
+                <a href="https://www.ibja.co/" target="_blank" rel="noopener noreferrer" style="color: #FCD34D; font-weight: 600; text-decoration: none;" title="Open Official IBJA website in new tab">
+                    IBJA ↗
+                </a>
+                <button type="button" onclick="refreshBullionsGlobal(event)" id="btnGlobalBullionRefresh" class="jewel-btn jewel-btn-secondary jewel-btn-xs" style="padding: 0.2rem 0.55rem; font-size: 0.72rem; border-color: #475569;" title="Force sync latest Bullions.co.in rates">
+                    🔄 Sync
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- TOP NAVIGATION -->
     <nav class="jewel-nav">
         <a href="/" class="jewel-logo">
@@ -74,7 +126,13 @@
                     Calibrated for Bharat Diamond Bourse (Mumbai) & Surat Diamond Bourse LGD Wholesale Hubs.
                 </div>
             </div>
-            <div style="display: flex; gap: 1rem; font-size: 0.85rem;">
+            <div style="display: flex; gap: 1rem; font-size: 0.85rem; align-items: center; flex-wrap: wrap;">
+                <a href="https://bullions.co.in/" target="_blank" rel="noopener noreferrer" style="color: var(--gold); text-decoration: none; font-weight: 600;" title="Live Bullions Portal">
+                    🪙 Bullions.co.in ↗
+                </a>
+                <a href="https://www.ibja.co/" target="_blank" rel="noopener noreferrer" style="color: var(--gold); text-decoration: none; font-weight: 600;" title="India Bullion & Jewellers Association">
+                    🏛️ IBJA (ibja.co) ↗
+                </a>
                 <span class="jewel-badge badge-emerald">● IGI Verified Portal Ready</span>
                 <span class="jewel-badge badge-gold">● INR (₹) Wholesale Feeds</span>
                 <span class="jewel-badge badge-cyan">● 3% GST Compliant</span>
@@ -84,6 +142,35 @@
 
     <!-- Core Platform JS -->
     <script src="{{ url_for('static', filename='js/jeweller_platform.js') }}"></script>
+    <script>
+    function refreshBullionsGlobal(e) {
+        if (e) e.preventDefault();
+        const btn = document.getElementById('btnGlobalBullionRefresh');
+        if (btn) btn.innerText = '⌛...';
+        fetch('/api/bullion/sync?force=true')
+            .then(res => res.json())
+            .then(data => {
+                if (btn) btn.innerText = '✓ Synced';
+                setTimeout(() => { if (btn) btn.innerText = '🔄 Sync'; }, 1800);
+                if (data && data.rates) {
+                    const g24 = document.getElementById('tickerGold24k');
+                    const g22 = document.getElementById('tickerGold22k');
+                    const g18 = document.getElementById('tickerGold18k');
+                    const s99 = document.getElementById('tickerSilver999');
+                    const ts = document.getElementById('tickerTimestamp');
+                    if (g24 && data.rates['24K']) g24.innerText = data.rates['24K'].formatted_rate_per_gram + '/g';
+                    if (g22 && data.rates['22K']) g22.innerText = data.rates['22K'].formatted_rate_per_gram + '/g';
+                    if (g18 && data.rates['18K']) g18.innerText = data.rates['18K'].formatted_rate_per_gram + '/g';
+                    if (s99 && data.rates['Silver_999']) s99.innerText = data.rates['Silver_999'].formatted_rate_per_gram + '/g';
+                    if (ts && data.fetched_timestamp) ts.innerText = data.fetched_timestamp;
+                }
+            })
+            .catch(err => {
+                console.error('Bullion sync error:', err);
+                if (btn) btn.innerText = '⚠️ Error';
+            });
+    }
+    </script>
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>

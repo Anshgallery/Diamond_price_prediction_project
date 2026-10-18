@@ -1,67 +1,76 @@
 {
-  "is_live": false,
-  "source": "India Bullion and Jewellers Association (IBJA) Official Benchmark",
-  "session": "Opening (AM) Benchmark",
-  "publication_timestamp": "17 Oct 2026, Opening (AM) Benchmark",
-  "fetched_timestamp": "17 Oct 2026, 01:28:16 PM IST",
-  "freshness": "Verified Official Daily Benchmark Baseline",
-  "base_24k_rate_per_gram": 7850.0,
+  "is_live": true,
+  "is_stale": false,
+  "status": "LIVE",
+  "source": "Bullions.co.in Live Market Rates",
+  "session": "India MCX Session: 18 Oct, 18:20",
+  "publication_timestamp": "18 Oct 2026, 06:23 PM IST",
+  "fetched_timestamp": "18 Oct 2026, 06:23:13 PM IST",
+  "freshness": "Live Broadcast (Bullions.co.in)",
+  "base_24k_rate_per_gram": 14828.0,
+  "base_silver_rate_per_gram": 212.0,
   "rates": {
     "24K": {
       "purity_code": "24K",
       "purity_percentage": "100.00%",
-      "rate_per_gram": 7850.0,
-      "rate_per_10g": 78500.0,
-      "formatted_rate_per_gram": "\u20b9 7,850.00",
-      "formatted_rate_per_10g": "\u20b9 78,500.00"
+      "rate_per_gram": 14828.0,
+      "rate_per_10g": 148280.0,
+      "formatted_rate_per_gram": "\u20b9 14,828.00",
+      "formatted_rate_per_10g": "\u20b9 148,280.00"
     },
     "22K": {
       "purity_code": "22K",
       "purity_percentage": "91.67%",
-      "rate_per_gram": 7195.83,
-      "rate_per_10g": 71958.3,
-      "formatted_rate_per_gram": "\u20b9 7,195.83",
-      "formatted_rate_per_10g": "\u20b9 71,958.30"
+      "rate_per_gram": 13592.0,
+      "rate_per_10g": 135923.0,
+      "formatted_rate_per_gram": "\u20b9 13,592.00",
+      "formatted_rate_per_10g": "\u20b9 135,923.00"
     },
     "18K": {
       "purity_code": "18K",
       "purity_percentage": "75.00%",
-      "rate_per_gram": 5887.5,
-      "rate_per_10g": 58875.0,
-      "formatted_rate_per_gram": "\u20b9 5,887.50",
-      "formatted_rate_per_10g": "\u20b9 58,875.00"
+      "rate_per_gram": 11121.0,
+      "rate_per_10g": 111210.0,
+      "formatted_rate_per_gram": "\u20b9 11,121.00",
+      "formatted_rate_per_10g": "\u20b9 111,210.00"
     },
     "14K": {
       "purity_code": "14K",
       "purity_percentage": "58.33%",
-      "rate_per_gram": 4579.17,
-      "rate_per_10g": 45791.7,
-      "formatted_rate_per_gram": "\u20b9 4,579.17",
-      "formatted_rate_per_10g": "\u20b9 45,791.70"
+      "rate_per_gram": 8650.0,
+      "rate_per_10g": 86500.0,
+      "formatted_rate_per_gram": "\u20b9 8,650.00",
+      "formatted_rate_per_10g": "\u20b9 86,500.00"
     },
     "10K": {
       "purity_code": "10K",
       "purity_percentage": "41.67%",
-      "rate_per_gram": 3270.83,
-      "rate_per_10g": 32708.3,
-      "formatted_rate_per_gram": "\u20b9 3,270.83",
-      "formatted_rate_per_10g": "\u20b9 32,708.30"
+      "rate_per_gram": 6178.33,
+      "rate_per_10g": 61783.3,
+      "formatted_rate_per_gram": "\u20b9 6,178.33",
+      "formatted_rate_per_10g": "\u20b9 61,783.30"
     },
     "9K": {
       "purity_code": "9K",
       "purity_percentage": "37.50%",
-      "rate_per_gram": 2943.75,
-      "rate_per_10g": 29437.5,
-      "formatted_rate_per_gram": "\u20b9 2,943.75",
-      "formatted_rate_per_10g": "\u20b9 29,437.50"
+      "rate_per_gram": 5560.5,
+      "rate_per_10g": 55605.0,
+      "formatted_rate_per_gram": "\u20b9 5,560.50",
+      "formatted_rate_per_10g": "\u20b9 55,605.00"
     },
     "Silver_999": {
       "purity_code": "Silver 999",
       "purity_percentage": "99.90%",
-      "rate_per_gram": 92.5,
-      "rate_per_kg": 92500.0,
-      "formatted_rate_per_gram": "\u20b9 92.50",
-      "formatted_rate_per_kg": "\u20b9 92,500.00"
+      "rate_per_gram": 212.0,
+      "rate_per_kg": 211820.0,
+      "formatted_rate_per_gram": "\u20b9 212.00",
+      "formatted_rate_per_kg": "\u20b9 211,820.00"
+    },
+    "Silver_925": {
+      "purity_code": "Silver 925",
+      "purity_percentage": "92.50%",
+      "rate_per_gram": 196.0,
+      "formatted_rate_per_gram": "\u20b9 196.00"
     },
     "Platinum_950": {
       "purity_code": "Platinum Pt950",
@@ -70,5 +79,7 @@
       "formatted_rate_per_gram": "\u20b9 3,150.00"
     }
   },
-  "disclaimer": "Official IBJA benchmark rates are published twice daily (Opening AM & Closing PM) excluding Sundays and bank holidays. When network access is restricted, system presents the verified published baseline and never fabricates live ticks."
+  "bullions_url": "https://bullions.co.in/",
+  "ibja_url": "https://www.ibja.co/",
+  "disclaimer": "Market rates fetched live from Bullions.co.in & official IBJA benchmarks. If network connectivity fails, the last valid rate is marked STALE with timestamp; the platform never generates fake or simulated market ticks."
 }

@@ -24,6 +24,42 @@
         </div>
     </div>
 
+    <!-- BULLIONS & IBJA LIVE RATE BENCHMARK BANNER -->
+    <div class="jewel-card" style="margin-bottom: 2rem; background: #FAF8F2; border: 1.5px solid var(--gold); padding: 1rem 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <span style="font-size: 1.2rem;">🪙</span>
+                <div>
+                    <strong style="color: var(--text-primary); font-size: 0.92rem;">
+                        Live Bullion Valuation Benchmark: 
+                        Gold 24K: <span style="color: var(--gold);">{{ bullion_rates.rates['24K'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates else '₹ 14,828.00' }}/g</span> • 
+                        22K: <span style="color: var(--text-primary);">{{ bullion_rates.rates['22K'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates else '₹ 13,592.00' }}/g</span> • 
+                        18K: <span style="color: var(--text-primary);">{{ bullion_rates.rates['18K'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates else '₹ 11,121.00' }}/g</span> • 
+                        Silver 999: <span style="color: var(--diamond-cyan);">{{ bullion_rates.rates['Silver_999'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates else '₹ 212.00' }}/g</span>
+                    </strong>
+                    <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.2rem;">
+                        Source: <strong>{{ bullion_rates.source if bullion_rates else 'Bullions.co.in' }}</strong> • 
+                        Timestamp: <strong>{{ bullion_rates.fetched_timestamp if bullion_rates else 'Today' }}</strong>
+                        {% if bullion_rates and bullion_rates.is_stale %}
+                            <span class="jewel-badge badge-ruby" style="font-size: 0.68rem; padding: 0.1rem 0.4rem;">⚠️ STALE BENCHMARK</span>
+                        {% else %}
+                            <span class="jewel-badge badge-emerald" style="font-size: 0.68rem; padding: 0.1rem 0.4rem;">● LIVE FEED</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.82rem;">
+                <a href="https://bullions.co.in/" target="_blank" rel="noopener noreferrer" class="jewel-btn jewel-btn-secondary jewel-btn-sm" style="color: var(--gold); font-weight: 700;">
+                    🪙 Bullions.co.in ↗
+                </a>
+                <a href="https://www.ibja.co/" target="_blank" rel="noopener noreferrer" class="jewel-btn jewel-btn-secondary jewel-btn-sm" style="color: var(--gold); font-weight: 700;">
+                    🏛️ IBJA (ibja.co) ↗
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- STATS SUMMARY CARDS -->
     <div class="jewel-grid-4" style="margin-bottom: 2rem;">
         <div class="stat-box">
@@ -148,8 +184,8 @@
                                     <a href="/invoice/{{ inv.id }}" class="jewel-btn jewel-btn-secondary jewel-btn-sm" title="View Full Details & Internal Margins">
                                         👁️ View
                                     </a>
-                                    <a href="/invoice/share/{{ inv.share_token }}" target="_blank" class="jewel-btn jewel-btn-secondary jewel-btn-sm" title="Open Customer Public Share Link">
-                                        🔗 Share
+                                    <a href="/invoice/share/{{ inv.share_token }}" target="_blank" rel="noopener noreferrer" class="jewel-btn jewel-btn-secondary jewel-btn-sm" title="Open Customer Public E-Invoice in new tab">
+                                        🔗 Share ↗️
                                     </a>
                                     <a href="/invoice/{{ inv.id }}/pdf" class="jewel-btn jewel-btn-secondary jewel-btn-sm" title="Download Official PDF">
                                         📥 PDF

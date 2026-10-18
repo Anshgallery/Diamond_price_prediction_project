@@ -6,7 +6,7 @@ from DiamondPricePrediction.services.indian_market_service import IndianMarketSe
 from DiamondPricePrediction.services.valuation_engine import ValuationEngine
 
 def test_ibja_gold_rates_purity_factors():
-    """Verify IBJA gold rates calculation across purities with Decimal precision."""
+    """Verify IBJA and Bullions.co.in gold rates calculation across purities with Decimal precision."""
     rates_data = IBJAGoldService.get_current_rates()
 
     assert "rates" in rates_data
@@ -23,19 +23,57 @@ def test_ibja_gold_rates_purity_factors():
     rate_22k = rates_data["rates"]["22K"]["rate_per_gram"]
     rate_18k = rates_data["rates"]["18K"]["rate_per_gram"]
 
-    # 22K should be exactly 22/24 of 24K
+    # Market rate for 22K is approx 22/24 of 24K (allow market rounding up to 1.0 rupee)
     expected_22k = round(base_24k * (22.0 / 24.0), 2)
-    assert abs(rate_22k - expected_22k) <= 0.05
+    assert abs(rate_22k - expected_22k) <= 1.5
 
-    # 18K should be exactly 75% of 24K
+    # 18K is approx 75% of 24K (allow market rounding up to 1.0 rupee)
     expected_18k = round(base_24k * 0.75, 2)
-    assert abs(rate_18k - expected_18k) <= 0.05
+    assert abs(rate_18k - expected_18k) <= 1.5
 
-    # Check timestamps and metadata
+    # Check timestamps, sources and links
     assert len(rates_data["publication_timestamp"]) > 5
     assert len(rates_data["fetched_timestamp"]) > 5
-    assert "IBJA" in rates_data["source"]
+    assert "IBJA" in rates_data["source"] or "Bullions" in rates_data["source"]
     assert rates_data["freshness"] is not None
+    assert rates_data["bullions_url"] == "https://bullions.co.in/"
+    assert rates_data["ibja_url"] == "https://www.ibja.co/"
+    assert rates_data["status"] in ["LIVE", "STALE"]
+
+
+def test_bullions_live_scraping_and_stale_fallback(monkeypatch):
+    """Verify live rate fetching from Bullions.co.in and graceful STALE fallback without faking."""
+    # 1. Test live rates
+    live_rates = IBJAGoldService.get_current_rates(force_refresh=True)
+    assert live_rates["rates"]["24K"]["rate_per_gram"] > 0
+    assert live_rates["rates"]["22K"]["rate_per_gram"] > 0
+    assert live_rates["rates"]["18K"]["rate_per_gram"] > 0
+    assert live_rates["rates"]["Silver_999"]["rate_per_gram"] > 0
+    assert live_rates["bullions_url"] == "https://bullions.co.in/"
+    assert live_rates["ibja_url"] == "https://www.ibja.co/"
+
+    # 2. Test STALE fallback when network fails
+    def mock_failing_fetch():
+        return None
+
+    monkeypatch.setattr(IBJAGoldService, "_fetch_live_bullions_rates", mock_failing_fetch)
+    monkeypatch.setattr(IBJAGoldService, "_fetch_live_ibja_rates", mock_failing_fetch)
+
+    # Force fresh read with failures
+    stale_rates = IBJAGoldService.get_current_rates(force_refresh=True)
+    assert stale_rates["is_stale"] is True
+    assert stale_rates["status"] == "STALE"
+    assert "STALE" in stale_rates["freshness"]
+    assert stale_rates["rates"]["24K"]["rate_per_gram"] > 0
+
+
+def test_jeweller_login_bullion_sync():
+    """Verify that sync_on_login successfully updates rates cache."""
+    sync_res = IBJAGoldService.sync_on_login(force_refresh=True)
+    assert sync_res is not None
+    assert "rates" in sync_res
+    assert "24K" in sync_res["rates"]
+    assert "Silver_999" in sync_res["rates"]
 
 def test_ibja_metal_cost_formula():
     """Verify net weight, wastage % and purity rate calculation."""

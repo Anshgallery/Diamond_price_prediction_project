@@ -96,19 +96,27 @@ class IndianMarketService:
 
         return {
             "usd_inr_rate": live_rate,
-            "provider": "IBJA Official Bullion Benchmark & BDB / Surat SDB Wholesale Diamond Indices",
+            "provider": "Bullions.co.in Live Feeds & IBJA Official Benchmarks • BDB & Surat SDB Indices",
             "api_key_configured": has_licensed_key,
             "last_sync": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
-            "status": f"IBJA Rates Active • USD/INR = ₹{live_rate:.2f} • BDB & Surat Wholesale Active",
+            "status": f"Bullions & IBJA Rates Active • USD/INR = ₹{live_rate:.2f} • BDB & Surat Wholesale Active",
             "ibja_rates": ibja_data.get("rates", {}),
+            "bullion_rates": ibja_data.get("rates", {}),
+            "bullions_url": "https://bullions.co.in/",
+            "ibja_url": "https://www.ibja.co/",
             "ibja_metadata": {
                 "source": ibja_data.get("source"),
                 "session": ibja_data.get("session"),
                 "publication_timestamp": ibja_data.get("publication_timestamp"),
                 "fetched_timestamp": ibja_data.get("fetched_timestamp"),
                 "is_live": ibja_data.get("is_live"),
+                "is_stale": ibja_data.get("is_stale", False),
+                "status": ibja_data.get("status", "LIVE"),
                 "freshness": ibja_data.get("freshness"),
-                "base_24k_rate_per_gram": ibja_data.get("base_24k_rate_per_gram")
+                "base_24k_rate_per_gram": ibja_data.get("base_24k_rate_per_gram"),
+                "base_silver_rate_per_gram": ibja_data.get("base_silver_rate_per_gram"),
+                "bullions_url": "https://bullions.co.in/",
+                "ibja_url": "https://www.ibja.co/"
             },
             "diamond_pricing": {
                 "has_licensed_key": has_licensed_key,

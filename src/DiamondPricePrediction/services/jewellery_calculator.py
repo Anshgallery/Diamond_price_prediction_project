@@ -52,7 +52,11 @@ class JewelleryCalculator:
             metal_label = f"{purity} Gold ({net_weight}g Net + {wastage_pct}% Wastage)"
             metal_category = "Gold"
         elif metal_type == "silver":
-            silver_base = Decimal(str(custom_base_rate)) if custom_base_rate > 0 else IBJAGoldService.BASE_BENCHMARK_SILVER_PER_G
+            if custom_base_rate > 0:
+                silver_base = Decimal(str(custom_base_rate))
+            else:
+                curr_rates = IBJAGoldService.get_current_rates()
+                silver_base = Decimal(str(curr_rates.get("rates", {}).get("Silver_999", {}).get("rate_per_gram", IBJAGoldService.BASE_BENCHMARK_SILVER_PER_G)))
             if "925" in purity or "sterling" in purity.lower():
                 metal_rate_per_g = (silver_base * Decimal("0.925")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
                 purity_label = "Sterling Silver 925"
@@ -65,7 +69,11 @@ class JewelleryCalculator:
             metal_label = f"{purity_label} ({net_weight}g Net + {wastage_pct}% Wastage)"
             metal_category = "Silver"
         elif metal_type == "platinum":
-            plat_base = Decimal(str(custom_base_rate)) if custom_base_rate > 0 else IBJAGoldService.BASE_BENCHMARK_PLATINUM_PER_G
+            if custom_base_rate > 0:
+                plat_base = Decimal(str(custom_base_rate))
+            else:
+                curr_rates = IBJAGoldService.get_current_rates()
+                plat_base = Decimal(str(curr_rates.get("rates", {}).get("Platinum_950", {}).get("rate_per_gram", IBJAGoldService.BASE_BENCHMARK_PLATINUM_PER_G)))
             if "900" in purity:
                 metal_rate_per_g = (plat_base * Decimal("0.90")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
                 purity_label = "Platinum Pt900"
@@ -536,7 +544,15 @@ class JewelleryCalculator:
             "total_state_tax": float(tot_state_tax),
             "formatted_total_state_tax": f"{tot_state_tax:,.2f}",
             "total_hsn_tax": float(tot_hsn_tax),
-            "formatted_total_hsn_tax": f"{tot_hsn_tax:,.2f}"
+            "formatted_total_hsn_tax": f"{tot_hsn_tax:,.2f}",
+
+            # Live Bullions & IBJA Traceability
+            "bullions_url": "https://bullions.co.in/",
+            "ibja_url": "https://www.ibja.co/",
+            "bullion_source": IBJAGoldService.get_current_rates().get("source", "Bullions.co.in Live Market Rates"),
+            "bullion_timestamp": IBJAGoldService.get_current_rates().get("fetched_timestamp", ""),
+            "bullion_is_stale": IBJAGoldService.get_current_rates().get("is_stale", False),
+            "bullion_status": IBJAGoldService.get_current_rates().get("status", "LIVE")
         }
 
     @classmethod

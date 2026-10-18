@@ -150,47 +150,61 @@
         <!-- RIGHT SIDEBAR: LIVE MARKET RATES & TOLKOWSKY CUT ANALYZER -->
         <div style="display: flex; flex-direction: column; gap: 1.5rem;">
 
-            <!-- WIDGET 1: LIVE IBJA BULLION RATES GLANCE -->
+            <!-- WIDGET 1: LIVE BULLIONS & IBJA RATES GLANCE -->
             <div class="jewel-card" style="padding: 1.25rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.4rem;">
                     <div class="jewel-card-title" style="font-size: 1rem;">
-                        <span>🪙</span> Live IBJA Bullion Rates
+                        <span>🪙</span> Live Bullion Rates (₹/gram)
                     </div>
-                    <span class="jewel-badge badge-gold" style="font-size: 0.7rem;">{{ ibja_rates.session if ibja_rates else 'Daily AM' }}</span>
+                    {% if bullion_rates and bullion_rates.is_stale %}
+                        <span class="jewel-badge badge-ruby" style="font-size: 0.7rem;">⚠️ STALE</span>
+                    {% else %}
+                        <span class="jewel-badge badge-emerald" style="font-size: 0.7rem;">● LIVE</span>
+                    {% endif %}
                 </div>
                 <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.75rem;">
-                    {{ ibja_rates.publication_timestamp if ibja_rates else 'Official IBJA Benchmark' }}
+                    Source: <strong style="color: var(--text-primary);">{{ bullion_rates.source if bullion_rates else 'Bullions.co.in Live Market' }}</strong><br>
+                    Updated: <strong>{{ bullion_rates.fetched_timestamp if bullion_rates else 'Today' }}</strong>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.75rem;">
                     <div style="background: var(--bg-body); padding: 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
                         <div style="font-size: 0.72rem; color: var(--text-muted);">24K Pure Gold</div>
-                        <strong style="color: var(--text-primary); font-size: 0.95rem;">
-                            {{ ibja_rates.rates['24K'].formatted_rate_per_10g if ibja_rates and ibja_rates.rates else '₹ 78,500' }}
+                        <strong style="color: var(--gold); font-size: 0.95rem;">
+                            {{ bullion_rates.rates['24K'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates else '₹ 14,828.00' }}/g
                         </strong>
-                        <div style="font-size: 0.68rem; color: var(--text-muted);">per 10 grams</div>
+                        <div style="font-size: 0.68rem; color: var(--text-muted);">99.9% Purity</div>
                     </div>
                     <div style="background: var(--bg-body); padding: 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
                         <div style="font-size: 0.72rem; color: var(--text-muted);">22K Standard Gold</div>
                         <strong style="color: var(--text-primary); font-size: 0.95rem;">
-                            {{ ibja_rates.rates['22K'].formatted_rate_per_10g if ibja_rates and ibja_rates.rates else '₹ 71,958' }}
+                            {{ bullion_rates.rates['22K'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates else '₹ 13,592.00' }}/g
                         </strong>
                         <div style="font-size: 0.68rem; color: var(--text-muted);">91.6% Fineness</div>
                     </div>
                     <div style="background: var(--bg-body); padding: 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
                         <div style="font-size: 0.72rem; color: var(--text-muted);">18K Studded Gold</div>
                         <strong style="color: var(--gold); font-size: 0.95rem;">
-                            {{ ibja_rates.rates['18K'].formatted_rate_per_10g if ibja_rates and ibja_rates.rates else '₹ 58,875' }}
+                            {{ bullion_rates.rates['18K'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates else '₹ 11,121.00' }}/g
                         </strong>
                         <div style="font-size: 0.68rem; color: var(--text-muted);">Solitaire Standard</div>
                     </div>
                     <div style="background: var(--bg-body); padding: 0.65rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
                         <div style="font-size: 0.72rem; color: var(--text-muted);">Silver 999 Fine</div>
-                        <strong style="color: var(--text-primary); font-size: 0.95rem;">
-                            {{ ibja_rates.rates['Silver_999'].formatted_rate_per_kg if ibja_rates and ibja_rates.rates else '₹ 92,500' }}
+                        <strong style="color: var(--diamond-cyan); font-size: 0.95rem;">
+                            {{ bullion_rates.rates['Silver_999'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates else '₹ 212.00' }}/g
                         </strong>
-                        <div style="font-size: 0.68rem; color: var(--text-muted);">per 1 kilogram</div>
+                        <div style="font-size: 0.68rem; color: var(--text-muted);">Pure Silver</div>
                     </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 0.5rem; font-size: 0.75rem;">
+                    <a href="https://bullions.co.in/" target="_blank" rel="noopener noreferrer" style="color: var(--gold); text-decoration: none; font-weight: 600;" title="Bullions.co.in live portal">
+                        🪙 Bullions.co.in ↗
+                    </a>
+                    <a href="https://www.ibja.co/" target="_blank" rel="noopener noreferrer" style="color: var(--gold); text-decoration: none; font-weight: 600;" title="IBJA official portal">
+                        🏛️ IBJA (ibja.co) ↗
+                    </a>
                 </div>
             </div>
 

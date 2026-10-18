@@ -89,12 +89,29 @@ class InvoiceService:
 
     @classmethod
     def _generate_next_invoice_number(cls, conn: sqlite3.Connection) -> str:
-        """Generates sequential invoice number e.g. GF-2026-0001."""
+        """Generates collision-free sequential invoice number e.g. GF-2026-0001."""
         year_str = datetime.now(timezone.utc).strftime("%Y")
         cursor = conn.cursor()
-        cursor.execute("SELECT COUNT(*) FROM invoices WHERE invoice_number LIKE ?", (f"GF-{year_str}-%",))
-        count = cursor.fetchone()[0]
-        return f"GF-{year_str}-{count + 1:04d}"
+        cursor.execute("SELECT invoice_number FROM invoices WHERE invoice_number LIKE ?", (f"GF-{year_str}-%",))
+        rows = cursor.fetchall()
+        max_seq = 0
+        for (inv_num,) in rows:
+            try:
+                parts = str(inv_num).split("-")
+                if len(parts) >= 3 and parts[2].isdigit():
+                    seq = int(parts[2])
+                    if seq > max_seq:
+                        max_seq = seq
+            except Exception:
+                pass
+
+        candidate_seq = max(max_seq + 1, len(rows) + 1)
+        while True:
+            candidate = f"GF-{year_str}-{candidate_seq:04d}"
+            cursor.execute("SELECT 1 FROM invoices WHERE invoice_number = ?", (candidate,))
+            if not cursor.fetchone():
+                return candidate
+            candidate_seq += 1
 
     @classmethod
     def create_invoice(cls, form_data: Dict[str, Any], jeweller_id: str = "default") -> Dict[str, Any]:

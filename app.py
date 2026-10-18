@@ -37,6 +37,16 @@ AITradeAdvisorAgent.init_db()
 # Pre-load Historical ML baseline pipeline
 prediction_pipeline = PredictionPipeline()
 
+@app.context_processor
+def inject_bullion_context():
+    """Universally injects live Bullions.co.in & IBJA rates and market config across all templates."""
+    rates = IBJAGoldService.get_current_rates()
+    return {
+        "bullion_rates": rates,
+        "ibja_rates": rates,
+        "market_config": IndianMarketService.get_config()
+    }
+
 
 # ============================================================
 # 1. PLATFORM HOME / IGI APPRAISAL PORTAL
@@ -527,10 +537,41 @@ def calculator():
 
 
 @app.route("/api/ibja-rates")
+@app.route("/api/bullion-rates")
 def api_ibja_rates():
-    """Live API endpoint for genuine timestamped IBJA rates."""
-    rates = IBJAGoldService.get_current_rates()
-    return jsonify(rates)
+    """Live API endpoint for genuine timestamped Bullions.co.in & IBJA rates with auto-refresh support."""
+    force = request.args.get("force", "false").lower() in ("true", "1", "yes")
+    rates = IBJAGoldService.get_current_rates(force_refresh=force)
+    resp = dict(rates)
+    resp["success"] = True
+    resp["rates_per_gram"] = {
+        "24K": rates.get("rates", {}).get("24K", {}).get("rate_per_gram"),
+        "22K": rates.get("rates", {}).get("22K", {}).get("rate_per_gram"),
+        "18K": rates.get("rates", {}).get("18K", {}).get("rate_per_gram"),
+        "14K": rates.get("rates", {}).get("14K", {}).get("rate_per_gram"),
+        "Silver_999": rates.get("rates", {}).get("Silver_999", {}).get("rate_per_gram"),
+        "Platinum_950": rates.get("rates", {}).get("Platinum_950", {}).get("rate_per_gram")
+    }
+    return jsonify(resp)
+
+
+@app.route("/api/bullion/sync", methods=["GET", "POST"])
+def api_bullion_sync():
+    """Triggers on-demand synchronization with Bullions.co.in, returning fresh or STALE rates."""
+    synced = IBJAGoldService.sync_on_login(force_refresh=True)
+    resp = dict(synced)
+    resp["success"] = True
+    resp["synced"] = True
+    resp["rates_per_gram"] = {
+        "24K": synced.get("rates", {}).get("24K", {}).get("rate_per_gram"),
+        "22K": synced.get("rates", {}).get("22K", {}).get("rate_per_gram"),
+        "18K": synced.get("rates", {}).get("18K", {}).get("rate_per_gram"),
+        "14K": synced.get("rates", {}).get("14K", {}).get("rate_per_gram"),
+        "Silver_999": synced.get("rates", {}).get("Silver_999", {}).get("rate_per_gram"),
+        "Platinum_950": synced.get("rates", {}).get("Platinum_950", {}).get("rate_per_gram")
+    }
+    return jsonify(resp)
+
 
 
 @app.route("/api/calculate-jewellery", methods=["POST"])
@@ -814,9 +855,12 @@ def market_rates():
     return render_template("market_rates.html", config=config)
 
 
+
 # ============================================================
 # 9. JEWELLER AUTHENTICATION (LOGIN, REGISTER, LOGOUT)
 # ============================================================
+
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -827,7 +871,16 @@ def login():
         jeweller = AuthService.authenticate(email, password)
         if jeweller:
             session["jeweller"] = jeweller
-            flash(f"Welcome back, {jeweller['owner_name']} ({jeweller['business_name']})!", "success")
+            # Trigger mandatory Bullions.co.in live fetch on jeweller login
+            synced_rates = IBJAGoldService.sync_on_login(force_refresh=True)
+            status_badge = "LIVE" if synced_rates.get("is_live") else "STALE"
+            gold_24k_str = synced_rates.get("rates", {}).get("24K", {}).get("formatted_rate_per_gram", "₹ 14,828/g")
+            silver_999_str = synced_rates.get("rates", {}).get("Silver_999", {}).get("formatted_rate_per_gram", "₹ 212/g")
+            flash(
+                f"Welcome back, {jeweller['owner_name']} ({jeweller['business_name']})! "
+                f"Bullions.co.in rates synced [{status_badge}]: Gold 24K: {gold_24k_str} • Silver 999: {silver_999_str}.",
+                "success"
+            )
             return redirect(url_for("workspace"))
         else:
             flash("Invalid email or password.", "danger")
@@ -847,7 +900,8 @@ def register():
     result = AuthService.register_jeweller(business_name, owner_name, email, password, city, gst)
     if result.get("success"):
         session["jeweller"] = result["jeweller"]
-        flash("Jeweller account registered successfully!", "success")
+        IBJAGoldService.sync_on_login(force_refresh=True)
+        flash("Jeweller account registered successfully! Latest Bullion rates synchronized.", "success")
         return redirect(url_for("workspace"))
     else:
         flash(result.get("error", "Registration failed."), "danger")

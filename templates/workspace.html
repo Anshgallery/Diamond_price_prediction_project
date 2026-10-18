@@ -28,6 +28,68 @@
         </div>
     </div>
 
+    <!-- BULLIONS.CO.IN & IBJA LIVE VALUATION BENCHMARK -->
+    <div class="jewel-card" style="margin-bottom: 2rem; background: #FAF8F2; border: 1.5px solid var(--gold); padding: 1.15rem 1.4rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.75rem;">
+            <div style="display: flex; align-items: center; gap: 0.6rem;">
+                <span style="font-size: 1.25rem;">🪙</span>
+                <div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                        <strong style="color: #0D2C54; font-size: 0.98rem;">Bullions.co.in &amp; IBJA Live Valuation Benchmarks</strong>
+                        {% if bullion_rates and bullion_rates.is_stale %}
+                            <span class="jewel-badge badge-ruby" style="font-size: 0.68rem; padding: 0.15rem 0.5rem;">⚠️ STALE BENCHMARK</span>
+                        {% else %}
+                            <span class="jewel-badge badge-emerald" style="font-size: 0.68rem; padding: 0.15rem 0.5rem;">● LIVE FEED</span>
+                        {% endif %}
+                    </div>
+                    <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 0.2rem;">
+                        Source: <strong>{{ bullion_rates.source if bullion_rates else 'Bullions.co.in Live Rates' }}</strong> • 
+                        Updated: <strong>{{ bullion_rates.fetched_timestamp if bullion_rates else 'Today' }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                <a href="https://bullions.co.in/" target="_blank" rel="noopener noreferrer" class="jewel-btn jewel-btn-secondary jewel-btn-sm" style="color: var(--gold); font-weight: 700;" title="Open Bullions.co.in in new tab">
+                    🪙 Bullions.co.in ↗
+                </a>
+                <a href="https://www.ibja.co/" target="_blank" rel="noopener noreferrer" class="jewel-btn jewel-btn-secondary jewel-btn-sm" style="color: var(--gold); font-weight: 700;" title="Open IBJA in new tab">
+                    🏛️ IBJA (ibja.co) ↗
+                </a>
+                <button type="button" onclick="refreshBullionsGlobal(event)" class="jewel-btn jewel-btn-primary jewel-btn-sm">
+                    🔄 Auto-Refresh
+                </button>
+            </div>
+        </div>
+
+        <div class="jewel-grid-4" style="gap: 0.65rem;">
+            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.6rem; text-align: center;">
+                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">24K Gold (999)</div>
+                <div style="font-weight: 800; color: var(--gold); font-size: 1.05rem;">
+                    {{ bullion_rates.rates['24K'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates and '24K' in bullion_rates.rates else '₹ 14,828.00' }}/g
+                </div>
+            </div>
+            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.65rem; text-align: center;">
+                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">22K Gold (916)</div>
+                <div style="font-weight: 800; color: var(--text-primary); font-size: 1.05rem;">
+                    {{ bullion_rates.rates['22K'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates and '22K' in bullion_rates.rates else '₹ 13,592.00' }}/g
+                </div>
+            </div>
+            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.65rem; text-align: center;">
+                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">18K Gold (750)</div>
+                <div style="font-weight: 800; color: var(--text-primary); font-size: 1.05rem;">
+                    {{ bullion_rates.rates['18K'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates and '18K' in bullion_rates.rates else '₹ 11,121.00' }}/g
+                </div>
+            </div>
+            <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.65rem; text-align: center;">
+                <div style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Silver (999 Fine)</div>
+                <div style="font-weight: 800; color: var(--diamond-cyan); font-size: 1.05rem;">
+                    {{ bullion_rates.rates['Silver_999'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates and 'Silver_999' in bullion_rates.rates else '₹ 212.00' }}/g
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- PORTFOLIO SUMMARY STATS -->
     <div class="jewel-grid-4" style="margin-bottom: 2.5rem;">
         <div class="stat-box">

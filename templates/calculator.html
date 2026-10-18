@@ -37,23 +37,39 @@
         </div>
     </div>
 
-    <!-- IBJA TIMESTAMPED BULLION BANNER -->
+    <!-- BULLIONS.CO.IN & IBJA TIMESTAMPED BULLION BANNER -->
     <div class="jewel-card" style="margin-bottom: 2rem; background: #FAF8F2; border: 1.5px solid var(--gold); padding: 1.25rem 1.5rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.75rem;">
             <div style="display: flex; align-items: center; gap: 0.6rem;">
-                <span style="font-size: 1.3rem;">🥇</span>
+                <span style="font-size: 1.3rem;">🪙</span>
                 <div>
-                    <strong style="color: #0D2C54; font-size: 1rem;">Genuine Timestamped IBJA Gold &amp; Silver Rates</strong>
-                    <div style="font-size: 0.78rem; color: var(--text-muted);">
-                        Source: <strong>{{ ibja_rates.source if ibja_rates else 'India Bullion and Jewellers Association (IBJA)' }}</strong> • 
-                        Session: <strong>{{ ibja_rates.session if ibja_rates else 'Daily Benchmark' }}</strong> • 
-                        Published: <strong>{{ ibja_rates.publication_timestamp if ibja_rates else 'Today' }}</strong>
+                    <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                        <strong style="color: #0D2C54; font-size: 1rem;">Genuine Timestamped Bullions.co.in &amp; IBJA Rates</strong>
+                        {% if bullion_rates and bullion_rates.is_stale %}
+                            <span class="jewel-badge badge-ruby" style="font-size: 0.7rem; padding: 0.15rem 0.5rem;">⚠️ STALE BENCHMARK</span>
+                        {% else %}
+                            <span class="jewel-badge badge-emerald" style="font-size: 0.7rem; padding: 0.15rem 0.5rem;">● LIVE FEED</span>
+                        {% endif %}
+                    </div>
+                    <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem;">
+                        Source: <strong>{{ bullion_rates.source if bullion_rates else 'Bullions.co.in Live Market Rates' }}</strong> • 
+                        Session: <strong>{{ bullion_rates.session if bullion_rates else 'Daily Market Session' }}</strong> • 
+                        Updated: <strong>{{ bullion_rates.fetched_timestamp if bullion_rates else 'Today' }}</strong>
                     </div>
                 </div>
             </div>
-            <div>
-                <button type="button" onclick="syncIbjaGoldRate({{ ibja_rates.rates['24K'].rate_per_gram if ibja_rates and ibja_rates.rates and '24K' in ibja_rates.rates else 7850 }})" class="jewel-btn jewel-btn-primary jewel-btn-sm">
-                    ⚡ Apply Today's IBJA 24K Rate (₹ {{ ibja_rates.rates['24K'].rate_per_gram if ibja_rates and ibja_rates.rates and '24K' in ibja_rates.rates else '7,850' }}/g)
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                <a href="https://bullions.co.in/" target="_blank" rel="noopener noreferrer" class="jewel-btn jewel-btn-secondary jewel-btn-sm" style="color: var(--gold); font-weight: 700;" title="Open Bullions.co.in Live Portal in new tab">
+                    🪙 Bullions.co.in ↗
+                </a>
+                <a href="https://www.ibja.co/" target="_blank" rel="noopener noreferrer" class="jewel-btn jewel-btn-secondary jewel-btn-sm" style="color: var(--gold); font-weight: 700;" title="Open Official IBJA website in new tab">
+                    🏛️ IBJA (ibja.co) ↗
+                </a>
+                <button type="button" onclick="refreshBullionsInCalculator(event)" id="btnCalcBullionSync" class="jewel-btn jewel-btn-secondary jewel-btn-sm" title="Force sync latest Bullions.co.in rates">
+                    🔄 Sync Rates
+                </button>
+                <button type="button" onclick="syncIbjaGoldRate({{ bullion_rates.rates['24K'].rate_per_gram if bullion_rates and bullion_rates.rates and '24K' in bullion_rates.rates else 14828 }})" class="jewel-btn jewel-btn-primary jewel-btn-sm">
+                    ⚡ Apply 24K Rate (₹ {{ bullion_rates.rates['24K'].rate_per_gram if bullion_rates and bullion_rates.rates and '24K' in bullion_rates.rates else '14,828' }}/g)
                 </button>
             </div>
         </div>
@@ -61,36 +77,36 @@
         <div class="jewel-grid-5" style="gap: 0.75rem;">
             <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.65rem; text-align: center;">
                 <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">24K Fine Gold (999)</div>
-                <div style="font-weight: 800; color: var(--gold); font-size: 1.05rem;">
-                    {{ ibja_rates.rates['24K'].formatted_rate_per_gram if ibja_rates and ibja_rates.rates and '24K' in ibja_rates.rates else '₹ 7,850.00' }}/g
+                <div style="font-weight: 800; color: var(--gold); font-size: 1.05rem;" id="calcBox24k">
+                    {{ bullion_rates.rates['24K'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates and '24K' in bullion_rates.rates else '₹ 14,828.00' }}/g
                 </div>
             </div>
 
             <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.65rem; text-align: center;">
                 <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">22K Hallmarked (916)</div>
-                <div style="font-weight: 800; color: var(--text-primary); font-size: 1.05rem;">
-                    {{ ibja_rates.rates['22K'].formatted_rate_per_gram if ibja_rates and ibja_rates.rates and '22K' in ibja_rates.rates else '₹ 7,195.83' }}/g
+                <div style="font-weight: 800; color: var(--text-primary); font-size: 1.05rem;" id="calcBox22k">
+                    {{ bullion_rates.rates['22K'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates and '22K' in bullion_rates.rates else '₹ 13,592.00' }}/g
                 </div>
             </div>
 
             <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.65rem; text-align: center;">
                 <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">18K Diamond Std (750)</div>
-                <div style="font-weight: 800; color: var(--text-primary); font-size: 1.05rem;">
-                    {{ ibja_rates.rates['18K'].formatted_rate_per_gram if ibja_rates and ibja_rates.rates and '18K' in ibja_rates.rates else '₹ 5,887.50' }}/g
+                <div style="font-weight: 800; color: var(--text-primary); font-size: 1.05rem;" id="calcBox18k">
+                    {{ bullion_rates.rates['18K'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates and '18K' in bullion_rates.rates else '₹ 11,121.00' }}/g
                 </div>
             </div>
 
             <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.65rem; text-align: center;">
                 <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">14K Daily Wear (585)</div>
-                <div style="font-weight: 800; color: var(--text-primary); font-size: 1.05rem;">
-                    {{ ibja_rates.rates['14K'].formatted_rate_per_gram if ibja_rates and ibja_rates.rates and '14K' in ibja_rates.rates else '₹ 4,579.17' }}/g
+                <div style="font-weight: 800; color: var(--text-primary); font-size: 1.05rem;" id="calcBox14k">
+                    {{ bullion_rates.rates['14K'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates and '14K' in bullion_rates.rates else '₹ 8,650.00' }}/g
                 </div>
             </div>
 
             <div style="background: #FFFFFF; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 0.65rem; text-align: center;">
                 <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Fine Silver (999)</div>
-                <div style="font-weight: 800; color: var(--diamond-cyan); font-size: 1.05rem;">
-                    {{ ibja_rates.rates['Silver_999'].formatted_rate_per_gram if ibja_rates and ibja_rates.rates and 'Silver_999' in ibja_rates.rates else '₹ 92.50' }}/g
+                <div style="font-weight: 800; color: var(--diamond-cyan); font-size: 1.05rem;" id="calcBoxSilver">
+                    {{ bullion_rates.rates['Silver_999'].formatted_rate_per_gram if bullion_rates and bullion_rates.rates and 'Silver_999' in bullion_rates.rates else '₹ 212.00' }}/g
                 </div>
             </div>
         </div>
@@ -705,6 +721,42 @@ function syncIbjaGoldRate(rate) {
     recalculateMaster();
 }
 
+function refreshBullionsInCalculator(e) {
+    if (e) e.preventDefault();
+    var btn = document.getElementById('btnCalcBullionSync');
+    if (btn) btn.innerText = '⌛ Syncing...';
+    fetch('/api/bullion/sync?force=true')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (btn) btn.innerText = '✓ Synced';
+            setTimeout(function() { if (btn) btn.innerText = '🔄 Sync Rates'; }, 1800);
+            if (data && data.rates) {
+                var b24 = document.getElementById('calcBox24k');
+                var b22 = document.getElementById('calcBox22k');
+                var b18 = document.getElementById('calcBox18k');
+                var b14 = document.getElementById('calcBox14k');
+                var bSil = document.getElementById('calcBoxSilver');
+                if (b24 && data.rates['24K']) b24.innerText = data.rates['24K'].formatted_rate_per_gram + '/g';
+                if (b22 && data.rates['22K']) b22.innerText = data.rates['22K'].formatted_rate_per_gram + '/g';
+                if (b18 && data.rates['18K']) b18.innerText = data.rates['18K'].formatted_rate_per_gram + '/g';
+                if (b14 && data.rates['14K']) b14.innerText = data.rates['14K'].formatted_rate_per_gram + '/g';
+                if (bSil && data.rates['Silver_999']) bSil.innerText = data.rates['Silver_999'].formatted_rate_per_gram + '/g';
+
+                if (document.getElementById('calc_metal_type').value === 'gold' && data.rates['24K']) {
+                    document.getElementById('calc_base_rate').value = data.rates['24K'].rate_per_gram;
+                    recalculateMaster();
+                } else if (document.getElementById('calc_metal_type').value === 'silver' && data.rates['Silver_999']) {
+                    document.getElementById('calc_base_rate').value = data.rates['Silver_999'].rate_per_gram;
+                    recalculateMaster();
+                }
+            }
+        })
+        .catch(function(err) {
+            console.error('Bullion sync error:', err);
+            if (btn) btn.innerText = '⚠️ Error';
+        });
+}
+
 function switchDossierTab(tab) {
     var custView = document.getElementById('dossierCustomerView');
     var jewView = document.getElementById('dossierJewellerView');
@@ -732,7 +784,8 @@ function onMetalTypeChange() {
     puritySel.innerHTML = '';
 
     if (mType === 'gold') {
-        if (!baseRateInput.value || parseFloat(baseRateInput.value) < 1000) baseRateInput.value = 7850;
+        var defaultGold = {{ bullion_rates.rates['24K'].rate_per_gram if bullion_rates and bullion_rates.rates and '24K' in bullion_rates.rates else 14828 }};
+        if (!baseRateInput.value || parseFloat(baseRateInput.value) < 1000) baseRateInput.value = defaultGold;
         puritySel.innerHTML = `
             <option value="18K" selected>18K Gold (75.0% Pure)</option>
             <option value="22K">22K Gold (91.6% BIS Hallmarked)</option>
@@ -741,7 +794,8 @@ function onMetalTypeChange() {
             <option value="10K">10K Gold (41.7% Pure)</option>
         `;
     } else if (mType === 'silver') {
-        baseRateInput.value = 92.5;
+        var defaultSilver = {{ bullion_rates.rates['Silver_999'].rate_per_gram if bullion_rates and bullion_rates.rates and 'Silver_999' in bullion_rates.rates else 212 }};
+        baseRateInput.value = defaultSilver;
         puritySel.innerHTML = `
             <option value="999" selected>999 Fine Silver (99.9%)</option>
             <option value="925">925 Sterling Silver (92.5%)</option>

@@ -40,7 +40,7 @@ class AITradeAdvisorAgent:
         "You advise Indian retail jewellers, wholesale traders, and high-net-worth buyers on "
         "diamond appraisals, gold bullion, jewellery manufacturing costs, and counter-offer negotiations.\n\n"
         "Guidelines for Your Responses:\n"
-        "1. GROUND IN REAL TRADE DATA: Always use your available tools to fetch current IBJA gold rates, "
+        "1. GROUND IN REAL TRADE DATA: Always use your available tools to fetch current Bullions.co.in and IBJA gold & silver rates (₹/gram), "
         "BDB natural diamond benchmarks, Surat SDB lab-grown matrices, or calculate exact GST and making charges.\n"
         "2. SEPARATE NATURAL VS. LAB-GROWN: Natural diamonds are geological assets valued on scarcity and BDB wholesale; "
         "Lab-grown (CVD/HPHT) are manufactured gems priced on Surat factory production cost (~85-95% discount to natural).\n"
@@ -57,7 +57,7 @@ class AITradeAdvisorAgent:
     TOOLS_DECLARATIONS = [
         {
             "name": "get_live_bullion_rates",
-            "description": "Fetches genuine, timestamped IBJA benchmark rates for 24K, 22K, 18K, 14K gold and Silver 999 in INR, including session and freshness.",
+            "description": "Fetches genuine, timestamped Bullions.co.in and IBJA market rates for 24K, 22K, 18K gold and Silver 999 in ₹/gram, including session, source, and STALE status.",
             "parameters": {
                 "type": "OBJECT",
                 "properties": {},
@@ -166,11 +166,24 @@ class AITradeAdvisorAgent:
                 rates = IBJAGoldService.get_current_rates()
                 return {
                     "success": True,
+                    "source": rates.get("source"),
                     "publication_timestamp": rates.get("publication_timestamp"),
+                    "fetched_timestamp": rates.get("fetched_timestamp"),
                     "session": rates.get("session"),
                     "freshness": rates.get("freshness"),
                     "is_live": rates.get("is_live", False),
-                    "base_24k_per_gram": rates.get("base_24k_rate_per_gram"),
+                    "is_stale": rates.get("is_stale", False),
+                    "status": rates.get("status", "LIVE"),
+                    "bullions_url": rates.get("bullions_url", "https://bullions.co.in/"),
+                    "ibja_url": rates.get("ibja_url", "https://www.ibja.co/"),
+                    "rates_per_gram": {
+                        "24K": rates.get("rates", {}).get("24K", {}).get("formatted_rate_per_gram"),
+                        "22K": rates.get("rates", {}).get("22K", {}).get("formatted_rate_per_gram"),
+                        "18K": rates.get("rates", {}).get("18K", {}).get("formatted_rate_per_gram"),
+                        "14K": rates.get("rates", {}).get("14K", {}).get("formatted_rate_per_gram"),
+                        "Silver_999": rates.get("rates", {}).get("Silver_999", {}).get("formatted_rate_per_gram"),
+                        "Platinum_950": rates.get("rates", {}).get("Platinum_950", {}).get("formatted_rate_per_gram")
+                    },
                     "rates_per_10g": {
                         "24K": rates.get("rates", {}).get("24K", {}).get("formatted_rate_per_10g"),
                         "22K": rates.get("rates", {}).get("22K", {}).get("formatted_rate_per_10g"),

@@ -65,13 +65,16 @@
                 </div>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                 <span id="shareUrlDisplay" style="font-family: monospace; font-size: 0.82rem; background: #F8FAFC; padding: 0.35rem 0.65rem; border: 1px solid var(--border-subtle); border-radius: 4px;">
                     {{ request.host_url.rstrip('/') }}/invoice/share/{{ invoice.share_token }}
                 </span>
                 <button type="button" onclick="copyShareLink()" class="jewel-btn jewel-btn-secondary jewel-btn-sm" id="copyBtn">
                     📋 Copy Link
                 </button>
+                <a href="/invoice/share/{{ invoice.share_token }}" target="_blank" rel="noopener noreferrer" class="jewel-btn jewel-btn-secondary jewel-btn-sm" title="Open Customer View in new tab">
+                    🔗 Customer View ↗️
+                </a>
             </div>
         </div>
     </div>

@@ -231,4 +231,29 @@ def test_invoices_full_lifecycle(client):
     assert InvoiceService.get_invoice_by_id(inv_id) is None
 
 
+def test_api_bullion_rates_and_sync(client):
+    """Verify JSON endpoints for Bullions.co.in rates and live synchronization."""
+    # 1. Test /api/bullion-rates
+    res = client.get("/api/bullion-rates")
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data["success"] is True
+    assert "rates_per_gram" in data
+    assert "24K" in data["rates_per_gram"]
+    assert "Silver_999" in data["rates_per_gram"]
+    assert data["bullions_url"] == "https://bullions.co.in/"
+    assert data["ibja_url"] == "https://www.ibja.co/"
+    assert data["status"] in ["LIVE", "STALE"]
+
+    # 2. Test /api/bullion/sync
+    res_sync = client.post("/api/bullion/sync")
+    assert res_sync.status_code == 200
+    sync_data = res_sync.get_json()
+    assert sync_data["success"] is True
+    assert sync_data["synced"] is True
+    assert "rates_per_gram" in sync_data
+    assert sync_data["rates_per_gram"]["24K"] > 0
+    assert sync_data["rates_per_gram"]["Silver_999"] > 0
+
+
 
