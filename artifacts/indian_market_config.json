@@ -1,11 +1,11 @@
 {
-  "usd_inr_rate": 95.91,
-  "provider": "OpenFacet Live Wholesale Index (data.openfacet.net) & Frankfurter FX API",
+  "usd_inr_rate": 94.93,
+  "provider": "Bullions.co.in Live Feeds & IBJA Official Benchmarks \u2022 BDB & Surat SDB Indices",
   "api_key_configured": false,
-  "last_sync": "2026-09-17 19:14:23 UTC",
-  "status": "Live OpenFacet & Frankfurter FX Connected",
+  "last_sync": "2026-10-18 18:05:42 UTC",
+  "status": "Indian Market & IBJA Bullion Connected",
   "markets": {
-    "natural": "OpenFacet Live Index / Mumbai Bharat Diamond Bourse (BDB)",
+    "natural": "Mumbai Bharat Diamond Bourse (BDB)",
     "lab_grown": "Surat Diamond Bourse (SDB) CVD/HPHT Hub"
   }
 }

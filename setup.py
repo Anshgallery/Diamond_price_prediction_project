@@ -11,6 +11,6 @@ setup(
         "numpy",
         "seaborn",
         "scipy",
-        "scikit-learn",
+        "scikit-learn==1.6.1",
     ],
 )
