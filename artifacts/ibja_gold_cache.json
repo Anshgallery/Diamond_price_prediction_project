@@ -3,80 +3,124 @@
   "is_stale": false,
   "status": "LIVE",
   "source": "Bullions.co.in Live Market Rates",
-  "session": "India MCX Session: 18 Oct, 23:45",
-  "publication_timestamp": "18 Oct 2026, 11:45 PM IST",
-  "fetched_timestamp": "18 Oct 2026, 11:45:59 PM IST",
+  "session": "India MCX Session: 22 Oct, 00:15",
+  "publication_timestamp": "22 Oct 2026, 12:15 AM IST",
+  "fetched_timestamp": "22 Oct 2026, 12:15:48 AM IST",
   "freshness": "Live Broadcast (Bullions.co.in)",
-  "base_24k_rate_per_gram": 14828.0,
-  "base_silver_rate_per_gram": 212.0,
+  "base_24k_rate_per_gram": 14637.0,
+  "base_silver_rate_per_gram": 210.0,
   "rates": {
     "24K": {
       "purity_code": "24K",
       "purity_percentage": "100.00%",
-      "rate_per_gram": 14828.0,
-      "rate_per_10g": 148280.0,
-      "formatted_rate_per_gram": "\u20b9 14,828.00",
-      "formatted_rate_per_10g": "\u20b9 148,280.00"
+      "rate_per_gram": 14637.0,
+      "rate_per_10g": 146370.0,
+      "formatted_rate_per_gram": "\u20b9 14,637.00",
+      "formatted_rate_per_10g": "\u20b9 146,370.00"
     },
     "22K": {
       "purity_code": "22K",
       "purity_percentage": "91.67%",
-      "rate_per_gram": 13592.0,
-      "rate_per_10g": 135923.0,
-      "formatted_rate_per_gram": "\u20b9 13,592.00",
-      "formatted_rate_per_10g": "\u20b9 135,923.00"
+      "rate_per_gram": 13417.0,
+      "rate_per_10g": 134173.0,
+      "formatted_rate_per_gram": "\u20b9 13,417.00",
+      "formatted_rate_per_10g": "\u20b9 134,173.00"
     },
     "18K": {
       "purity_code": "18K",
       "purity_percentage": "75.00%",
-      "rate_per_gram": 11121.0,
-      "rate_per_10g": 111210.0,
-      "formatted_rate_per_gram": "\u20b9 11,121.00",
-      "formatted_rate_per_10g": "\u20b9 111,210.00"
+      "rate_per_gram": 10978.0,
+      "rate_per_10g": 109778.0,
+      "formatted_rate_per_gram": "\u20b9 10,978.00",
+      "formatted_rate_per_10g": "\u20b9 109,778.00"
     },
     "14K": {
       "purity_code": "14K",
       "purity_percentage": "58.33%",
-      "rate_per_gram": 8650.0,
-      "rate_per_10g": 86500.0,
-      "formatted_rate_per_gram": "\u20b9 8,650.00",
-      "formatted_rate_per_10g": "\u20b9 86,500.00"
+      "rate_per_gram": 8538.0,
+      "rate_per_10g": 85380.0,
+      "formatted_rate_per_gram": "\u20b9 8,538.00",
+      "formatted_rate_per_10g": "\u20b9 85,380.00"
     },
     "10K": {
       "purity_code": "10K",
       "purity_percentage": "41.67%",
-      "rate_per_gram": 6178.33,
-      "rate_per_10g": 61783.3,
-      "formatted_rate_per_gram": "\u20b9 6,178.33",
-      "formatted_rate_per_10g": "\u20b9 61,783.30"
+      "rate_per_gram": 6098.75,
+      "rate_per_10g": 60987.5,
+      "formatted_rate_per_gram": "\u20b9 6,098.75",
+      "formatted_rate_per_10g": "\u20b9 60,987.50"
     },
     "9K": {
       "purity_code": "9K",
       "purity_percentage": "37.50%",
-      "rate_per_gram": 5560.5,
-      "rate_per_10g": 55605.0,
-      "formatted_rate_per_gram": "\u20b9 5,560.50",
-      "formatted_rate_per_10g": "\u20b9 55,605.00"
+      "rate_per_gram": 5488.88,
+      "rate_per_10g": 54888.8,
+      "formatted_rate_per_gram": "\u20b9 5,488.88",
+      "formatted_rate_per_10g": "\u20b9 54,888.80"
     },
     "Silver_999": {
       "purity_code": "Silver 999",
       "purity_percentage": "99.90%",
-      "rate_per_gram": 212.0,
-      "rate_per_kg": 211820.0,
-      "formatted_rate_per_gram": "\u20b9 212.00",
-      "formatted_rate_per_kg": "\u20b9 211,820.00"
+      "rate_per_gram": 210.0,
+      "rate_per_kg": 209510.0,
+      "formatted_rate_per_gram": "\u20b9 210.00",
+      "formatted_rate_per_kg": "\u20b9 209,510.00"
     },
     "Silver_925": {
       "purity_code": "Silver 925",
       "purity_percentage": "92.50%",
-      "rate_per_gram": 196.0,
-      "formatted_rate_per_gram": "\u20b9 196.00"
+      "rate_per_gram": 194.0,
+      "formatted_rate_per_gram": "\u20b9 194.00"
     },
     "Platinum_950": {
       "purity_code": "Platinum Pt950",
       "purity_percentage": "95.00%",
       "rate_per_gram": 3150.0,
       "formatted_rate_per_gram": "\u20b9 3,150.00"
+    }
+  },
+  "daily_changes": {
+    "gold_24k": {
+      "current": 14637.0,
+      "prev_close": 14515.0,
+      "change_inr": 122.0,
+      "change_pct": 0.84,
+      "direction": "up",
+      "formatted_change": "+\u20b9 122.00 (+0.84%)",
+      "day_high": 14702.0,
+      "day_low": 14592.0,
+      "session_am": 14612.0,
+      "session_pm": 14637.0
+    },
+    "gold_22k": {
+      "current": 13417.0,
+      "prev_close": 13305.42,
+      "change_inr": 111.83,
+      "change_pct": 0.84,
+      "direction": "up",
+      "formatted_change": "+\u20b9 111.83 (+0.84%)",
+      "day_high": 13476.833333333334,
+      "day_low": 13376.0
+    },
+    "silver_999": {
+      "current": 210.0,
+      "prev_close": 208.5,
+      "change_inr": 1.5,
+      "change_pct": 0.72,
+      "direction": "up",
+      "formatted_change": "+\u20b9 1.50 (+0.72%)",
+      "day_high": 212.5,
+      "day_low": 208.2
+    },
+    "platinum_950": {
+      "current": 3150.0,
+      "prev_close": 3140.0,
+      "change_inr": 10.0,
+      "change_pct": 0.32,
+      "direction": "up",
+      "formatted_change": "+\u20b9 10.00 (+0.32%)",
+      "day_high": 3170.0,
+      "day_low": 3135.0
     }
   },
   "bullions_url": "https://bullions.co.in/",

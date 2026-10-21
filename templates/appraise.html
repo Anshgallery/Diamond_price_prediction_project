@@ -393,9 +393,98 @@
         </div>
     </div>
 
+    <!-- 🌐 LIVE CARATHUNTER MARKET INTELLIGENCE CARD -->
+    {% if valuation.carathunter and valuation.carathunter.median_usd %}
+    <div class="jewel-card" style="margin-bottom: 2rem; background: #FFFFFF; border: 1.5px solid var(--diamond-cyan); box-shadow: var(--shadow-card); padding: 1.5rem;">
+        <div class="jewel-card-header" style="flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem;">
+            <div class="jewel-card-title" style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.15rem;">
+                <span style="font-size: 1.4rem;">🌐</span> Carat Hunter Live Global Market Intelligence
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                {% if valuation.carathunter.is_live %}
+                    <span class="jewel-badge badge-emerald">● Live CaratHunter API</span>
+                {% else %}
+                    <span class="jewel-badge badge-ruby">⚠️ Offline Cache Benchmark</span>
+                {% endif %}
+                <span class="jewel-badge badge-cyan">{{ valuation.carathunter.origin }} Diamond Index</span>
+            </div>
+        </div>
+
+        <div style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+            Live cross-retailer pricing tracked across <strong>128+ global retailers</strong> via the Carat Hunter MCP network.
+        </div>
+
+        <div class="jewel-grid-4" style="margin-bottom: 1.25rem;">
+            <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #FAF8F2;">
+                <div class="stat-label">Global Median Price</div>
+                <div class="stat-value gold" style="font-size: 1.35rem;">
+                    US$ {{ valuation.carathunter.median_usd | int }}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Equivalent: <strong style="color: var(--text-primary);">₹ {{ valuation.carathunter.median_inr | int }}</strong>
+                </div>
+            </div>
+
+            <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #F4F8FA;">
+                <div class="stat-label">Middle-Half Range (IQR)</div>
+                <div class="stat-value cyan" style="font-size: 1.15rem;">
+                    ₹ {{ valuation.carathunter.low_inr | int }} – {{ valuation.carathunter.high_inr | int }}
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Interquartile 50% band
+                </div>
+            </div>
+
+            <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #F0F7F3;">
+                <div class="stat-label">Retailers &amp; Sample Size</div>
+                <div class="stat-value emerald" style="font-size: 1.25rem;">
+                    {{ valuation.carathunter.stones_count }} Stones
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Across <strong>{{ valuation.carathunter.retailers_count }} retailers</strong>
+                </div>
+            </div>
+
+            <div class="stat-box" style="border: 1px solid var(--border-subtle); background: #FAFAF8;">
+                <div class="stat-label">Retailer Price Spread</div>
+                <div class="stat-value ruby" style="font-size: 1.25rem;">
+                    {{ valuation.carathunter.spread_pct }}%
+                </div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">
+                    Cheapest vs Dearest spread
+                </div>
+            </div>
+        </div>
+
+        {% if valuation.carathunter.certificate_lookup and valuation.carathunter.certificate_lookup.data_available %}
+        <div style="background: #EAF4EE; border: 1px solid #2F6B4F; border-radius: var(--radius-sm); padding: 0.75rem 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+                <strong style="color: #2F6B4F;">✓ Exact Certificate Listed on CaratHunter:</strong>
+                <span style="font-size: 0.85rem; color: var(--text-primary); margin-left: 0.4rem;">
+                    Report #{{ diamond_spec.report_number }} • Grade: <strong>{{ valuation.carathunter.certificate_lookup.grade }}</strong>
+                </span>
+            </div>
+            <a href="{{ valuation.carathunter.certificate_lookup.source_url }}" target="_blank" rel="noopener noreferrer" style="color: #2F6B4F; font-weight: 700; font-size: 0.82rem; text-decoration: underline;">
+                View Stone on CaratHunter ↗
+            </a>
+        </div>
+        {% endif %}
+
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #FAF8F2; padding: 0.85rem 1.25rem; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); flex-wrap: wrap; gap: 0.75rem;">
+            <div style="font-size: 0.85rem; color: var(--text-muted);">
+                Direct Source Attribution: <strong>Carat Hunter (carathunter.com)</strong> • FX: 1 USD = ₹{{ config.usd_inr_rate }}
+            </div>
+            <a href="{{ valuation.carathunter.source_url }}" target="_blank" rel="noopener noreferrer" class="jewel-btn jewel-btn-secondary jewel-btn-sm" style="color: var(--gold); font-weight: 700;">
+                View Canonical Spec on CaratHunter ↗
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
 
     <!-- MAIN 2-COLUMN SECTION: GEMOLOGICAL SPECS & CUSTOM DEAL CALCULATOR -->
     <div class="jewel-grid-2" style="margin-bottom: 2rem; align-items: start;">
+
 
         <!-- LEFT: 4CS & GEMOLOGICAL GEOMETRY -->
         <div class="jewel-card">

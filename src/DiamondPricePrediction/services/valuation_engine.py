@@ -200,46 +200,29 @@ class ValuationEngine:
                 "confidence_grade": confidence["grade"],
                 "confidence_breakdown": confidence["details"],
                 "quality_score": quality_score,
-                "source": market_quote_inr.get("source", "Bharat Diamond Bourse / Surat LGD Benchmark"),
+                "source": market_quote_inr.get("source", "Carat Hunter Live Market API"),
+                "source_type": market_quote_inr.get("source_type", "Carat Hunter Cross-Retailer Live Pricing"),
+                "source_url": market_quote_inr.get("source_url", "https://carathunter.com/"),
+                "is_live": market_quote_inr.get("is_live", True),
+                "is_stale": market_quote_inr.get("is_stale", False),
+                "freshness": market_quote_inr.get("freshness", "Live Market Feed"),
                 "timestamp": market_quote_inr.get("timestamp", ""),
-                "market_date": market_quote_inr.get("market_date", ""),
-                "currency_symbol": "₹",
-                "origin_type": "Lab-Grown" if is_lab else "Natural",
+                "usd_inr_rate": market_quote_inr.get("usd_inr_rate", usd_inr),
                 
-                # Core Indian Pricing Numbers
-                "today_market_price": fair_market_val,
-                "today_market_price_formatted": IndianMarketService.format_inr(fair_market_val),
-                "fair_market_value": fair_market_val,
-                "fair_market_value_formatted": IndianMarketService.format_inr(fair_market_val),
-                "fair_market_lakhs": IndianMarketService.format_inr_lakhs(fair_market_val),
-                "low_estimate": low_market_val,
-                "low_estimate_formatted": IndianMarketService.format_inr(low_market_val),
-                "high_estimate": high_market_val,
-                "high_estimate_formatted": IndianMarketService.format_inr(high_market_val),
-                "price_per_carat": price_per_carat_inr,
-                "price_per_carat_formatted": IndianMarketService.format_inr(price_per_carat_inr),
-                
-                # Jeweller Business Strategy
-                "suggested_buy_price": suggested_buy_price,
-                "suggested_buy_price_formatted": IndianMarketService.format_inr(suggested_buy_price),
-                "suggested_sell_price": suggested_sell_price,
-                "suggested_sell_price_formatted": IndianMarketService.format_inr(suggested_sell_price),
-                "expected_profit": expected_profit_inr,
-                "expected_profit_formatted": IndianMarketService.format_inr(expected_profit_inr),
-                "expected_margin_pct": expected_margin_pct,
-                "gst_amount": gst_amount_inr,
-                "gst_amount_formatted": IndianMarketService.format_inr(gst_amount_inr),
-                "customer_price_with_gst": customer_price_with_gst,
-                "customer_price_with_gst_formatted": IndianMarketService.format_inr(customer_price_with_gst),
-                
-                # Evidence & Confidence & Source Metadata
-                "confidence_score": confidence["total_score"],
-                "confidence_grade": confidence["grade"],
-                "confidence_breakdown": confidence["details"],
-                "quality_score": quality_score,
-                "source": market_quote_inr.get("source", "Bharat Diamond Bourse / Surat LGD Benchmark"),
-                "timestamp": market_quote_inr.get("timestamp", ""),
-                "market_date": market_quote_inr.get("market_date", ""),
+                # Dedicated CaratHunter Intelligence
+                "carathunter": {
+                    "median_usd": market_quote_inr.get("carathunter_usd"),
+                    "median_inr": market_quote_inr.get("carathunter_inr"),
+                    "low_inr": market_quote_inr.get("low_wholesale_inr"),
+                    "high_inr": market_quote_inr.get("high_wholesale_inr"),
+                    "stones_count": market_quote_inr.get("stones_count", 0),
+                    "retailers_count": market_quote_inr.get("retailers_count", 0),
+                    "spread_pct": market_quote_inr.get("spread_pct", 0.0),
+                    "source_url": market_quote_inr.get("source_url", "https://carathunter.com/"),
+                    "certificate_lookup": market_quote_inr.get("certificate_lookup"),
+                    "is_live": market_quote_inr.get("is_live", True),
+                    "origin": "Lab-Grown" if is_lab else "Natural"
+                },
                 
                 # Multi-Pillar Valuation Breakdown
                 "pillars": {

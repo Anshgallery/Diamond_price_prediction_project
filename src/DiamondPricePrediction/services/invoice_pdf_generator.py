@@ -54,14 +54,14 @@ class InvoicePdfGenerator:
 
         printable_width = 545.0  # 595.27 - 50
 
-        jeweller = jeweller_profile or {
-            "business_name": "Shree Ganesh Gems & Jewels",
-            "owner_name": "Rajesh Zaveri",
-            "city": "Mumbai (Zaveri Bazaar)",
-            "address": "142 Shaikh Memon Street, Zaveri Bazaar, Mumbai 400002",
-            "gst_number": "27AABCS1429B1Z8",
-            "email": "billing@zaveribazaar.in",
-            "phone": "+91 98200 88990"
+        jeweller = jeweller_profile or invoice.get("seller") or {
+            "business_name": "GemForecast Fine Jewels",
+            "owner_name": "Master Jeweller",
+            "city": "Mumbai",
+            "address": "Bullion Plaza, Zaveri Bazaar, Mumbai 400002",
+            "gst_number": "27AABCG1234F1Z5",
+            "email": "billing@gemforecast.com",
+            "phone": "+91 98200 11223"
         }
 
         calc = invoice.get("calc", {})
@@ -69,7 +69,7 @@ class InvoicePdfGenerator:
             recalc = JewelleryCalculator.calculate(calc)
             calc.update(recalc)
 
-        seller_gstin = jeweller.get("gst_number", "27AABCS1429B1Z8")
+        seller_gstin = jeweller.get("gst_number") or ""
         buyer_gstin = invoice.get("customer_gstin", "")
 
         # Retrieve or build full e-Invoice package
@@ -81,8 +81,14 @@ class InvoicePdfGenerator:
                 doc_no=invoice.get("invoice_number", "GF-2026-0001"),
                 doc_date_str=invoice.get("invoice_date", "Today"),
                 grand_total=invoice.get("grand_total", 0.0),
+                taxable_total=invoice.get("taxable_amount", 0.0),
+                total_gst=invoice.get("total_gst", 0.0),
                 item_count=len(calc.get("line_items", [])) or 1,
-                main_hsn="7113"
+                main_hsn=calc.get("line_items", [{}])[0].get("hsn", "7113") if calc.get("line_items") else "7113",
+                supplier_name=jeweller.get("business_name", "GemForecast Fine Jewels"),
+                buyer_name=invoice.get("customer_name", "Valued Customer"),
+                share_token=invoice.get("share_token", ""),
+                base_url=base_url
             )
 
         styles = getSampleStyleSheet()
@@ -212,27 +218,48 @@ class InvoicePdfGenerator:
             elements.append(Spacer(1, 4))
 
         # ============================================================
-        # 1. TOP HEADER: Tax Invoice (Center), e-Invoice + QR (Right), IRN (Left)
+        # 1. TOP HEADER: Adaptive Rule 46 Tax Invoice or Rule 48(4) e-Invoice
         # ============================================================
+        seller_state = einvoice.get("seller_state", "Maharashtra")
+        seller_code = einvoice.get("seller_state_code", "27")
+        buyer_state = einvoice.get("buyer_state", "Maharashtra")
+        buyer_code = einvoice.get("buyer_state_code", "27")
+
         qr_drawing = EInvoiceService.generate_qr_drawing(einvoice["qr_payload"], size=62.0)
+        is_irn_registered = bool(einvoice.get("is_irn_registered"))
 
-        left_irn_html = f"""
-        <b>IRN &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</b> {einvoice['irn_line1']}-<br/>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{einvoice['irn_line2']}<br/>
-        <b>Ack No. &nbsp;:</b> {einvoice['ack_no']}<br/>
-        <b>Ack Date:</b> {einvoice['ack_date']}
-        """
+        if is_irn_registered:
+            left_header_html = f"""
+            <b>IRN &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</b> {einvoice.get('irn_line1', '')}-<br/>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{einvoice.get('irn_line2', '')}<br/>
+            <b>Ack No. &nbsp;:</b> {einvoice.get('ack_no', '')}<br/>
+            <b>Ack Date:</b> {einvoice.get('ack_date', '')}
+            """
+            center_header_html = "<b>Tax Invoice</b>"
+            right_header_label = "<b>e-Invoice</b>"
+            top_col_widths = [315.0, 150.0, 80.0]
+        else:
+            left_header_html = f"""
+            <b>Invoice No. &nbsp;:</b> {invoice.get('invoice_number', 'GF-2026-0001')}<br/>
+            <b>Invoice Date:</b> {einvoice.get('ack_date', invoice.get('invoice_date', 'Today'))}<br/>
+            <b>Place of Supply:</b> {buyer_state} ({buyer_code})<br/>
+            <b>Reverse Charge:</b> No
+            """
+            center_header_html = """
+            <b>TAX INVOICE</b><br/>
+            <font size="6.5">(Issued under Rule 46 of CGST Rules, 2017)</font><br/>
+            <font size="6.5"><b>ORIGINAL FOR RECIPIENT</b></font>
+            """
+            right_header_label = "<b>Digital Verification</b>"
+            top_col_widths = [240.0, 220.0, 85.0]
 
-        right_einvoice_html = "<b>e-Invoice</b>"
-
-        # 3-column top header: Left IRN (330 pt), Center Title (135 pt), Right QR (80 pt)
         top_header_table = Table([
             [
-                Paragraph(left_irn_html, style_irn),
-                Paragraph("<b>Tax Invoice</b>", style_title),
-                [Paragraph(right_einvoice_html, style_einvoice_lbl), qr_drawing]
+                Paragraph(left_header_html, style_irn),
+                Paragraph(center_header_html, style_title),
+                [Paragraph(right_header_label, style_einvoice_lbl), qr_drawing]
             ]
-        ], colWidths=[315.0, 150.0, 80.0])
+        ], colWidths=top_col_widths)
         top_header_table.setStyle(TableStyle([
             ('VALIGN', (0, 0), (-1, -1), 'TOP'),
             ('ALIGN', (1, 0), (1, 0), 'CENTER'),
@@ -248,20 +275,19 @@ class InvoicePdfGenerator:
         # ============================================================
         # 2. SELLER, BUYER & DISPATCH METADATA GRID
         # ============================================================
-        seller_state = einvoice.get("seller_state", "Maharashtra")
-        seller_code = einvoice.get("seller_state_code", "27")
-        buyer_state = einvoice.get("buyer_state", "Maharashtra")
-        buyer_code = einvoice.get("buyer_state_code", "27")
-
         cust_name = invoice.get("customer_name", "Valued Client")
         cust_addr = invoice.get("customer_address", "In-Store Counter Purchase")
         cust_gst = buyer_gstin if buyer_gstin else "Unregistered"
         cust_pan = invoice.get("customer_pan", "")
 
+        seller_name = jeweller.get('business_name', 'GemForecast Fine Jewels')
+        seller_addr = jeweller.get('address') or jeweller.get('city') or 'Store Counter'
+        seller_gst_val = seller_gstin if seller_gstin else "Unregistered"
+
         seller_text = f"""
-        <b>{jeweller.get('business_name', 'Shree Ganesh Gems & Jewels')}</b><br/>
-        {jeweller.get('address', 'Zaveri Bazaar, Mumbai 400002')}<br/>
-        GSTIN/UIN: <b>{seller_gstin}</b><br/>
+        <b>{seller_name}</b><br/>
+        {seller_addr}<br/>
+        GSTIN/UIN: <b>{seller_gst_val}</b><br/>
         State Name : <b>{seller_state}</b>, Code : <b>{seller_code}</b>
         """
 
@@ -435,7 +461,9 @@ class InvoicePdfGenerator:
 
         # Final Total Row
         grand_tot = calc.get("grand_total", invoice.get("grand_total", 0.0))
-        summary_qty = " / ".join(qtys[:2]) if qtys else ""
+        # Dynamically adapt total summary quantity: filter out Job / service units and show actual physical units
+        physical_qtys = [q for q in qtys if not q.endswith("Job")]
+        summary_qty = " + ".join(physical_qtys) if physical_qtys else (" / ".join(qtys[:2]) if qtys else "")
         items_table_data.append([
             "",
             Paragraph("<b>Total</b>", style_cell_right),

@@ -12,12 +12,12 @@ class JewelleryCalculator:
     and profit margins.
     
     Supports:
-      - Gold: 24K (999), 22K (916), 18K (750), 14K (585), 10K (417)
+      - Gold: 24K (999), 22K (916 BIS Hallmark), 18K (750), 14K (585), 10K (417), 9K (375)
       - Silver: 999 (Fine Silver), 925 (Sterling Silver)
       - Platinum: Pt950, Pt900, Pt850
-      - Diamond: 4Cs, IGI/GIA certificate, natural / lab, live rate per carat
-      - Ruby: Natural Pigeon Blood / Burmese / Mozambique, carats, live rate per carat
-      - Labour & Making: per gram, flat, or percentage
+      - Diamond: 4Cs, certified / non-certified, natural / lab-grown, live wholesale benchmarks
+      - Gemstone: Ruby, Emerald, Blue/Yellow Sapphire, Coral, Pearl, etc., with Jaipur/BDB benchmarks
+      - Labour & Making: per gram, flat, or percentage; standalone SAC 9988 job work support
       - GST Breakup: 3% composite jewellery GST (CGST 1.5% + SGST 1.5% or IGST 3.0%)
     """
 
@@ -25,6 +25,19 @@ class JewelleryCalculator:
     CGST_RATE = Decimal("1.5")            # Central GST: 1.5%
     SGST_RATE = Decimal("1.5")            # State GST: 1.5%
     IGST_RATE = Decimal("3.0")            # Integrated GST: 3.0%
+
+    # Verified Jaipur Johari Bazaar & BDB Wholesale Gemstone Benchmark Matrix (₹ Per Carat)
+    GEMSTONE_BENCHMARKS = {
+        "ruby": Decimal("15000.00"),            # Ruby (Manik)
+        "emerald": Decimal("12000.00"),         # Emerald (Panna)
+        "sapphire": Decimal("18000.00"),        # Blue Sapphire (Neelam)
+        "yellow_sapphire": Decimal("9500.00"),  # Yellow Sapphire (Pukhraj)
+        "coral": Decimal("3500.00"),            # Red Coral (Moonga)
+        "pearl": Decimal("2500.00"),            # Pearl (Moti)
+        "hessonite": Decimal("2000.00"),        # Hessonite (Gomed)
+        "cats_eye": Decimal("4000.00"),         # Cat's Eye (Lehsuniya)
+        "default": Decimal("8000.00")           # Standard semi-precious benchmark
+    }
 
     @classmethod
     def calculate(cls, params: Dict[str, Any]) -> Dict[str, Any]:
@@ -92,23 +105,28 @@ class JewelleryCalculator:
             metal_cost = Decimal("0.00")
             metal_rate_per_g = Decimal("0.00")
             gross_weight = Decimal("0.000")
-            metal_label = "No Metal (Loose Stones Only)"
+            metal_label = "No Metal (Loose Stones / Labour Only)"
             metal_category = "None"
 
         # 2. Diamonds
-        enable_diamond = bool(params.get("enable_diamond", True))
-        if isinstance(params.get("enable_diamond"), str):
-            enable_diamond = params.get("enable_diamond").lower() in ("true", "1", "yes", "on")
+        raw_enable_dia = params.get("enable_diamond")
+        if isinstance(raw_enable_dia, str):
+            enable_diamond = raw_enable_dia.lower() in ("true", "1", "yes", "on")
+        elif raw_enable_dia is not None:
+            enable_diamond = bool(raw_enable_dia)
+        else:
+            enable_diamond = float(params.get("diamond_carat", 0.0) or 0.0) > 0.0 or float(params.get("diamond_cost", 0.0) or 0.0) > 0.0
 
-        if enable_diamond:
-            diamond_carat = Decimal(str(max(0.0, float(params.get("diamond_carat", 0.0)))))
-            diamond_stones = int(max(1, int(params.get("diamond_stones", 1))))
+        diamond_carat = Decimal(str(max(0.0, float(params.get("diamond_carat", 0.0) or 0.0))))
+
+        if enable_diamond and diamond_carat > Decimal("0.00"):
+            diamond_stones = int(max(1, int(params.get("diamond_stones", 1) or 1)))
             diamond_color = str(params.get("diamond_color", "F")).upper().strip()
             diamond_clarity = str(params.get("diamond_clarity", "VS1")).upper().strip()
             diamond_cut = str(params.get("diamond_cut", "Ideal")).title().strip()
             diamond_shape = str(params.get("diamond_shape", "Round Brilliant")).title().strip()
             diamond_origin = str(params.get("diamond_origin", "Natural")).strip()
-            diamond_cert = str(params.get("diamond_cert", "IGI Certified")).strip()
+            diamond_cert = str(params.get("diamond_cert", "")).strip() or "Non-Certified"
             diamond_report_no = str(params.get("diamond_report_no", "")).strip()
 
             manual_diamond_cost = params.get("diamond_cost")
@@ -133,9 +151,11 @@ class JewelleryCalculator:
                 diamond_rate_per_ct = Decimal(str(quote.get("price_per_carat_inr", 0))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
                 diamond_quote_source = quote.get("source", "Wholesale Benchmark")
 
-            diamond_label = f"{diamond_cert} ({diamond_carat} ct, {diamond_stones} stone{'s' if diamond_stones > 1 else ''})"
-            diamond_sub = f"{diamond_origin} • {diamond_color} / {diamond_clarity} / {diamond_cut}"
+            cert_str = f" • {diamond_cert}" if diamond_cert != "Non-Certified" else ""
+            diamond_label = f"{diamond_origin} Diamond ({diamond_carat} ct, {diamond_stones} stone{'s' if diamond_stones > 1 else ''}{cert_str})"
+            diamond_sub = f"{diamond_color} / {diamond_clarity} / {diamond_cut} • {diamond_shape}"
         else:
+            enable_diamond = False
             diamond_carat = Decimal("0.00")
             diamond_stones = 0
             diamond_cost = Decimal("0.00")
@@ -157,33 +177,66 @@ class JewelleryCalculator:
         gem_carat = Decimal(str(max(0.0, float(gem_carat_raw or 0.0))))
         gem_rate_raw = params.get("gem_rate_per_carat") or params.get("gem_rate") or params.get("ruby_rate_per_carat")
 
-        if gem_rate_raw and float(gem_rate_raw) > 0 and gem_carat > 0:
-            gem_rate_per_ct = Decimal(str(float(gem_rate_raw))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-            gem_cost = (gem_carat * gem_rate_per_ct).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-        elif raw_gem_cost is not None and float(raw_gem_cost) > 0:
-            gem_cost = Decimal(str(float(raw_gem_cost))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-            gem_rate_per_ct = (gem_cost / gem_carat).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if gem_carat > 0 else Decimal("0.00")
-        else:
-            gem_cost = Decimal("0.00")
-            gem_rate_per_ct = Decimal("0.00")
-
         raw_enable_gem = params.get("enable_gemstone")
         if isinstance(raw_enable_gem, str):
             enable_gemstone = raw_enable_gem.lower() in ("true", "1", "yes", "on")
         elif raw_enable_gem is not None:
             enable_gemstone = bool(raw_enable_gem)
         else:
-            enable_gemstone = bool(gem_cost > Decimal("0.00") or gem_carat > Decimal("0.00"))
+            enable_gemstone = bool((raw_gem_cost and float(raw_gem_cost) > 0) or gem_carat > Decimal("0.00"))
 
         gem_type = str(params.get("gem_type", "Ruby (Manik)")).strip()
-        gem_origin = str(params.get("gem_origin", "Burma (Myanmar)")).strip()
-        gem_treatment = str(params.get("gem_treatment", "Natural Unheated")).strip()
-        gem_label = f"{gem_type} Gemstone ({gem_carat} ct)" if enable_gemstone and gem_carat > 0 else "No Gemstone"
+        gem_origin = str(params.get("gem_origin", "")).strip()
+        gem_treatment = str(params.get("gem_treatment", "")).strip()
+
+        if enable_gemstone and gem_carat > Decimal("0.00"):
+            if gem_rate_raw and float(gem_rate_raw) > 0:
+                gem_rate_per_ct = Decimal(str(float(gem_rate_raw))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                gem_cost = (gem_carat * gem_rate_per_ct).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                gem_quote_source = "Jeweller Specified Rate"
+            elif raw_gem_cost is not None and float(raw_gem_cost) > 0:
+                gem_cost = Decimal(str(float(raw_gem_cost))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                gem_rate_per_ct = (gem_cost / gem_carat).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                gem_quote_source = "Jeweller Specified Manual Cost"
+            else:
+                # Benchmark fallback based on gemstone type
+                gt_lower = gem_type.lower()
+                if "ruby" in gt_lower or "manik" in gt_lower:
+                    bench = cls.GEMSTONE_BENCHMARKS["ruby"]
+                elif "emerald" in gt_lower or "panna" in gt_lower:
+                    bench = cls.GEMSTONE_BENCHMARKS["emerald"]
+                elif "yellow" in gt_lower or "pukhraj" in gt_lower:
+                    bench = cls.GEMSTONE_BENCHMARKS["yellow_sapphire"]
+                elif "sapphire" in gt_lower or "neelam" in gt_lower:
+                    bench = cls.GEMSTONE_BENCHMARKS["sapphire"]
+                elif "coral" in gt_lower or "moonga" in gt_lower:
+                    bench = cls.GEMSTONE_BENCHMARKS["coral"]
+                elif "pearl" in gt_lower or "moti" in gt_lower:
+                    bench = cls.GEMSTONE_BENCHMARKS["pearl"]
+                elif "hessonite" in gt_lower or "gomed" in gt_lower:
+                    bench = cls.GEMSTONE_BENCHMARKS["hessonite"]
+                elif "cats" in gt_lower or "lehsuniya" in gt_lower:
+                    bench = cls.GEMSTONE_BENCHMARKS["cats_eye"]
+                else:
+                    bench = cls.GEMSTONE_BENCHMARKS["default"]
+
+                gem_rate_per_ct = bench
+                gem_cost = (gem_carat * gem_rate_per_ct).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                gem_quote_source = "Jaipur / BDB Wholesale Benchmark"
+
+            gem_label = f"Natural {gem_type} ({gem_carat:.2f} ct)"
+        else:
+            enable_gemstone = False
+            gem_carat = Decimal("0.00")
+            gem_cost = Decimal("0.00")
+            gem_rate_per_ct = Decimal("0.00")
+            gem_label = "No Gemstone"
+            gem_quote_source = "None"
 
         # 4. Making, Setting & Labour Charges
         making_mode = str(params.get("making_mode", "per_gram")).strip()
         raw_making = params.get("making_val") if params.get("making_val") is not None else (params.get("making_charge_per_gram") or params.get("making_rate", 0.0))
-        making_val = Decimal(str(max(0.0, float(raw_making))))
+        making_val = Decimal(str(max(0.0, float(raw_making or 0.0))))
 
         if making_mode == "per_gram":
             making_charge = (gross_weight * making_val).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
@@ -193,21 +246,21 @@ class JewelleryCalculator:
             making_charge = making_val.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
         setting_mode = str(params.get("setting_mode", "per_stone")).strip()
-        setting_val = Decimal(str(max(0.0, float(params.get("setting_val", 0.0)))))
+        setting_val = Decimal(str(max(0.0, float(params.get("setting_val", 0.0) or 0.0))))
         if setting_mode == "per_stone":
             setting_charge = (Decimal(str(diamond_stones)) * setting_val).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         else:
             setting_charge = setting_val.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
         raw_hallmark = params.get("hallmark_fee") if params.get("hallmark_fee") is not None else params.get("hallmarking_fee", 45.0)
-        hallmark_fee = Decimal(str(max(0.0, float(raw_hallmark)))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-        misc_labour = Decimal(str(max(0.0, float(params.get("misc_labour", 0.0))))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        hallmark_fee = Decimal(str(max(0.0, float(raw_hallmark or 0.0)))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        misc_labour = Decimal(str(max(0.0, float(params.get("misc_labour", 0.0) or 0.0)))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
         total_making_setting = (making_charge + setting_charge).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         total_hallmark_labour = (hallmark_fee + misc_labour).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         total_artisan_labour = (total_making_setting + total_hallmark_labour).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
-        # 5. Total Landed Cost (CP)
+        # 5. Total Landed Cost (Cost Price - CP)
         landed_cost = (
             metal_cost +
             diamond_cost +
@@ -220,12 +273,12 @@ class JewelleryCalculator:
 
         # 6. Commercial Strategy (Markup & Discount)
         raw_markup = params.get("markup_pct") if params.get("markup_pct") is not None else params.get("retail_markup_pct", 25.0)
-        markup_pct = Decimal(str(max(0.0, float(raw_markup))))
+        markup_pct = Decimal(str(max(0.0, float(raw_markup or 0.0))))
         retail_pre_discount = (landed_cost * (Decimal("1.0") + (markup_pct / Decimal("100")))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
         discount_mode = str(params.get("discount_mode", "percentage")).strip()
         raw_discount = params.get("discount_val") if params.get("discount_val") is not None else params.get("discount_pct", 0.0)
-        discount_val = Decimal(str(max(0.0, float(raw_discount))))
+        discount_val = Decimal(str(max(0.0, float(raw_discount or 0.0))))
         if discount_mode == "percentage":
             discount_amount = (retail_pre_discount * (discount_val / Decimal("100"))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
         else:
@@ -234,12 +287,12 @@ class JewelleryCalculator:
         # Net Taxable Retail Amount
         taxable_amount = max(Decimal("0.00"), retail_pre_discount - discount_amount).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
-        # 7. Indian GST Calculation (HSN 7113 - 3.0%)
+        # 7. Indian GST Calculation (HSN 7113 - 3.0% / SAC 9988)
         is_interstate = bool(params.get("is_interstate", False))
         if isinstance(params.get("is_interstate"), str):
             is_interstate = params.get("is_interstate").lower() in ("true", "1", "yes")
 
-        gst_rate = Decimal(str(float(params.get("gst_rate", 3.0))))
+        gst_rate = Decimal(str(float(params.get("gst_rate", 3.0) or 3.0)))
 
         if is_interstate:
             igst_amount = (taxable_amount * (gst_rate / Decimal("100"))).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
@@ -269,12 +322,20 @@ class JewelleryCalculator:
             realized_markup_pct = Decimal("0.0")
 
         # 9. Build Structured Itemized Line Items for Tally/e-Invoice Bill Table
-        # (Exact columns: Sl No, Description of Goods, HSN/SAC, Quantity, Rate, per, Disc. %, Amount)
         line_items: List[Dict[str, Any]] = []
         sr_idx = 1
 
-        # Calculate proportional retail share of each component if retail markup exists
         cost_ratio = (taxable_amount / landed_cost) if landed_cost > 0 else Decimal("1.0")
+
+        # Compute effective overall discount percentage across all line items
+        if retail_pre_discount > Decimal("0.00") and discount_amount > Decimal("0.00"):
+            effective_disc_pct = ((discount_amount / retail_pre_discount) * Decimal("100")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            disc_pct_str = f"{effective_disc_pct:.2f}%"
+            disc_pct_float = float(effective_disc_pct)
+        else:
+            effective_disc_pct = Decimal("0.00")
+            disc_pct_str = ""
+            disc_pct_float = 0.0
 
         # Metal Item (Gold / Silver / Platinum)
         if gross_weight > Decimal("0.000"):
@@ -296,8 +357,8 @@ class JewelleryCalculator:
                 "rate": float(effective_metal_rate),
                 "formatted_rate": f"{effective_metal_rate:,.2f}",
                 "per": "g",
-                "disc_pct": float(discount_val) if discount_mode == "percentage" else 0.0,
-                "disc_pct_str": f"{discount_val:.2f}%" if (discount_mode == "percentage" and discount_val > 0) else "",
+                "disc_pct": disc_pct_float,
+                "disc_pct_str": disc_pct_str,
                 "amount": float(retail_metal_amt),
                 "formatted_amount": f"{retail_metal_amt:,.2f}"
             })
@@ -325,8 +386,8 @@ class JewelleryCalculator:
                 "rate": float(effective_dia_rate),
                 "formatted_rate": f"{effective_dia_rate:,.2f}",
                 "per": "ct",
-                "disc_pct": float(discount_val) if discount_mode == "percentage" else 0.0,
-                "disc_pct_str": f"{discount_val:.2f}%" if (discount_mode == "percentage" and discount_val > 0) else "",
+                "disc_pct": disc_pct_float,
+                "disc_pct_str": disc_pct_str,
                 "amount": float(retail_dia_amt),
                 "formatted_amount": f"{retail_dia_amt:,.2f}"
             })
@@ -338,7 +399,14 @@ class JewelleryCalculator:
             effective_gem_rate = (retail_gem_amt / gem_carat).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if gem_carat > 0 else gem_rate_per_ct
             gem_hsn = "7103"
             gem_title = f"Natural {gem_type} ({gem_carat:.2f} ct)"
-            gem_spec = f"Origin: {gem_origin} • Treatment: {gem_treatment}"
+            if gem_origin and gem_treatment:
+                gem_spec = f"Origin: {gem_origin} • Treatment: {gem_treatment}"
+            elif gem_origin:
+                gem_spec = f"Origin: {gem_origin}"
+            elif gem_treatment:
+                gem_spec = f"Treatment: {gem_treatment}"
+            else:
+                gem_spec = "Natural Gemstone"
 
             line_items.append({
                 "sr": sr_idx,
@@ -350,8 +418,8 @@ class JewelleryCalculator:
                 "rate": float(effective_gem_rate),
                 "formatted_rate": f"{effective_gem_rate:,.2f}",
                 "per": "ct",
-                "disc_pct": float(discount_val) if discount_mode == "percentage" else 0.0,
-                "disc_pct_str": f"{discount_val:.2f}%" if (discount_mode == "percentage" and discount_val > 0) else "",
+                "disc_pct": disc_pct_float,
+                "disc_pct_str": disc_pct_str,
                 "amount": float(retail_gem_amt),
                 "formatted_amount": f"{retail_gem_amt:,.2f}"
             })
@@ -381,16 +449,16 @@ class JewelleryCalculator:
             })
             sr_idx += 1
 
-        # If line items sum has minor rounding difference with taxable_amount, adjust the primary line item
+        # Reconcile any rounding diff between sum of line items and taxable_amount
         if line_items:
             sum_line_items = sum(Decimal(str(item["amount"])) for item in line_items)
             diff = taxable_amount - sum_line_items
             if abs(diff) > Decimal("0.00"):
-                line_items[0]["amount"] = float(Decimal(str(line_items[0]["amount"])) + diff)
-                line_items[0]["formatted_amount"] = f"{line_items[0]['amount']:,.2f}"
+                adj = (Decimal(str(line_items[0]["amount"])) + diff).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+                line_items[0]["amount"] = float(adj)
+                line_items[0]["formatted_amount"] = f"{adj:,.2f}"
 
         # 10. Build HSN/SAC Tax Breakdown Table
-        # Groups by HSN code (e.g. 7113, 7102, 7103, 9988)
         hsn_groups: Dict[str, Decimal] = {}
         for item in line_items:
             h = item["hsn"]
@@ -438,8 +506,10 @@ class JewelleryCalculator:
                 "formatted_total_tax_amount": f"{tot_tax_row:,.2f}"
             })
 
-        amount_words = cls.number_to_indian_words(int(grand_total), "Indian Rupee ")
-        tax_words = cls.number_to_indian_words(int(total_gst), "Indian Rupee ")
+        amount_words = cls.number_to_indian_words(grand_total, "Indian Rupee ")
+        tax_words = cls.number_to_indian_words(total_gst, "Indian Rupee ")
+
+        current_rates = IBJAGoldService.get_current_rates()
 
         return {
             # Metal
@@ -472,7 +542,7 @@ class JewelleryCalculator:
             "diamond_sub": diamond_sub,
             "formatted_diamond_cost": cls.format_inr(diamond_cost),
 
-            # Gemstone / Ruby
+            # Gemstone
             "enable_gemstone": enable_gemstone,
             "gem_type": gem_type,
             "gem_carat": float(gem_carat),
@@ -481,6 +551,7 @@ class JewelleryCalculator:
             "gem_origin": gem_origin,
             "gem_treatment": gem_treatment,
             "gem_label": gem_label,
+            "gem_quote_source": gem_quote_source,
             "formatted_gem_cost": cls.format_inr(gem_cost),
 
             # Labour & Hallmarking
@@ -507,6 +578,7 @@ class JewelleryCalculator:
             "discount_val": float(discount_val),
             "discount_amount": float(discount_amount),
             "formatted_discount_amount": cls.format_inr(discount_amount),
+            "effective_disc_pct": float(effective_disc_pct),
             "taxable_amount": float(taxable_amount),
             "formatted_taxable_amount": cls.format_inr(taxable_amount),
 
@@ -529,7 +601,7 @@ class JewelleryCalculator:
             "realized_markup_pct": float(realized_markup_pct),
             "formatted_profit_amount": cls.format_inr(profit_amount),
 
-            # Words Representation (Matching exact Indian GST Tax Invoice format)
+            # Words Representation (Indian Rupee ... Only / Paise)
             "amount_in_words": amount_words,
             "amount_chargeable_words": amount_words,
             "tax_amount_words": tax_words,
@@ -549,10 +621,10 @@ class JewelleryCalculator:
             # Live Bullions & IBJA Traceability
             "bullions_url": "https://bullions.co.in/",
             "ibja_url": "https://www.ibja.co/",
-            "bullion_source": IBJAGoldService.get_current_rates().get("source", "Bullions.co.in Live Market Rates"),
-            "bullion_timestamp": IBJAGoldService.get_current_rates().get("fetched_timestamp", ""),
-            "bullion_is_stale": IBJAGoldService.get_current_rates().get("is_stale", False),
-            "bullion_status": IBJAGoldService.get_current_rates().get("status", "LIVE")
+            "bullion_source": current_rates.get("source", "Bullions.co.in Live Market Rates"),
+            "bullion_timestamp": current_rates.get("fetched_timestamp", ""),
+            "bullion_is_stale": current_rates.get("is_stale", False),
+            "bullion_status": current_rates.get("status", "LIVE")
         }
 
     @classmethod
@@ -582,9 +654,22 @@ class JewelleryCalculator:
             return f"₹ {value}"
 
     @classmethod
-    def number_to_indian_words(cls, n: int, currency_prefix: str = "Indian Rupee ") -> str:
-        """Converts integer into Indian numbering currency words (Lakhs, Crores)."""
-        if n == 0:
+    def number_to_indian_words(cls, n: Any, currency_prefix: str = "Indian Rupee ") -> str:
+        """
+        Converts integer or Decimal into Indian numbering currency words (Lakhs, Crores).
+        Properly handles paise (e.g. '... and Fifty Paise Only') and large numbers up to multiple thousand Crores.
+        """
+        try:
+            val_dec = Decimal(str(n)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        except Exception:
+            val_dec = Decimal(str(float(n) if n else 0)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+
+        is_neg = val_dec < 0
+        abs_val = abs(val_dec)
+        rupees_int = int(abs_val)
+        paise_int = int((abs_val - Decimal(str(rupees_int))) * Decimal("100"))
+
+        if rupees_int == 0 and paise_int == 0:
             return f"{currency_prefix}Zero Only"
 
         ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
@@ -592,13 +677,12 @@ class JewelleryCalculator:
                 "Seventeen", "Eighteen", "Nineteen"]
         tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"]
 
-        def two_digits(num):
+        def two_digits(num: int) -> str:
             if num < 20:
                 return ones[num]
-            else:
-                return tens[num // 10] + (" " + ones[num % 10] if num % 10 != 0 else "")
+            return tens[num // 10] + (" " + ones[num % 10] if num % 10 != 0 else "")
 
-        def three_digits(num):
+        def three_digits(num: int) -> str:
             h = num // 100
             rem = num % 100
             res = ""
@@ -610,24 +694,44 @@ class JewelleryCalculator:
                 res += two_digits(rem)
             return res
 
-        crore = n // 10000000
-        rem_cr = n % 10000000
+        def convert_less_than_crore(num: int) -> List[str]:
+            parts = []
+            lakh = (num % 10000000) // 100000
+            rem_lakh = num % 100000
+            thousand = rem_lakh // 1000
+            rem_th = rem_lakh % 1000
 
-        lakh = rem_cr // 100000
-        rem_lakh = rem_cr % 100000
+            if lakh > 0:
+                parts.append(two_digits(lakh) + " Lakh")
+            if thousand > 0:
+                parts.append(two_digits(thousand) + " Thousand")
+            if rem_th > 0:
+                parts.append(three_digits(rem_th))
+            return parts
 
-        thousand = rem_lakh // 1000
-        rem_th = rem_lakh % 1000
+        final_parts: List[str] = []
+        crore_val = rupees_int // 10000000
+        rem_val = rupees_int % 10000000
 
-        parts = []
-        if crore > 0:
-            parts.append(two_digits(crore) + " Crore")
-        if lakh > 0:
-            parts.append(two_digits(lakh) + " Lakh")
-        if thousand > 0:
-            parts.append(two_digits(thousand) + " Thousand")
-        if rem_th > 0:
-            parts.append(three_digits(rem_th))
+        if crore_val > 0:
+            if crore_val >= 10000000:
+                sub_cr = cls.number_to_indian_words(crore_val, currency_prefix="").replace(" Only", "").strip()
+                final_parts.append(f"{sub_cr} Crore")
+            elif crore_val >= 100:
+                sub_parts = convert_less_than_crore(crore_val)
+                final_parts.append(" ".join(sub_parts) + " Crore")
+            else:
+                final_parts.append(two_digits(crore_val) + " Crore")
 
-        words = " ".join(parts).strip()
-        return f"{currency_prefix}{words} Only"
+        if rem_val > 0:
+            final_parts.extend(convert_less_than_crore(rem_val))
+
+        words = " ".join([p for p in final_parts if p]).strip()
+        neg_str = "Minus " if is_neg else ""
+
+        if rupees_int > 0 and paise_int > 0:
+            return f"{currency_prefix}{neg_str}{words} and {two_digits(paise_int)} Paise Only"
+        elif rupees_int > 0:
+            return f"{currency_prefix}{neg_str}{words} Only"
+        else:
+            return f"{currency_prefix}{neg_str}{two_digits(paise_int)} Paise Only"

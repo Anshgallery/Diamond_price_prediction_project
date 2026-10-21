@@ -9,6 +9,7 @@ from datetime import datetime, timezone, timedelta
 from DiamondPricePrediction.utils.logger import logging
 from DiamondPricePrediction.services.jewellery_calculator import JewelleryCalculator
 from DiamondPricePrediction.services.einvoice_service import EInvoiceService
+from DiamondPricePrediction.services.auth_service import AuthService
 
 class InvoiceService:
     """
@@ -142,6 +143,19 @@ class InvoiceService:
         buyer_order_no = str(form_data.get("buyer_order_no", "")).strip()
         dispatched_through = str(form_data.get("dispatched_through", "Hand Delivery (Store Counter)")).strip()
         destination = str(form_data.get("destination", customer_address or "Store Counter")).strip()
+
+        # Snapshot jeweller seller details
+        jeweller = AuthService.get_jeweller_by_id(jeweller_id)
+        seller_snapshot = {
+            "business_name": form_data.get("seller_business_name") or (jeweller.get("business_name") if jeweller else "GemForecast Fine Jewels"),
+            "owner_name": form_data.get("seller_owner_name") or (jeweller.get("owner_name") if jeweller else "Master Jeweller"),
+            "gst_number": form_data.get("seller_gst_number") or (jeweller.get("gst_number") if jeweller else ""),
+            "city": form_data.get("seller_city") or (jeweller.get("city") if jeweller else "Mumbai"),
+            "address": form_data.get("seller_address") or (jeweller.get("address") if jeweller else "Bullion Plaza, Zaveri Bazaar, Mumbai 400002"),
+            "phone": form_data.get("seller_phone") or (jeweller.get("phone") if jeweller else "+91 98200 11223"),
+            "email": form_data.get("seller_email") or (jeweller.get("email") if jeweller else "billing@gemforecast.com")
+        }
+        calc_res["seller"] = seller_snapshot
 
         # Item description headline
         metal_desc = calc_res.get("metal_label", "Fine Jewellery")
@@ -344,8 +358,8 @@ class InvoiceService:
             recalc = JewelleryCalculator.calculate(d["calc"])
             d["calc"]["line_items"] = recalc.get("line_items", [])
             d["calc"]["hsn_summary"] = recalc.get("hsn_summary", [])
-            d["calc"]["amount_chargeable_words"] = recalc.get("amount_chargeable_words", JewelleryCalculator.number_to_indian_words(int(d["grand_total"]), "Indian Rupee "))
-            d["calc"]["tax_amount_words"] = recalc.get("tax_amount_words", JewelleryCalculator.number_to_indian_words(int(d["total_gst"]), "Indian Rupee "))
+            d["calc"]["amount_chargeable_words"] = recalc.get("amount_chargeable_words", JewelleryCalculator.number_to_indian_words(d["grand_total"], "Indian Rupee "))
+            d["calc"]["tax_amount_words"] = recalc.get("tax_amount_words", JewelleryCalculator.number_to_indian_words(d["total_gst"], "Indian Rupee "))
 
         d["formatted_grand_total"] = JewelleryCalculator.format_inr(d["grand_total"])
         d["formatted_taxable"] = JewelleryCalculator.format_inr(d["taxable_amount"])
@@ -353,19 +367,35 @@ class InvoiceService:
         d["formatted_profit"] = JewelleryCalculator.format_inr(d["profit_amount"])
         d["formatted_landed"] = JewelleryCalculator.format_inr(d["landed_cost"])
 
-        # Default Jeweller Profile
-        seller_gstin = "27AABCS1429B1Z8"
-        buyer_gstin = d.get("customer_gstin") or ""
+        # Dynamic Jeweller Profile from Calculation Snapshot or DB Lookup
+        seller = d["calc"].get("seller")
+        if not seller or not isinstance(seller, dict):
+            seller = AuthService.get_jeweller_by_id(d.get("jeweller_id"))
+        d["seller"] = seller
 
-        # Build official e-Invoice package (IRN, Ack No, Ack Date, QR SVG)
+        seller_gstin = (seller.get("gst_number") or "").strip()
+        seller_name = seller.get("business_name") or "GemForecast Fine Jewels"
+        buyer_gstin = (d.get("customer_gstin") or "").strip()
+        buyer_name = (d.get("customer_name") or "Valued Customer").strip()
+
+        # Build official GST compliance package (Rule 46 Tax Invoice or Rule 48(4) e-Invoice)
+        main_hsn = d["calc"].get("line_items", [{}])[0].get("hsn", "7113") if d["calc"].get("line_items") else "7113"
         einvoice = EInvoiceService.get_full_einvoice_package(
             supplier_gstin=seller_gstin,
             buyer_gstin=buyer_gstin,
             doc_no=d["invoice_number"],
             doc_date_str=d["invoice_date"],
             grand_total=d["grand_total"],
+            taxable_total=d["taxable_amount"],
+            total_gst=d["total_gst"],
             item_count=len(d["calc"].get("line_items", [])) or 1,
-            main_hsn="7113"
+            main_hsn=main_hsn,
+            supplier_name=seller_name,
+            buyer_name=buyer_name,
+            share_token=d.get("share_token", ""),
+            irn=d["calc"].get("irn"),
+            ack_no=d["calc"].get("ack_no"),
+            ack_date=d["calc"].get("ack_date")
         )
         d["einvoice"] = einvoice
 
@@ -383,7 +413,7 @@ class InvoiceService:
             "dispatch_doc_no": "",
             "delivery_note_date": "",
             "dispatched_through": d.get("dispatched_through") or "Hand Delivery (Store Counter)",
-            "destination": d.get("destination") or d.get("customer_address") or "Store Counter, Mumbai",
+            "destination": d.get("destination") or d.get("customer_address") or "Store Counter",
             "terms_of_delivery": "Goods once sold are certified authentic BIS hallmarked items."
         }
 

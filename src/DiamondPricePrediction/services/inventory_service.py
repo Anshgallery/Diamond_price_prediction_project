@@ -303,3 +303,68 @@ class InventoryService:
                 "avg_confidence": round(avg_conf or 0, 1),
                 "total_appraisals_logged": total_appraisals or 0
             }
+
+    @classmethod
+    def revalue_all_inventory(cls, jeweller_id: str = "default") -> Dict[str, Any]:
+        """
+        Recomputes real-time market valuations for all stock items using live CaratHunter pricing.
+        Updates fair_market_inr, suggested_sell_inr, expected profit, and margins.
+        """
+        from DiamondPricePrediction.services.licensed_diamond_service import LicensedDiamondService
+        cls.init_db()
+        updated_count = 0
+        total_market_before = 0.0
+        total_market_after = 0.0
+
+        with cls._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM inventory WHERE (jeweller_id = ? OR jeweller_id = 'default')", (jeweller_id,))
+            rows = cursor.fetchall()
+
+            for row in rows:
+                item = dict(row)
+                item_id = item["id"]
+                buying_price = float(item.get("buying_price_inr") or 0.0)
+                old_market = float(item.get("fair_market_inr") or 0.0)
+                total_market_before += old_market
+
+                # Diamond spec for live CaratHunter quote
+                spec = {
+                    "carat": item.get("carat", 1.0),
+                    "color": item.get("color", "F"),
+                    "clarity": item.get("clarity", "VS1"),
+                    "cut": item.get("cut", "Ideal"),
+                    "shape": item.get("shape", "Round Brilliant"),
+                    "origin_type": item.get("origin_type", "Natural"),
+                    "report_number": item.get("report_number", "")
+                }
+                quote = LicensedDiamondService.get_pricing_quote(spec)
+                new_market = float(quote.get("total_wholesale_inr", old_market or 100000))
+                total_market_after += new_market
+
+                # Standard Indian jeweller retail markup 22%
+                suggested_sell = round(new_market * 1.22)
+                profit = round(suggested_sell - buying_price) if buying_price > 0 else round(suggested_sell - new_market)
+                margin = round((profit / suggested_sell) * 100.0, 1) if suggested_sell > 0 else 0.0
+
+                now_iso = datetime.now(timezone.utc).isoformat()
+                cursor.execute("""
+                    UPDATE inventory 
+                    SET fair_market_inr = ?, suggested_sell_inr = ?, profit_inr = ?, margin_pct = ?, updated_at = ?
+                    WHERE id = ?
+                """, (new_market, suggested_sell, profit, margin, now_iso, item_id))
+                updated_count += 1
+
+            conn.commit()
+
+        logging.info(f"Re-valued {updated_count} inventory items with live CaratHunter market quotes.")
+        return {
+            "success": True,
+            "updated_count": updated_count,
+            "total_market_before": total_market_before,
+            "total_market_after": total_market_after,
+            "net_appreciation_inr": total_market_after - total_market_before,
+            "formatted_total_market": IndianMarketService.format_inr(total_market_after),
+            "timestamp": datetime.now(timezone(timedelta(hours=5, minutes=30))).strftime("%d %b %Y, %I:%M %p IST")
+        }
+

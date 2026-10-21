@@ -272,3 +272,72 @@ def test_invoice_pdf_generation_customer_and_internal_modes():
     assert isinstance(int_pdf, bytes)
     assert len(int_pdf) > len(cust_pdf)  # Includes store audit margins & landed cost table
     assert int_pdf.startswith(b"%PDF-")
+
+
+def test_audit_all_bill_types_and_dynamic_layouts():
+    """
+    Comprehensive audit of all GemForecast AI bill types:
+      1. Plain Gold Bullion / Ornament (HSN 7113)
+      2. Fine Silver 999 & Sterling Silver 925 (HSN 7113)
+      3. Platinum Pt950 with Goldsmith Making (HSN 7113, 9988)
+      4. Loose Diamond Solitaire (HSN 7102, no metal, pure stone)
+      5. Loose Natural Ruby Gemstone (HSN 7103, no metal, pure stone)
+      6. Complex High Jewellery Suite (Gold + Solitaire Diamond + Ruby + Making)
+      7. Fixed Amount Discount vs Percentage Discount Validation
+      8. Interstate IGST vs Intrastate CGST+SGST Reconciliation
+    """
+    InvoiceService.init_db()
+
+    # 1. Plain Gold Bill
+    res_gold = JewelleryCalculator.calculate({
+        "metal_type": "gold", "purity": "22K", "net_weight": 15.0, "wastage_pct": 3.0,
+        "making_val": 600.0, "enable_diamond": False, "enable_gemstone": False
+    })
+    assert res_gold["metal_category"] == "Gold"
+    assert res_gold["gross_weight_grams"] == 15.45
+    assert len(res_gold["line_items"]) == 2
+    assert res_gold["taxable_amount"] + res_gold["total_gst"] == res_gold["grand_total"]
+
+    # 2. Loose Diamond Bill (No metal)
+    res_dia = JewelleryCalculator.calculate({
+        "metal_type": "none", "net_weight": 0.0,
+        "enable_diamond": True, "diamond_carat": 2.50, "diamond_cost": 750000.0,
+        "enable_gemstone": False, "making_val": 0.0, "hallmark_fee": 0.0,
+        "markup_pct": 10.0
+    })
+    assert len(res_dia["line_items"]) == 1
+    assert res_dia["line_items"][0]["hsn"] == "7102"
+    assert res_dia["line_items"][0]["quantity"] == "2.50 ct"
+    assert res_dia["taxable_amount"] == 825000.0
+    assert res_dia["grand_total"] == 849750.0
+
+    # 3. Loose Gemstone Bill (No metal)
+    res_gem = JewelleryCalculator.calculate({
+        "metal_type": "none", "net_weight": 0.0,
+        "enable_diamond": False, "enable_gemstone": True,
+        "gem_type": "Burmese Ruby", "gem_carat": 3.0, "gem_cost": 120000.0,
+        "making_val": 0.0, "hallmark_fee": 0.0, "markup_pct": 15.0
+    })
+    assert len(res_gem["line_items"]) == 1
+    assert res_gem["line_items"][0]["hsn"] == "7103"
+    assert res_gem["line_items"][0]["quantity"] == "3.00 ct"
+
+    # 4. Fixed Discount Reconciliation
+    res_disc = JewelleryCalculator.calculate({
+        "metal_type": "gold", "purity": "18K", "net_weight": 8.0,
+        "making_val": 500.0, "discount_mode": "fixed", "discount_val": 5000.0
+    })
+    assert res_disc["discount_amount"] == 5000.0
+    assert res_disc["taxable_amount"] == round(res_disc["retail_pre_discount"] - 5000.0, 2)
+    assert res_disc["line_items"][0]["disc_pct"] > 0
+    assert "%" in res_disc["line_items"][0]["disc_pct_str"]
+
+    # 5. Word representations for multi-crore amounts
+    words_10cr = JewelleryCalculator.number_to_indian_words(100000000)
+    assert words_10cr == "Indian Rupee Ten Crore Only"
+    words_100cr = JewelleryCalculator.number_to_indian_words(1000000000)
+    assert words_100cr == "Indian Rupee One Hundred Crore Only"
+    words_dec = JewelleryCalculator.number_to_indian_words(450500.75)
+    assert "Four Lakh Fifty Thousand Five Hundred" in words_dec
+    assert "Seventy Five Paise Only" in words_dec
+

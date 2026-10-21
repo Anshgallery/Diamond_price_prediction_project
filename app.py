@@ -20,6 +20,7 @@ from DiamondPricePrediction.services.licensed_diamond_service import LicensedDia
 from DiamondPricePrediction.services.jewellery_calculator import JewelleryCalculator
 from DiamondPricePrediction.services.invoice_service import InvoiceService
 from DiamondPricePrediction.services.invoice_pdf_generator import InvoicePdfGenerator
+from DiamondPricePrediction.services.carathunter_service import CaratHunterService
 
 # ============================================================
 # FLASK APPLICATION INITIALIZATION
@@ -632,7 +633,7 @@ def view_invoice(invoice_id):
         flash("Invoice not found.", "warning")
         return redirect(url_for("list_invoices"))
 
-    jeweller = session.get("jeweller")
+    jeweller = session.get("jeweller") or invoice.get("seller") or AuthService.get_jeweller_by_id(invoice.get("jeweller_id"))
     return render_template("invoice_view.html", invoice=invoice, jeweller=jeweller)
 
 
@@ -647,7 +648,7 @@ def download_invoice_pdf(invoice_id):
 
         mode = request.args.get("mode", "customer").lower()
         is_internal = (mode == "internal")
-        jeweller = session.get("jeweller")
+        jeweller = session.get("jeweller") or invoice.get("seller") or AuthService.get_jeweller_by_id(invoice.get("jeweller_id"))
         base_url = request.host_url
         pdf_bytes = InvoicePdfGenerator.generate_invoice_pdf(
             invoice,
@@ -674,7 +675,7 @@ def share_invoice(share_token):
         flash("The requested invoice link is invalid or has expired.", "warning")
         return redirect(url_for("home_page"))
 
-    jeweller = None
+    jeweller = invoice.get("seller") or AuthService.get_jeweller_by_id(invoice.get("jeweller_id"))
     return render_template("invoice_share.html", invoice=invoice, jeweller=jeweller)
 
 
@@ -687,7 +688,8 @@ def share_invoice_pdf(share_token):
             return "Invoice not found or link expired", 404
 
         base_url = request.host_url
-        pdf_bytes = InvoicePdfGenerator.generate_invoice_pdf(invoice, jeweller_profile=None, base_url=base_url)
+        jeweller = invoice.get("seller") or AuthService.get_jeweller_by_id(invoice.get("jeweller_id"))
+        pdf_bytes = InvoicePdfGenerator.generate_invoice_pdf(invoice, jeweller_profile=jeweller, base_url=base_url)
 
         response = make_response(pdf_bytes)
         response.headers['Content-Type'] = 'application/pdf'
@@ -841,7 +843,7 @@ def evaluate_proportions():
 def market_rates():
     if request.method == "POST":
         usd_inr = float(request.form.get("usd_inr_rate", 87.5))
-        provider = request.form.get("provider", "Bharat Diamond Bourse (BDB) Wholesale")
+        provider = request.form.get("provider", "Bharat Diamond Bourse & Carat Hunter Wholesale")
         api_key = request.form.get("api_key", "").strip()
         igi_key = request.form.get("igi_api_key", "").strip()
 
@@ -852,7 +854,101 @@ def market_rates():
         flash("Indian wholesale market settings updated.", "success")
 
     config = IndianMarketService.get_config()
-    return render_template("market_rates.html", config=config)
+    usd_inr = float(config.get("usd_inr_rate", 87.5))
+    bullion_rates = IBJAGoldService.get_current_rates()
+    daily_changes = bullion_rates.get("daily_changes", {})
+    historical_prices = IBJAGoldService.get_historical_datewise_prices(days=30)
+    chart_series = IBJAGoldService.get_chart_series(days=30)
+    ch_matrix = CaratHunterService.get_wholesale_index_matrix(usd_inr_rate=usd_inr)
+    ch_overview = CaratHunterService.get_market_overview()
+
+    return render_template(
+        "market_rates.html",
+        config=config,
+        bullion_rates=bullion_rates,
+        daily_changes=daily_changes,
+        historical_prices=historical_prices,
+        chart_series=chart_series,
+        ch_matrix=ch_matrix,
+        ch_overview=ch_overview
+    )
+
+
+@app.route("/api/market-rates/live")
+def api_market_rates_live():
+    """Live streaming endpoint for stock-market ticker, cards, and Chart.js series."""
+    force = request.args.get("force", "false").lower() in ("true", "1", "yes")
+    config = IndianMarketService.get_config()
+    usd_inr = float(config.get("usd_inr_rate", 87.5))
+    bullion_rates = IBJAGoldService.get_current_rates(force_refresh=force)
+    chart_series = IBJAGoldService.get_chart_series(days=30)
+    ch_overview = CaratHunterService.get_market_overview()
+    
+    # 1ct benchmark quotes
+    nat_1ct = CaratHunterService.get_price_check(1.0, "F", "VS1", "round", "natural", usd_inr_rate=usd_inr)
+    lab_1ct = CaratHunterService.get_price_check(1.0, "F", "VS1", "round", "lab-grown", usd_inr_rate=usd_inr)
+
+    return jsonify({
+        "success": True,
+        "is_live": bullion_rates.get("is_live", True),
+        "rates": bullion_rates.get("rates", {}),
+        "daily_changes": bullion_rates.get("daily_changes", {}),
+        "chart_series": chart_series,
+        "carathunter": {
+            "natural_1ct": nat_1ct,
+            "lab_1ct": lab_1ct,
+            "overview": ch_overview
+        },
+        "session": bullion_rates.get("session", "Live Session"),
+        "timestamp": bullion_rates.get("fetched_timestamp", "")
+    })
+
+
+@app.route("/api/carathunter/quote")
+def api_carathunter_quote():
+    """Live CaratHunter price_check API for any carat, color, clarity, shape, origin."""
+    try:
+        carat = float(request.args.get("carat", 1.0))
+        color = request.args.get("color", "F")
+        clarity = request.args.get("clarity", "VS1")
+        shape = request.args.get("shape", "round")
+        origin = request.args.get("origin", "natural")
+        config = IndianMarketService.get_config()
+        usd_inr = float(config.get("usd_inr_rate", 87.5))
+
+        quote = CaratHunterService.get_price_check(
+            carat=carat,
+            color=color,
+            clarity=clarity,
+            shape=shape,
+            origin=origin,
+            usd_inr_rate=usd_inr
+        )
+        return jsonify({"success": True, "data": quote})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+
+@app.route("/api/carathunter/certificate")
+def api_carathunter_cert():
+    """Live certificate lookup (IGI, GIA) against CaratHunter's 24.5M diamonds."""
+    cert_num = request.args.get("certificate_number", "").strip()
+    if not cert_num:
+        return jsonify({"success": False, "error": "Missing certificate_number"}), 400
+    res = CaratHunterService.lookup_certificate(cert_num)
+    return jsonify({"success": True, "data": res})
+
+
+@app.route("/api/inventory/revalue", methods=["POST"])
+def api_inventory_revalue():
+    """Triggers live market revaluation of inventory portfolio using CaratHunter quotes."""
+    try:
+        jeweller_id = session.get("jeweller", {}).get("id", "default")
+        result = InventoryService.revalue_all_inventory(jeweller_id=jeweller_id)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
 
 
 

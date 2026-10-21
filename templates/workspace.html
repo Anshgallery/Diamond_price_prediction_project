@@ -21,7 +21,10 @@
             </div>
         </div>
 
-        <div style="display: flex; gap: 0.75rem;">
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <button type="button" id="revalueBtn" onclick="triggerPortfolioRevaluation()" class="jewel-btn jewel-btn-secondary" style="background: linear-gradient(135deg, rgba(200,155,60,0.15), rgba(13,44,84,0.1)); border: 1.5px solid var(--gold); color: var(--gold); font-weight: 700;">
+                ⚡ Re-value Portfolio with Live Rates
+            </button>
             <a href="/" class="jewel-btn jewel-btn-primary">
                 + Appraise New IGI Diamond
             </a>
@@ -216,4 +219,31 @@
     </div>
 
 </div>
+<script>
+function triggerPortfolioRevaluation() {
+    var btn = document.getElementById('revalueBtn');
+    if (!btn) return;
+    var origText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '⚡ Fetching CaratHunter & Bullions Live Quotes...';
+
+    fetch('/api/inventory/revalue', { method: 'POST' })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data && data.success) {
+                alert('Portfolio re-valued successfully! ' + (data.updated_count || 0) + ' items updated with live CaratHunter wholesale quotes.');
+                window.location.reload();
+            } else {
+                alert('Revaluation notice: ' + (data ? data.message : 'Unable to complete update.'));
+                btn.disabled = false;
+                btn.innerHTML = origText;
+            }
+        })
+        .catch(function(err) {
+            alert('Revaluation error: ' + err);
+            btn.disabled = false;
+            btn.innerHTML = origText;
+        });
+}
+</script>
 {% endblock %}

@@ -133,22 +133,22 @@
                     <div class="jewel-grid-2" style="margin-bottom: 1rem;">
                         <div>
                             <label class="jewel-label" for="customer_name">Customer Full Name *</label>
-                            <input type="text" id="customer_name" name="customer_name" class="jewel-input" value="Aarav Mehta" required>
+                            <input type="text" id="customer_name" name="customer_name" class="jewel-input" placeholder="e.g. Rahul Sharma" required>
                         </div>
                         <div>
                             <label class="jewel-label" for="customer_phone">Mobile Number</label>
-                            <input type="tel" id="customer_phone" name="customer_phone" class="jewel-input" value="+91 98200 12345">
+                            <input type="tel" id="customer_phone" name="customer_phone" class="jewel-input" placeholder="e.g. +91 98765 43210">
                         </div>
                     </div>
 
                     <div class="jewel-grid-2" style="margin-bottom: 1rem;">
                         <div>
                             <label class="jewel-label" for="customer_email">Email Address</label>
-                            <input type="email" id="customer_email" name="customer_email" class="jewel-input" value="aarav.mehta@example.com">
+                            <input type="email" id="customer_email" name="customer_email" class="jewel-input" placeholder="e.g. client@example.com">
                         </div>
                         <div>
                             <label class="jewel-label" for="customer_pan">Customer PAN (KYC for &gt;₹2L)</label>
-                            <input type="text" id="customer_pan" name="customer_pan" class="jewel-input" value="ABCDE1234F" style="text-transform: uppercase;">
+                            <input type="text" id="customer_pan" name="customer_pan" class="jewel-input" placeholder="e.g. ABCDE1234F" style="text-transform: uppercase;">
                         </div>
                     </div>
 
@@ -159,13 +159,13 @@
                         </div>
                         <div>
                             <label class="jewel-label" for="customer_address">Customer Address / City</label>
-                            <input type="text" id="customer_address" name="customer_address" class="jewel-input" value="Bandra West, Mumbai 400050">
+                            <input type="text" id="customer_address" name="customer_address" class="jewel-input" placeholder="e.g. 12 Park Avenue, Mumbai 400050">
                         </div>
                     </div>
 
                     <div>
                         <label class="jewel-label" for="invoice_notes">Invoice Notes &amp; Special Instructions</label>
-                        <input type="text" id="invoice_notes" name="notes" class="jewel-input" value="Authentic BIS Hallmarked & IGI Certified Diamond Solitaire.">
+                        <input type="text" id="invoice_notes" name="notes" class="jewel-input" placeholder="e.g. Certified authentic BIS hallmarked jewellery.">
                     </div>
                 </div>
 
@@ -308,10 +308,11 @@
                             <div>
                                 <label class="jewel-label" for="calc_diamond_cert">Certification</label>
                                 <select id="calc_diamond_cert" name="diamond_cert" class="jewel-select" onchange="recalculateMaster()">
-                                    <option value="IGI Certified" selected>IGI Certified</option>
+                                    <option value="Non-Certified" selected>Non-Certified / Store Certified</option>
+                                    <option value="IGI Certified">IGI Certified</option>
                                     <option value="GIA Certified">GIA Certified</option>
                                     <option value="HRD Certified">HRD Certified</option>
-                                    <option value="Non-Certified">In-House / Non-Certified</option>
+                                    <option value="SGL Certified">SGL Certified</option>
                                 </select>
                             </div>
                             <div>
@@ -320,6 +321,7 @@
                                     <button type="button" onclick="autoCalcDiamondPrice()" style="background: none; border: none; color: var(--gold); font-size: 0.78rem; cursor: pointer; text-decoration: underline;">Auto Market Rate</button>
                                 </div>
                                 <input type="number" id="calc_diamond_cost" name="diamond_cost" class="jewel-input" value="300000" style="font-weight: 700; color: var(--gold);" oninput="recalculateMaster()">
+                                <div id="chQuoteBadge" style="margin-top: 0.35rem; font-size: 0.72rem; color: var(--text-muted); line-height: 1.3;"></div>
                             </div>
                         </div>
                     </div>
@@ -339,11 +341,15 @@
                         <div class="jewel-grid-3">
                             <div>
                                 <label class="jewel-label" for="calc_gem_type">Gemstone Type</label>
-                                <select id="calc_gem_type" name="gem_type" class="jewel-select" onchange="recalculateMaster()">
+                                <select id="calc_gem_type" name="gem_type" class="jewel-select" onchange="autoCalcGemstonePrice()">
                                     <option value="Ruby (Manik)" selected>Ruby (Manik)</option>
                                     <option value="Emerald (Panna)">Emerald (Panna)</option>
                                     <option value="Blue Sapphire (Neelam)">Blue Sapphire (Neelam)</option>
+                                    <option value="Yellow Sapphire (Pukhraj)">Yellow Sapphire (Pukhraj)</option>
                                     <option value="Pearl (Moti)">Pearl (Moti)</option>
+                                    <option value="Red Coral (Moonga)">Red Coral (Moonga)</option>
+                                    <option value="Hessonite (Gomed)">Hessonite (Gomed)</option>
+                                    <option value="Cat's Eye (Lehsuniya)">Cat's Eye (Lehsuniya)</option>
                                     <option value="Polki / Kundan">Polki / Kundan</option>
                                     <option value="Cubic Zirconia (CZ)">Cubic Zirconia (CZ)</option>
                                 </select>
@@ -353,7 +359,10 @@
                                 <input type="number" id="calc_gem_carat" name="gem_carat" class="jewel-input" value="2.5" step="0.1" oninput="recalculateMaster()">
                             </div>
                             <div>
-                                <label class="jewel-label" for="calc_gem_cost">Total Gemstone Value (₹)</label>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                                    <label class="jewel-label" for="calc_gem_cost" style="margin: 0;">Total Value (₹)</label>
+                                    <button type="button" onclick="autoCalcGemstonePrice()" style="background: none; border: none; color: var(--gold); font-size: 0.78rem; cursor: pointer; text-decoration: underline;">Auto Market Rate</button>
+                                </div>
                                 <input type="number" id="calc_gem_cost" name="gem_cost" class="jewel-input" value="25000" oninput="recalculateMaster()">
                             </div>
                         </div>
@@ -660,15 +669,45 @@
 // Metal Purity Ratios relative to Fine (24K / 999 / Pt950)
 const PURITY_FACTORS = {
     "24K": 1.0000,
-    "22K": 22 / 24, // 0.9167
-    "18K": 18 / 24, // 0.7500
-    "14K": 14 / 24, // 0.5833
-    "10K": 10 / 24, // 0.4167
+    "22K": 0.9160, // BIS 916 Hallmark Standard
+    "18K": 0.7500, // 750 Standard
+    "14K": 0.5850, // 585 Standard
+    "10K": 0.4170, // 417 Standard
     "999": 1.0000,
     "925": 0.9250,
     "Pt950": 0.9500,
     "Pt900": 0.9000
 };
+
+// Jaipur / BDB Wholesale Gemstone Benchmark Rates (₹ Per Carat)
+const GEMSTONE_BENCHMARKS = {
+    "ruby": 15000,
+    "emerald": 12000,
+    "sapphire": 18000,
+    "yellow_sapphire": 9500,
+    "coral": 3500,
+    "pearl": 2500,
+    "hessonite": 2000,
+    "cats_eye": 4000,
+    "default": 8000
+};
+
+function autoCalcGemstonePrice() {
+    var carat = parseFloat(document.getElementById('calc_gem_carat').value) || 0;
+    var type = (document.getElementById('calc_gem_type').value || '').toLowerCase();
+    var rate = GEMSTONE_BENCHMARKS.default;
+    if (type.includes('ruby') || type.includes('manik')) rate = GEMSTONE_BENCHMARKS.ruby;
+    else if (type.includes('emerald') || type.includes('panna')) rate = GEMSTONE_BENCHMARKS.emerald;
+    else if (type.includes('yellow') || type.includes('pukhraj')) rate = GEMSTONE_BENCHMARKS.yellow_sapphire;
+    else if (type.includes('blue') || type.includes('neelam') || type.includes('sapphire')) rate = GEMSTONE_BENCHMARKS.sapphire;
+    else if (type.includes('coral') || type.includes('moonga')) rate = GEMSTONE_BENCHMARKS.coral;
+    else if (type.includes('pearl') || type.includes('moti')) rate = GEMSTONE_BENCHMARKS.pearl;
+    else if (type.includes('hessonite') || type.includes('gomed')) rate = GEMSTONE_BENCHMARKS.hessonite;
+    else if (type.includes('cat') || type.includes('lehsuniya')) rate = GEMSTONE_BENCHMARKS.cats_eye;
+
+    document.getElementById('calc_gem_cost').value = Math.round(carat * rate);
+    recalculateMaster();
+}
 
 // Preset Configuration Definitions
 const PRESETS = {
@@ -822,45 +861,86 @@ function toggleSection(secId) {
 
 function autoCalcDiamondPrice() {
     var carat = parseFloat(document.getElementById('calc_diamond_carat').value) || 1.0;
-    var origin = document.getElementById('calc_diamond_origin').value;
+    var rawOrigin = document.getElementById('calc_diamond_origin').value;
+    var origin = rawOrigin.toLowerCase().indexOf('lab') !== -1 ? 'lab-grown' : 'natural';
     var color = document.getElementById('calc_diamond_color').value;
     var clarity = document.getElementById('calc_diamond_clarity').value;
     var cut = document.getElementById('calc_diamond_cut').value;
+    var shapeVal = document.getElementById('calc_diamond_shape') ? document.getElementById('calc_diamond_shape').value : 'Round';
+    var shape = shapeVal.split(' ')[0]; // 'Round Brilliant' -> 'Round'
 
-    if (origin === 'Lab-Grown') {
-        // Surat SDB CVD/HPHT Manufacturing Matrix
-        var basePpc = 18000;
-        if (carat < 0.5) basePpc = 8500;
-        else if (carat < 0.7) basePpc = 11500;
-        else if (carat < 1.0) basePpc = 14500;
-        else if (carat < 1.5) basePpc = 18000;
-        else if (carat < 2.0) basePpc = 22500;
-        else if (carat < 3.0) basePpc = 28000;
-        else basePpc = 34000;
-
-        var colorMult = (color === 'D' || color === 'E' || color === 'F') ? 1.15 : 1.0;
-        var clarityMult = (clarity === 'FL' || clarity === 'IF' || clarity === 'VVS1' || clarity === 'VVS2') ? 1.20 : 1.0;
-        var estPrice = Math.round(basePpc * colorMult * clarityMult * carat);
-        document.getElementById('calc_diamond_cost').value = estPrice;
-    } else {
-        // Mumbai BDB Natural Wholesale Matrix
-        var basePpc = 460000;
-        if (carat < 0.5) basePpc = 68000;
-        else if (carat < 0.7) basePpc = 115000;
-        else if (carat < 0.9) basePpc = 205000;
-        else if (carat < 1.0) basePpc = 310000;
-        else if (carat < 1.5) basePpc = 460000;
-        else if (carat < 2.0) basePpc = 710000;
-        else basePpc = 1120000;
-
-        var colorMults = { "D": 1.18, "E": 1.08, "F": 1.00, "G": 0.90, "H": 0.82, "I": 0.74, "J": 0.65 };
-        var clarityMults = { "FL": 1.45, "IF": 1.35, "VVS1": 1.22, "VVS2": 1.12, "VS1": 1.00, "VS2": 0.90, "SI1": 0.76 };
-        var cutMults = { "Ideal": 1.05, "Excellent": 1.00, "Very Good": 0.92, "Good": 0.80 };
-
-        var estPrice = Math.round(basePpc * (colorMults[color]||1.0) * (clarityMults[clarity]||1.0) * (cutMults[cut]||1.0) * carat);
-        document.getElementById('calc_diamond_cost').value = estPrice;
+    var badge = document.getElementById('chQuoteBadge');
+    if (badge) {
+        badge.innerHTML = '<span style="color: var(--gold);"><span class="live-pulse" style="display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--gold); margin-right:4px;"></span>Querying CaratHunter Live...</span>';
     }
-    recalculateMaster();
+
+    var fallbackMatrix = function() {
+        if (origin === 'lab-grown') {
+            var basePpc = 18000;
+            if (carat < 0.5) basePpc = 8500;
+            else if (carat < 0.7) basePpc = 11500;
+            else if (carat < 1.0) basePpc = 14500;
+            else if (carat < 1.5) basePpc = 18000;
+            else if (carat < 2.0) basePpc = 22500;
+            else if (carat < 3.0) basePpc = 28000;
+            else basePpc = 34000;
+
+            var colorMult = (color === 'D' || color === 'E' || color === 'F') ? 1.15 : 1.0;
+            var clarityMult = (clarity === 'FL' || clarity === 'IF' || clarity === 'VVS1' || clarity === 'VVS2') ? 1.20 : 1.0;
+            return Math.round(basePpc * colorMult * clarityMult * carat);
+        } else {
+            var basePpc = 460000;
+            if (carat < 0.5) basePpc = 68000;
+            else if (carat < 0.7) basePpc = 115000;
+            else if (carat < 0.9) basePpc = 205000;
+            else if (carat < 1.0) basePpc = 310000;
+            else if (carat < 1.5) basePpc = 460000;
+            else if (carat < 2.0) basePpc = 710000;
+            else basePpc = 1120000;
+
+            var colorMults = { "D": 1.18, "E": 1.08, "F": 1.00, "G": 0.90, "H": 0.82, "I": 0.74, "J": 0.65 };
+            var clarityMults = { "FL": 1.45, "IF": 1.35, "VVS1": 1.22, "VVS2": 1.12, "VS1": 1.00, "VS2": 0.90, "SI1": 0.76 };
+            var cutMults = { "Ideal": 1.05, "Excellent": 1.00, "Very Good": 0.92, "Good": 0.80 };
+            return Math.round(basePpc * (colorMults[color]||1.0) * (clarityMults[clarity]||1.0) * (cutMults[cut]||1.0) * carat);
+        }
+    };
+
+    var url = '/api/carathunter/quote?carat=' + encodeURIComponent(carat) +
+              '&color=' + encodeURIComponent(color) +
+              '&clarity=' + encodeURIComponent(clarity) +
+              '&cut=' + encodeURIComponent(cut) +
+              '&shape=' + encodeURIComponent(shape) +
+              '&origin=' + encodeURIComponent(origin);
+
+    fetch(url)
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data && data.success && data.quote_inr) {
+                var inrVal = Math.round(data.quote_inr);
+                document.getElementById('calc_diamond_cost').value = inrVal;
+                if (badge) {
+                    var usdStr = data.median_price_usd ? '$' + Number(data.median_price_usd).toLocaleString() : '';
+                    var linkHtml = data.canonical_url ? ' · <a href="' + data.canonical_url + '" target="_blank" rel="noopener noreferrer" style="color:var(--gold); text-decoration:underline;">View on CaratHunter ↗</a>' : '';
+                    var retCount = data.retailer_count ? data.retailer_count + ' Retailers' : 'Live Retailers';
+                    badge.innerHTML = '<span style="color: #10B981;">⚡ CaratHunter Live: ' + (usdStr ? usdStr + ' / ' : '') + '₹' + inrVal.toLocaleString('en-IN') + ' (' + retCount + ')</span>' + linkHtml;
+                }
+            } else {
+                var estPrice = fallbackMatrix();
+                document.getElementById('calc_diamond_cost').value = estPrice;
+                if (badge) {
+                    badge.innerHTML = '<span style="color: var(--text-muted);">ℹ️ Indian Wholesale Benchmark: ₹' + estPrice.toLocaleString('en-IN') + '</span>';
+                }
+            }
+            recalculateMaster();
+        })
+        .catch(function(err) {
+            var estPrice = fallbackMatrix();
+            document.getElementById('calc_diamond_cost').value = estPrice;
+            if (badge) {
+                badge.innerHTML = '<span style="color: var(--text-muted);">ℹ️ Offline Benchmark: ₹' + estPrice.toLocaleString('en-IN') + '</span>';
+            }
+            recalculateMaster();
+        });
 }
 
 function loadPreset(key) {
@@ -871,7 +951,15 @@ function loadPreset(key) {
     onMetalTypeChange();
 
     document.getElementById('calc_purity').value = p.purity;
-    document.getElementById('calc_base_rate').value = p.baseRate;
+    if (p.metal === 'gold') {
+        var defaultGold = {{ bullion_rates.rates['24K'].rate_per_gram if bullion_rates and bullion_rates.rates and '24K' in bullion_rates.rates else 14828 }};
+        document.getElementById('calc_base_rate').value = defaultGold;
+    } else if (p.metal === 'silver') {
+        var defaultSilver = {{ bullion_rates.rates['Silver_999'].rate_per_gram if bullion_rates and bullion_rates.rates and 'Silver_999' in bullion_rates.rates else 212 }};
+        document.getElementById('calc_base_rate').value = defaultSilver;
+    } else if (p.metal === 'platinum') {
+        document.getElementById('calc_base_rate').value = 3150;
+    }
     document.getElementById('calc_net_weight').value = p.netWeight;
     document.getElementById('calc_wastage_pct').value = p.wastage;
 
